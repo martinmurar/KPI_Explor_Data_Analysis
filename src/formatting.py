@@ -35,12 +35,12 @@ def format_pct(value, decimals=1):
 def format_signed_eur(value):
     if value is None or pd.isna(value):
         return MISSING_VALUE
-    prefix = "+" if value > 0 else "-"
+    prefix = "+" if value > 0 else ""
     return prefix + format_eur(value)
 
 
 def format_signed_pct(value, decimals=1):
     if value is None or pd.isna(value):
         return MISSING_VALUE
-    prefix = "+" if value > 0 else "-"
+    prefix = "+" if value > 0 else ""
     return prefix + format_pct(value, decimals)

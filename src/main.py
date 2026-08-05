@@ -11,6 +11,7 @@ import sys
 
 from src import constants as C
 import data
+import metrics_account_growth
 import metrics_bridge
 import metrics_churn
 import metrics_concentration
@@ -21,6 +22,32 @@ import sections
 
 def compute_metrics(df):
     """Vypočíta všetky metriky použité v reporte."""
+    metrics = _base_metrics(df)
+    metrics.update(_account_growth_metrics(df))
+    return metrics
+
+
+def _account_growth_metrics(df):
+    """Metriky interného KPI account growth.
+
+    Základná tabuľka sa počíta raz a všetky rezy sa robia z nej.
+    """
+    table = metrics_account_growth.account_table(df, C.AS_OF)
+    return {
+        "account_growth_summary": metrics_account_growth.kpi_summary(table),
+        "account_growth_composition": metrics_account_growth.composition(table),
+        "account_growth_history": metrics_account_growth.history(df),
+        "account_growth_sensitivity": metrics_account_growth.definition_sensitivity(df),
+        "account_growth_by_band": metrics_account_growth.by_size_band(table),
+        "account_growth_by_group": metrics_account_growth.by_customer_group(table),
+        "account_growth_by_country": metrics_account_growth.by_country(table),
+        "account_growth_by_cohort": metrics_account_growth.by_cohort(table),
+        "account_growth_by_orders": metrics_account_growth.by_previous_orders(table),
+    }
+
+
+def _base_metrics(df):
+    """Metriky ostatných sekcií reportu."""
     return {
         "quality": data.data_quality(df),
         "status_table": data.gmv_by_status(df),

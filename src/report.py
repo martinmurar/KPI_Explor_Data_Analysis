@@ -85,6 +85,10 @@ function buildDataset(series, spec) {
     dataset.fill = false;
     dataset.order = 0;
     if (series.dashed) { dataset.borderDash = [6, 4]; dataset.borderWidth = 2; }
+    // V stohovanom grafe Chart.js stohuje aj línie. Vlastná stack skupina pre
+    // každú líniu ich drží nezávislé — bez toho sa druhá línia vykreslí ako
+    // súčet s prvou a pri y_max = 100 vypadne z grafu.
+    if (spec.stacked) { dataset.stack = 'line-' + series.label; }
   } else {
     dataset.backgroundColor = series.point_colors || series.color;
     dataset.borderRadius = 3;

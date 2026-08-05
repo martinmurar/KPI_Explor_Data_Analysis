@@ -32,12 +32,20 @@ def _month_ends(df):
     return pd.date_range(start=C.CHURN_CURVE_START, end=C.AS_OF, freq="ME")
 
 
-def _churn_at(df, as_of, threshold_months):
+def _churn_at(df, as_of, threshold_months, churn_limit_months=None):
     """Churn v jednom časovom bode."""
     cutoff = as_of - pd.DateOffset(months=threshold_months)
 
+    # df_limited limits how far into the past we consider churned customers - churn_limit_months = 24 means that if
+    # the customer was inactive for more than 24 months, they won't be taken into account
+
+    df_limited = df
+    if churn_limit_months is not None:
+        df_limited = df.copy()
+        df_limited = df_limited[df_limited["created_at"] >= as_of - pd.DateOffset(months=churn_limit_months)]
+
     first_orders = data.first_order_per_customer(df)
-    last_orders = data.last_order_per_customer(df, as_of=as_of)
+    last_orders = data.last_order_per_customer(df_limited, as_of=as_of)
 
     # Do bázy patria len zákazníci, ktorí mali šancu odísť.
     in_base = first_orders.loc[first_orders <= cutoff].index
@@ -298,7 +306,7 @@ def frequency_histogram(df):
     Stĺpec customers_at_or_above je reverzný kumulatív — počet zákazníkov
     s danou frekvenciou a vyššou.
     """
-    counts = _order_counts_with_dormant(df)
+    counts = orders_per_customer_last_year(df)
     total = len(counts)
 
     rows = []

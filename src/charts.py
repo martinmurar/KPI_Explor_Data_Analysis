@@ -412,6 +412,113 @@ def _frequency_hover_lines(histogram):
     return lines
 
 
+# ── account growth ────────────────────────────────────────────────────────────
+def account_growth_over_time(history):
+    """Podiel rastúcich účtov v čase, s GMV-váženým variantom a cieľovou čiarou."""
+    target = [C.ACCOUNT_GROWTH_TARGET_PCT] * len(history)
+    labels = [f"{date:%Y-%m}" for date in history.index]
+
+    return _figure(
+        "account_growth_over_time",
+        "Account growth v čase",
+        f"V %, klzavé {C.GMV_WINDOW_MONTHS} mesiace medziročne, body sú konce kvartálov. "
+        f"Zvyšok stĺpca do 100 % menovateľa sú klesajúce účty. Čierna línia je GMV-vážený variant: "
+        f"podiel tržieb, ktoré ležia v rastúcich účtoch. Prerušovaná čiara je cieľ "
+        f"{C.ACCOUNT_GROWTH_TARGET_PCT} %.",
+        "bar",
+        labels,
+        [
+            _series(f"Cieľ {C.ACCOUNT_GROWTH_TARGET_PCT} %", target,
+                    C.ACCOUNT_GROWTH_COLOR_TARGET, chart_type="line", dashed=True),
+            _series("% GMV v rastúcich účtoch", history["gmv_growing_pct"],
+                    C.ACCOUNT_GROWTH_COLOR_GMV, chart_type="line"),
+            _series("% rastúcich účtov", history["growing_pct"],
+                    C.ACCOUNT_GROWTH_COLOR_GROWING),
+        ],
+        height=360,
+        value_format="pct",
+        y_max=100,
+        hover_extras=_account_count_hover(history),
+    )
+
+
+def _account_count_hover(history):
+    """Riadky do hover: veľkosť menovateľa v danom bode."""
+    lines = []
+    for _, row in history.iterrows():
+        accounts = formatting.format_number(row["accounts"])
+        lines.append([f"Menovateľ: {accounts} účtov"])
+    return lines
+
+
+def account_growth_composition(composition):
+    """Rozklad menovateľa na reaktivované, odídené a aktívne v oboch oknách."""
+    return _figure(
+        "account_growth_composition",
+        "Z čoho sa skladá menovateľ KPI",
+        "Počet účtov. Prvé dve skupiny nie sú rozhodnuté rastom, ale tým, či účet "
+        "v okne vôbec nakúpil — reaktivované sú rastúce automaticky, odídené "
+        "klesajúce automaticky. Len tretia skupina meria skutočnú zmenu objemu.",
+        "bar",
+        composition.index,
+        [
+            _series("Rastúce", composition["growing"], C.ACCOUNT_GROWTH_COLOR_GROWING),
+            _series("Klesajúce", composition["declining"], C.ACCOUNT_GROWTH_COLOR_DECLINING),
+        ],
+        height=240,
+        stacked=True,
+        index_axis="y",
+        value_format="count",
+    )
+
+
+def account_growth_breakdown(breakdown, figure_id, title, caption, overall_pct):
+    """Podiel rastúcich účtov v jednom reze, farebne voči cieľu a priemeru."""
+    values = list(breakdown["growing_pct"])
+    return _figure(
+        figure_id,
+        title,
+        caption,
+        "bar",
+        breakdown.index,
+        [_series("% rastúcich účtov", values, C.ACCOUNT_GROWTH_COLOR_GROWING,
+                 point_colors=_target_colors(values, overall_pct))],
+        height=max(200, 34 * len(breakdown) + 60),
+        index_axis="y",
+        value_format="pct",
+        y_max=100,
+        hover_extras=_breakdown_hover(breakdown),
+    )
+
+
+def _target_colors(values, overall_pct):
+    """Zelená nad cieľom, červená pod celkovým KPI, inak modrá."""
+    colors = []
+    for value in values:
+        if value >= C.ACCOUNT_GROWTH_TARGET_PCT:
+            colors.append(C.ACCOUNT_GROWTH_COLOR_ABOVE_TARGET)
+        elif value < overall_pct:
+            colors.append(C.ACCOUNT_GROWTH_COLOR_DECLINING)
+        else:
+            colors.append(C.ACCOUNT_GROWTH_COLOR_GROWING)
+    return colors
+
+
+def _breakdown_hover(breakdown):
+    """Riadky do hover: počet účtov, GMV-vážený podiel a netto zmena GMV."""
+    lines = []
+    for _, row in breakdown.iterrows():
+        accounts = formatting.format_number(row["customers"])
+        gmv_share = formatting.format_pct(row["gmv_growing_pct"])
+        net = formatting.format_signed_eur(row["net_delta"])
+        lines.append([
+            f"Účtov: {accounts}",
+            f"GMV v rastúcich účtoch: {gmv_share}",
+            f"Netto zmena GMV: {net}",
+        ])
+    return lines
+
+
 def net_gmv_by_band(growth):
     """Netto medziročná zmena GMV podľa pásma."""
     values = list(growth["net_delta"] / 1000)

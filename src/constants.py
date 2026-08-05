@@ -4,8 +4,8 @@
 import pandas as pd
 
 # ── vstup a výstup ────────────────────────────────────────────────────────────
-INPUT_XLSX = "b2b_orders_cleaned.xlsx"
-OUTPUT_HTML = "b2b_gmv_eda.html"
+INPUT_XLSX = "../data/b2b_orders_cleaned.xlsx"
+OUTPUT_HTML = "../data/b2b_gmv_eda.html"
 
 # ── časové hranice ────────────────────────────────────────────────────────────
 # Posledný deň dát. Používa sa ako "dnešný dátum" pre churn a rolling okná.
@@ -43,6 +43,31 @@ CHURN_CURVE_START = pd.Timestamp("2020-01-31")
 
 # Medzera bez objednávky, po ktorej sa ďalšia objednávka počíta ako reaktivácia.
 REACTIVATION_GAP_MONTHS = 12
+
+# ── account growth (interné KPI) ──────────────────────────────────────────────
+# Účet mladší ako toto sa do KPI nepočíta. Hodnota nie je voľná:
+# 12 + GMV_WINDOW_MONTHS zaručuje, že každý účet v menovateli mal k dispozícii
+# plné minuloročné porovnávacie okno.
+ACCOUNT_GROWTH_MIN_AGE_MONTHS = 12 + GMV_WINDOW_MONTHS
+
+# Cieľová hodnota KPI. Kreslí sa ako referenčná čiara.
+ACCOUNT_GROWTH_TARGET_PCT = 60
+
+# Prvý bod kvartálneho časového radu KPI.
+ACCOUNT_GROWTH_HISTORY_START = pd.Timestamp("2022-07-31")
+
+# Segment menší ako toto sa v rezoch nezobrazuje — pri jednotkách účtov je
+# podiel rastúcich už len šum.
+ACCOUNT_GROWTH_MIN_SEGMENT_SIZE = 15
+
+# Koše počtu objednávok v minuloročnom okne. EDGES sú horné hranice košov,
+# posledný kôš je otvorený a hranicu nemá.
+ACCOUNT_GROWTH_ORDER_EDGES = [0, 1, 2, 5]
+ACCOUNT_GROWTH_ORDER_BUCKETS = ["0", "1", "2", "3–5", "6+"]
+
+# Varianty definície, na ktorých sa meria citlivosť KPI.
+ACCOUNT_GROWTH_WINDOW_VARIANTS = (1, 3, 6, 12)
+ACCOUNT_GROWTH_AGE_VARIANTS = (15, 24, 36, 48)
 
 # ── veľkostné pásma zákazníkov ────────────────────────────────────────────────
 # Podľa GMV v porovnávacom období.
@@ -114,3 +139,10 @@ BRIDGE_LABELS_SK = {
 
 # Poradie komponentov: najprv prírastky, potom straty.
 BRIDGE_COMPONENTS = ["expansion", "reactivated", "new", "contraction", "churn"]
+
+# Farby v grafoch account growth.
+ACCOUNT_GROWTH_COLOR_GROWING = COLOR_BLUE
+ACCOUNT_GROWTH_COLOR_DECLINING = COLOR_RED
+ACCOUNT_GROWTH_COLOR_GMV = COLOR_INK
+ACCOUNT_GROWTH_COLOR_TARGET = COLOR_GREY
+ACCOUNT_GROWTH_COLOR_ABOVE_TARGET = COLOR_TEAL
