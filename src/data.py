@@ -1,0 +1,128 @@
+# -*- coding: utf-8 -*-
+"""Načítanie a príprava dát o objednávkach.
+
+Rozhodnutia:
+- Statusy sa nefiltrujú. V dátach nie je žiadny `canceled`; nedokončené stavy sú
+  0,3 % GMV, ale v poslednom mesiaci ~10 % (čerstvé objednávky). Filtrovanie na
+  `complete` by posledný mesiac systematicky podhodnotilo.
+- Zákazník = customer_email (lowercase, strip). Ak firma nakupuje z viacerých
+  e-mailov, je v dátach ako viac zákazníkov -> nadhodnocuje new/churn/reactivated.
+"""
+
+import pandas as pd
+
+from src import constants as C
+
+
+def load_orders(path):
+    """Načíta objednávky z xlsx a doplní derivované stĺpce."""
+    df = pd.read_excel(path, dtype=str)
+    df["created_at"] = pd.to_datetime(df["created_at"])
+    df["gmv"] = pd.to_numeric(df["gmv"])
+    df["cust"] = df["customer_email"].str.strip().str.lower()
+    df = _add_period_columns(df)
+    df = _add_customer_columns(df)
+    df["market"] = _market_group(df["country"])
+    return df
+
+
+def _market_group(countries):
+    """Zaradí krajinu do vykazovaného trhu alebo do kategórie Ostatné."""
+    is_reported = countries.isin(C.REPORTED_COUNTRIES)
+    return countries.where(is_reported, C.OTHER_MARKET_LABEL)
+
+
+def _add_period_columns(df):
+    """Doplní stĺpce pre mesiac, kvartál a rok."""
+    df = df.copy()
+    df["month"] = df["created_at"].dt.to_period("M")
+    df["quarter"] = df["created_at"].dt.to_period("Q")
+    df["year"] = df["created_at"].dt.year
+    return df
+
+
+def _add_customer_columns(df):
+    """Doplní prvú a poslednú objednávku zákazníka a akvizičnú kohortu."""
+    df = df.copy()
+    first_order = df.groupby("cust")["created_at"].min()
+    df["first_order"] = df["cust"].map(first_order)
+    df["cohort_year"] = df["first_order"].dt.year
+    df["months_since_first"] = _months_between(df["first_order"], df["created_at"])
+    return df
+
+
+def _months_between(start, end):
+    """Počet celých mesiacov medzi dvoma sériami dátumov (0 = ten istý mesiac)."""
+    start_period = start.dt.to_period("M")
+    end_period = end.dt.to_period("M")
+    return (end_period - start_period).apply(lambda offset: offset.n)
+
+
+def data_quality(df):
+    """Vráti prehľad kvality dát ako slovník."""
+    return {
+        "orders": len(df),
+        "customers": df["cust"].nunique(),
+        "gmv": df["gmv"].sum(),
+        "date_min": df["created_at"].min(),
+        "date_max": df["created_at"].max(),
+        "missing_values": int(df.isna().sum().sum()),
+        "duplicate_ids": int(df["entity_id"].duplicated().sum()),
+        "zero_gmv_orders": int((df["gmv"] == 0).sum()),
+    }
+
+
+def gmv_by_status(df):
+    """GMV a počet objednávok podľa statusu."""
+    table = df.groupby("status")["gmv"].agg(["count", "sum"])
+    table["share_pct"] = table["sum"] / table["sum"].sum() * 100
+    return table.sort_values("sum", ascending=False)
+
+
+def trend_years(df):
+    """Zoznam rokov použitých v ročných grafoch."""
+    years = sorted(df.loc[df["year"] >= C.FIRST_TREND_YEAR, "year"].unique())
+    return [int(year) for year in years]
+
+
+def year_label(year):
+    """Označí nekompletný rok hviezdičkou."""
+    if year == C.PARTIAL_YEAR:
+        return f"{year}*"
+    return str(year)
+
+
+def orders_in_window(df, start, end):
+    """Objednávky v intervale [start, end)."""
+    mask = (df["created_at"] >= start) & (df["created_at"] < end)
+    return df.loc[mask]
+
+
+def gmv_per_customer(df, start, end):
+    """GMV každého zákazníka v intervale [start, end)."""
+    window = orders_in_window(df, start, end)
+    return window.groupby("cust")["gmv"].sum()
+
+
+def last_order_per_customer(df, as_of=None):
+    """Dátum poslednej objednávky každého zákazníka do dátumu as_of."""
+    if as_of is None:
+        subset = df
+    else:
+        subset = df.loc[df["created_at"] <= as_of]
+    return subset.groupby("cust")["created_at"].max()
+
+
+def first_order_per_customer(df):
+    """Dátum prvej objednávky každého zákazníka."""
+    return df.groupby("cust")["created_at"].min()
+
+
+def assign_bands(gmv_series, edges, labels):
+    """Zaradí zákazníkov do veľkostných pásiem podľa GMV.
+
+    Hranice sa posúvajú o malé epsilon, aby GMV presne na hranici padlo
+    do nižšieho pásma a nulové GMV sa nevylúčilo.
+    """
+    cut_edges = [edges[0] - 0.01] + list(edges[1:])
+    return pd.cut(gmv_series, bins=cut_edges, labels=labels)
