@@ -18,6 +18,20 @@ SIGNED_EUR = R.format_signed_eur
 SIGNED_PCT = R.format_signed_pct
 
 
+def _fig(figures, figure_id):
+    """Vykreslí graf podľa jeho ID, alebo nič, ak je v C.HIDDEN_CHARTS.
+
+    Vypnúť/zapnúť graf v reporte znamená len upraviť C.HIDDEN_CHARTS —
+    toto je jediné miesto, ktoré ten zoznam pri kreslení grafu čita.
+    """
+    if figure_id in C.HIDDEN_CHARTS:
+        return ""
+    for figure in figures:
+        if figure["id"] == figure_id:
+            return R.render_figure(figure)
+    raise KeyError(f"graf s id '{figure_id}' nie je medzi figures")
+
+
 def header(metrics):
     """Nadpis, prehľadové karty a hlavný nález."""
     quality = metrics["quality"]
@@ -117,9 +131,9 @@ def trend_section(metrics):
 
     html = f"""
 <h2>1. Trend GMV</h2>
-{R.render_figure(figures[0])}
+{_fig(figures, "monthly_trend")}
 {table}
-{R.render_figure(figures[1])}
+{_fig(figures, "seasonality")}
 <p>Najsilnejší mesiac je {peak_month}. ({PCT(seasonality.max())} ročného GMV), najslabší
 {low_month}. ({PCT(seasonality.min())}). Rozdiel medzi špičkou a dnom je len
 {PCT(seasonality.max() - seasonality.min())} — sezonalita je mierna a rozhodnutia
@@ -144,7 +158,7 @@ def bridge_section(metrics):
 
     html = f"""
 <h2>2. Komponenty medziročnej zmeny GMV</h2>
-{R.render_figure(figure)}
+{_fig([figure], "yearly_bridge")}
 {table}
 <p>V období {last["label"]} sú hrubé prírastky {SIGNED_EUR(gross_gains)} a hrubé straty
 {SIGNED_EUR(gross_losses)} — na každé euro prírastku sa stratí
@@ -184,7 +198,7 @@ def order_value_section(metrics):
 
     html = f"""
 <h2>3. Priemerná vs mediánová hodnota objednávky</h2>
-{R.render_figure(figure)}
+{_fig([figure], "order_value")}
 {table}
 <p>Od {first["label"]} do {last["label"]} vzrástol priemer o {SIGNED_PCT(mean_growth, 0)},
 zatiaľ čo medián o {SIGNED_PCT(median_growth, 0)}. Pomer priemer/medián sa zdvihol
@@ -234,14 +248,14 @@ def concentration_section(metrics):
 
     html = f"""
 <h2>4. Koncentrácia portfólia</h2>
-{R.render_figure(figures[0])}
-{R.render_figure(figures[1])}
+{_fig(figures, "concentration_shares")}
+{_fig(figures, "concentration_threshold")}
 {concentration_table}
 <p>Podiel top 5 zákazníkov sa zmenil z {PCT(first["top5_pct"])} ({first["label"]}) na
 {PCT(last["top5_pct"])} ({last["label"]}). Na 80 % GMV dnes stačí
 {NUM(last["customers_for_80pct"])} zákazníkov, HHI je {NUM(last["hhi"])} a Gini
 {NUM(last["gini"], 2)}.</p>
-{R.render_figure(figures[2])}
+{_fig(figures, "portfolio_structure")}
 {structure_table}
 <p>Pásmo {biggest_band} tvorí {PCT(structure.loc[biggest_band, "gmv_pct"])} GMV pri
 {PCT(structure.loc[biggest_band, "customer_pct"])} zákazníkov.</p>
@@ -278,12 +292,12 @@ def markets_section(metrics):
 
     html = f"""
 <h2>5. Rozdelenie trhov</h2>
-{R.render_figure(figures[0])}
+{_fig(figures, "market_gmv")}
 {table}
 <p>{" + ".join(top_two.index)} tvoria {PCT(top_two_share)} GMV. Rozdiel v GMV na zákazníka
 je zásadný: {top_two.index[0]} {EUR(top_two.iloc[0]["gmv_per_customer"])} oproti
 {weakest} {EUR(summary.loc[weakest, "gmv_per_customer"])}.</p>
-{R.render_figure(figures[1])}
+{_fig(figures, "market_growth")}
 <p>Kategória {C.OTHER_MARKET_LABEL} je najzreteľnejší prípad rozdielu medzi počtom
 a hodnotou: {NUM(other["customers"])} zákazníkov, teda
 {PCT(other["customers"] / summary["customers"].sum() * 100)} celej bázy, ale len
@@ -324,7 +338,7 @@ def churn_section(metrics):
 
     html = f"""
 <h2>6. Churn</h2>
-{R.render_figure(figures[0])}
+{_fig(figures, "churn_over_time")}
 <p>Churn rastie na všetkých troch prahoch. {C.CHURN_MAIN_THRESHOLD_MONTHS}-mesačný churn stúpol
 z {PCT(first_point[main])} ({curves.index[0]:%-m/%Y}) na {PCT(last_point[main])}
 ({curves.index[-1]:%-m/%Y}). Krivky sú blízko seba
@@ -334,7 +348,7 @@ Rozdiel medzi 3- a 12-mesačným churnom, teda pásmo zákazníkov, ktorých sa 
 je len {PCT(last_point["churn_3m"] - last_point["churn_12m"])} bázy.</p>
 
 <h3>Rast a churn podľa veľkostného pásma</h3>
-{R.render_figure(figures[1])}
+{_fig(figures, "band_growth_churn")}
 {band_table}
 <p>Podiel rastúcich stúpa s veľkosťou zákazníka z {PCT(growth.iloc[0]["growing_pct"])} na
 {PCT(top_band["growing_pct"])}, churn klesá z {PCT(churn_bands.iloc[0]["churn_pct"])} na
@@ -344,7 +358,7 @@ Typický zákazník neklesá len v dlhom chvoste; klesá všade, a agregát ťah
 výnimiek.</p>
 
 <h3>Netto GMV podľa pásma</h3>
-{R.render_figure(figures[2])}
+{_fig(figures, "net_gmv_by_band")}
 <p>Pásmo {growth.index[-1]} pridalo {SIGNED_EUR(top_band["net_delta"])} pri
 {int(top_band["customers"])} zákazníkoch. Všetky ostatné pásma spolu
 {SIGNED_EUR(smaller["net_delta"].sum())} pri {int(smaller["customers"].sum())} zákazníkoch.
@@ -368,11 +382,11 @@ def account_growth_section(metrics):
     html = f"""
 <h2>7. Account growth (interné KPI)</h2>
 {_account_growth_definition(summary)}
-{R.render_figure(figures[0])}
+{_fig(figures, "account_growth_over_time")}
 {_account_growth_trend_text(history, summary)}
 
 <h3>Z čoho sa skladá menovateľ</h3>
-{R.render_figure(figures[1])}
+{_fig(figures, "account_growth_composition")}
 {_account_growth_composition_table(composition)}
 {_account_growth_composition_text(composition, summary)}
 
@@ -481,7 +495,12 @@ def _account_growth_breakdown_specs(metrics):
 
 
 def _account_growth_breakdown_figures(metrics):
-    """Grafy všetkých rezov."""
+    """Grafy všetkých rezov.
+
+    Vytvoria sa všetky, aj tie skryté cez C.HIDDEN_CHARTS — nie sú výpočtovo
+    náročné a _account_growth_breakdown_html z nich aj tak vynechá celý rez
+    (graf i komentár), ak je jeho ID medzi skrytými.
+    """
     overall = metrics["account_growth_summary"]["growing_pct"]
     figures = []
     for key, figure_id, title, caption in _account_growth_breakdown_specs(metrics):
@@ -491,11 +510,12 @@ def _account_growth_breakdown_figures(metrics):
 
 
 def _account_growth_breakdown_html(metrics, figures):
-    """HTML rezov: grafy a k nim komentáre so extrémami."""
+    """HTML rezov: graf a k nemu komentár so extrémami, skrytý rez sa vynechá celý."""
     parts = []
-    for index, (key, _, _, _) in enumerate(_account_growth_breakdown_specs(metrics)):
-        figure = figures[index + 2]
-        parts.append(R.render_figure(figure))
+    for key, figure_id, _, _ in _account_growth_breakdown_specs(metrics):
+        if figure_id in C.HIDDEN_CHARTS:
+            continue
+        parts.append(_fig(figures, figure_id))
         parts.append(_breakdown_comment(metrics[key]))
     return "\n".join(parts)
 
@@ -579,14 +599,14 @@ def loyalty_section(metrics):
 
     html = f"""
 <h2>8. Lojalita a frekvencia</h2>
-{R.render_figure(figures[0])}
+{_fig(figures, "single_order")}
 {single_table}
 <p>Podiel zákazníkov s jedinou objednávkou za život stúpol z {PCT(first["single_order_pct"])}
 (kohorta {first["label"]}) na {PCT(last["single_order_pct"])} ({last["label"]}). Medián
 objednávok za život klesol z {NUM(first["median_orders"])} na {NUM(last["median_orders"])}
 a medián LTV z {EUR(first["median_ltv"])} na {EUR(last["median_ltv"])}. Akvizícia rastie
 v počte a klesá v kvalite.</p>
-{R.render_figure(figures[1])}
+{_fig(figures, "frequency_histogram")}
 <p>Menovateľom je celá databáza, {NUM(total_base)} zákazníkov. Najväčšia skupina za
 posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov <b>nenakúpila vôbec</b> —
 {NUM(dormant["customers"])} zákazníkov, teda {PCT(dormant["share_pct"])} bázy.
@@ -638,12 +658,12 @@ def reactivation_section(metrics):
 
     html = f"""
 <h2>9. Reaktivovaní zákazníci</h2>
-{R.render_figure(figures[0])}
+{_fig(figures, "reactivation_histogram")}
 {histogram_table}
 <p>Zo zákazníkov s aspoň dvoma objednávkami nebolo nikdy reaktivovaných
 {PCT(never["share_pct"])}. Raz {PCT(once["share_pct"])}, dvakrát a viackrát
 {PCT(repeat_share)}, čo je {NUM(repeat)} zákazníkov.</p>
-{R.render_figure(figures[1])}
+{_fig(figures, "repeat_reactivation")}
 <p><b>Odpoveď na otázku, či sa v reaktiváciách točia stále tí istí: nie.</b>
 V období {last_year["label"]} bolo {NUM(last_year["events"])} reaktivácií a len
 {PCT(last_year["repeat_pct"])} z nich pripadalo na zákazníkov, ktorí už raz reaktivovaní boli.
@@ -758,11 +778,18 @@ SECTION_BUILDERS = [
 
 
 def build_all(metrics):
-    """Poskladá HTML všetkých sekcií a zoznam grafov."""
+    """Poskladá HTML všetkých sekcií a zoznam grafov, ktoré sa naozaj vykreslili.
+
+    Grafy skryté cez C.HIDDEN_CHARTS sa sem nedostanú — inak by Chart.js na
+    strane prehliadača skúšal nakresliť graf do neexistujúceho <canvas> a
+    spadol by aj so zvyšnými grafmi za ním.
+    """
     html_parts = []
     figures = []
     for builder in SECTION_BUILDERS:
         section_html, section_figures = builder(metrics)
         html_parts.append(section_html)
-        figures.extend(section_figures)
+        for figure in section_figures:
+            if figure["id"] not in C.HIDDEN_CHARTS:
+                figures.append(figure)
     return "\n".join(html_parts), figures

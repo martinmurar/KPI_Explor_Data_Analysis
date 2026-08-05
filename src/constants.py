@@ -7,6 +7,17 @@ import pandas as pd
 INPUT_XLSX = "../data/b2b_orders_cleaned.xlsx"
 OUTPUT_HTML = "../data/b2b_gmv_eda.html"
 
+# ── viditeľnosť grafov ────────────────────────────────────────────────────────
+# ID grafov, ktoré sa v reporte nevykresľujú (text okolo nich zostáva).
+# ID zodpovedá figure_id/id z charts.py — pri hľadaní ID grafu, ktorý chceš
+# vypnúť, stačí grepnúť charts.py za "_figure(".
+HIDDEN_CHARTS = {
+    "ag_by_group",
+    "ag_by_country",
+    "ag_by_cohort",
+    "ag_by_orders",
+}
+
 # ── časové hranice ────────────────────────────────────────────────────────────
 # Posledný deň dát. Používa sa ako "dnešný dátum" pre churn a rolling okná.
 AS_OF = pd.Timestamp("2026-07-31")
