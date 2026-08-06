@@ -24,7 +24,18 @@ def compute_metrics(df):
     """Vypočíta všetky metriky použité v reporte."""
     metrics = _base_metrics(df)
     metrics.update(_account_growth_metrics(df))
+    metrics["top_band_companies"] = _top_band_companies(df)
     return metrics
+
+
+def _top_band_companies(df):
+    """Názvy firiem v najvyššom GMV pásme, pre úvodný komentár.
+
+    Zákazník bez vyplneného company_bill sa v zozname nahradí e-mailom.
+    """
+    top_customers = metrics_churn.top_band_customers(df)
+    names = data.company_names(df)
+    return [names.get(cust, cust) for cust in top_customers.index]
 
 
 def _account_growth_metrics(df):

@@ -120,16 +120,31 @@ def _summarise_churn_bands(table):
 
 
 # ── rast a netto GMV podľa pásma ──────────────────────────────────────────────
-def growth_by_band(df):
-    """Podiel rastúcich zákazníkov a netto zmena GMV podľa pásma, 3 mesiace YoY."""
+def _customers_by_band(df):
+    """Zákazníci aktívni v porovnávacom období (3 mesiace YoY), so zaradením do GMV pásma."""
     start, end = metrics_bridge.gmv_window(C.AS_OF, C.GMV_WINDOW_MONTHS)
     comparison = metrics_bridge.customer_comparison(df, start, end)
 
     # Do pásiem patria len zákazníci, ktorí boli aktívni v porovnávacom období.
     active_before = comparison.loc[comparison["previous"] > 0].copy()
     active_before["band"] = data.assign_bands(active_before["previous"], C.BAND_EDGES, C.BAND_LABELS)
+    return active_before
 
-    return _summarise_growth_bands(active_before)
+
+def growth_by_band(df):
+    """Podiel rastúcich zákazníkov a netto zmena GMV podľa pásma, 3 mesiace YoY."""
+    return _summarise_growth_bands(_customers_by_band(df))
+
+
+def top_band_customers(df):
+    """Zákazníci v najvyššom GMV pásme, zoradení od najväčšieho po najmenšie.
+
+    Rovnaké zaradenie do pásma ako growth_by_band, len bez agregácie — potrebné
+    na dohľadanie mien firiem pre úvodný komentár.
+    """
+    customers = _customers_by_band(df)
+    top_label = C.BAND_LABELS[-1]
+    return customers.loc[customers["band"] == top_label].sort_values("previous", ascending=False)
 
 
 def _summarise_growth_bands(table):

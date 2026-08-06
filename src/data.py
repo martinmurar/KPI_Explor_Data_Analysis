@@ -79,6 +79,20 @@ def gmv_by_status(df):
     return table.sort_values("sum", ascending=False)
 
 
+def company_names(df):
+    """Najčastejšie použitý company_bill pre každého zákazníka.
+
+    Fakturačné údaje majú preklepy a historické varianty názvu (napr. "Kaufland"
+    vs "Kaufland Slovenská republika v.o.s.") — berie sa najčastejšie použitý.
+    Zákazníci bez vyplneného company_bill v zozname nie sú.
+    """
+    named = df.dropna(subset=["company_bill"])
+    names = {}
+    for cust, group in named.groupby("cust"):
+        names[cust] = group["company_bill"].value_counts().idxmax()
+    return names
+
+
 def trend_years(df):
     """Zoznam rokov použitých v ročných grafoch a tabuľkách.
 

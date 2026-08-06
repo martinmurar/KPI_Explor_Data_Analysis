@@ -47,6 +47,7 @@ def header(metrics):
     churn_now = churn[f"churn_{C.CHURN_MAIN_THRESHOLD_MONTHS}m"].iloc[-1]
     top_band = growth.iloc[-1]
     smaller_bands_delta = growth.iloc[:-1]["net_delta"].sum()
+    top_band_companies = metrics["top_band_companies"]
 
     cards = [
         (f"GMV {data.year_label(C.PARTIAL_YEAR)}", EUR(partial["gmv"] / 1e6, 2).replace("\u00a0€", "\u00a0mil.\u00a0€")),
@@ -72,8 +73,19 @@ GMV {EUR(quality["gmv"] / 1e6, 2).replace("\u00a0€", "\u00a0mil.\u00a0€")}</
     f"{SIGNED_EUR(smaller_bands_delta)}. Zároveň "
     f"{PCT(churn_now, 0)} akvirovanej bázy nenakúpilo posledných "
     f"{C.CHURN_MAIN_THRESHOLD_MONTHS} mesiacov.")}
+{_top_band_companies_text(top_band_companies, growth.index[-1])}
 """
     return html, []
+
+
+def _top_band_companies_text(companies, band_label):
+    """Veta so zoznamom firiem v najvyššom GMV pásme.
+
+    Bodka na konci sa nepridáva, ak už tam nejaká je (napr. skratka "s.r.o.").
+    """
+    names = ", ".join(R.escape(name) for name in companies)
+    ending = "" if names.endswith(".") else "."
+    return f'<p class="small">Účty v pásme {band_label}: {names}{ending}</p>'
 
 
 def methodology(metrics):
