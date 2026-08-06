@@ -80,8 +80,12 @@ def gmv_by_status(df):
 
 
 def trend_years(df):
-    """Zoznam rokov použitých v ročných grafoch."""
-    years = sorted(df.loc[df["year"] >= C.FIRST_TREND_YEAR, "year"].unique())
+    """Zoznam rokov použitých v ročných grafoch a tabuľkách.
+
+    Filtruje na C.DISPLAY_START_YEAR, nie na C.FIRST_TREND_YEAR — ide o to,
+    ktoré roky sa v reporte zobrazujú, nie ktoré roky sú platné dáta.
+    """
+    years = sorted(df.loc[df["year"] >= C.DISPLAY_START_YEAR, "year"].unique())
     return [int(year) for year in years]
 
 

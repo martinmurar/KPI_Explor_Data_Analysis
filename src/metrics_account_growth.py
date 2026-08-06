@@ -56,8 +56,9 @@ CUSTOMER_GROUP_ID_TO_NAME_MAP = {
 def account_table(df, as_of, window_months=None, min_age_months=None):
     """Tabuľka účtov v menovateli KPI s ich GMV v oboch oknách.
 
-    window_months a min_age_months sú parametrizovateľné len preto, aby sa dala
-    zmerať citlivosť KPI na definíciu. Predvolené hodnoty sú tie firemné.
+    window_months a min_age_months sú parametrizovateľné pre prípadné ad-hoc
+    porovnanie s inou definíciou KPI — report už takú tabuľku nemá, ale
+    volanie s vlastnými hodnotami funguje. Predvolené hodnoty sú tie firemné.
     """
     if window_months is None:
         window_months = C.GMV_WINDOW_MONTHS

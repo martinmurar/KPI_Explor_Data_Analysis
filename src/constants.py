@@ -4,7 +4,8 @@
 import pandas as pd
 
 # ── vstup a výstup ────────────────────────────────────────────────────────────
-INPUT_XLSX = "../data/b2b_orders_cleaned.xlsx"
+# INPUT_XLSX = "../data/b2b_orders_cleaned.xlsx"
+INPUT_XLSX = "../data/b2b_orders_cleaned_w_company_name_2.xlsx"
 OUTPUT_HTML = "../data/b2b_gmv_eda.html"
 
 # ── viditeľnosť grafov ────────────────────────────────────────────────────────
@@ -19,11 +20,21 @@ HIDDEN_CHARTS = {
 }
 
 # ── časové hranice ────────────────────────────────────────────────────────────
+# Rok, od ktorého report zobrazuje dáta — ročné tabuľky a grafy (trend,
+# koncentrácia, trhy, bridge, kohorty, reaktivácie), mesačný trend, churn
+# krivka aj kvartálna história account growth. Metriky s klzavým oknom alebo
+# historickým menovateľom (napr. 12-mesačný priemer, churn báza) počítajú aj
+# s dátami spred tohto roka — tie len nie sú v reporte vidieť, sú potrebné,
+# aby prvý zobrazený bod mal platnú hodnotu. Zmena tejto jednej hodnoty
+# preráta všetky časové grafy a tabuľky v reporte naraz.
+DISPLAY_START_YEAR = 2024
+
 # Posledný deň dát. Používa sa ako "dnešný dátum" pre churn a rolling okná.
 AS_OF = pd.Timestamp("2026-07-31")
 
-# 2018 je pilot (146 objednávok, medián 16,8 €) — vylúčené z trendov.
-FIRST_TREND_YEAR = 2023
+# 2018 je pilot (146 objednávok, medián 16,8 €) — vylúčené z trendov aj z
+# výpočtov, nielen zo zobrazenia (na rozdiel od DISPLAY_START_YEAR vyššie).
+FIRST_TREND_YEAR = 2019
 
 # Rok, ktorý je v dátach nekompletný. V grafoch sa značí hviezdičkou.
 PARTIAL_YEAR = 2026
@@ -33,7 +44,7 @@ PARTIAL_YEAR_LAST_MONTH = 7
 GMV_WINDOW_MONTHS = 3
 
 # Roky, z ktorých sa počíta priemerná sezonalita (len kompletné roky).
-SEASONALITY_YEARS = (2023, 2025)
+SEASONALITY_YEARS = (2022, 2025)
 
 # Šírka klzavého priemeru v mesačnom trende.
 MOVING_AVERAGE_MONTHS = 12
@@ -49,8 +60,10 @@ CHURN_MAIN_THRESHOLD_MONTHS = 6
 # Ako dlho dozadu sa meria veľkosť zákazníka pri churne podľa pásma.
 CHURN_BAND_LOOKBACK_MONTHS = 12
 
-# Prvý mesiac churn krivky (skôr je báza príliš malá na stabilné čísla).
-CHURN_CURVE_START = pd.Timestamp("2020-01-31")
+# Prvý mesiac churn krivky. Odvodené z DISPLAY_START_YEAR — churn báza sa aj
+# tak počíta zo všetkých historicky akvirovaných zákazníkov, len sa krivka
+# nekreslí skôr, ako report zobrazuje dáta.
+CHURN_CURVE_START = pd.Timestamp(year=DISPLAY_START_YEAR, month=1, day=1)
 
 # Medzera bez objednávky, po ktorej sa ďalšia objednávka počíta ako reaktivácia.
 REACTIVATION_GAP_MONTHS = 12
@@ -64,8 +77,10 @@ ACCOUNT_GROWTH_MIN_AGE_MONTHS = 12 + GMV_WINDOW_MONTHS
 # Cieľová hodnota KPI. Kreslí sa ako referenčná čiara.
 ACCOUNT_GROWTH_TARGET_PCT = 60
 
-# Prvý bod kvartálneho časového radu KPI.
-ACCOUNT_GROWTH_HISTORY_START = pd.Timestamp("2022-07-31")
+# Prvý bod kvartálneho časového radu KPI. Odvodené z DISPLAY_START_YEAR —
+# každý bod je nezávislý prierez, takže skrátenie radu nemení hodnoty
+# ostávajúcich bodov, len históriu pred nimi nekreslí.
+ACCOUNT_GROWTH_HISTORY_START = pd.Timestamp(year=DISPLAY_START_YEAR, month=1, day=1)
 
 # Segment menší ako toto sa v rezoch nezobrazuje — pri jednotkách účtov je
 # podiel rastúcich už len šum.
@@ -97,11 +112,12 @@ MARKET_ORDER = REPORTED_COUNTRIES + [OTHER_MARKET_LABEL]
 # Okno, za ktoré sa meria frekvencia objednávania.
 FREQUENCY_WINDOW_MONTHS = 12
 
-# Histogram frekvencie má jednotkové koše od FREQUENCY_FIRST_BUCKET
-# po FREQUENCY_TOP_BUCKET - 1. Dormantní zákazníci v ňom nie sú, preto sa
-# začína na 1. Posledný kôš zlučuje FREQUENCY_TOP_BUCKET a všetky vyššie
-# frekvencie a nesie označenie "30+".
+# Histogram frekvencie má jednotkové koše od FREQUENCY_FIRST_BUCKET po
+# FREQUENCY_TOP_BUCKET - 1. Menovateľom sú len zákazníci s aspoň jednou
+# objednávkou v okne, takže koše idú od 1, nie od 0.
 FREQUENCY_FIRST_BUCKET = 1
+
+# Posledný kôš zlučuje túto frekvenciu a všetky vyššie a nesie označenie "30+".
 FREQUENCY_TOP_BUCKET = 30
 
 # Koše histogramu počtu reaktivácií za život zákazníka.
