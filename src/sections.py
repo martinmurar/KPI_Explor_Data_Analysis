@@ -87,9 +87,6 @@ def methodology(metrics):
 <ul>
 <li>Chýbajúce hodnoty: {NUM(quality["missing_values"])}. Duplicitné <code>entity_id</code>:
 {NUM(quality["duplicate_ids"])}. Objednávky s GMV = 0: {NUM(quality["zero_gmv_orders"])}.</li>
-<li><b>Statusy sa nefiltrujú.</b> {PCT(complete_share)} GMV je v dokončených stavoch a v dátach
-nie je žiadny <code>canceled</code>. Filtrovaním by sa podhodnotil posledný mesiac, kde sú
-čerstvé objednávky ešte rozpracované.</li>
 <li><b>Rok 2018 je vylúčený z trendov</b> — pilot, {NUM(len(metrics["orders_2018"]))} objednávok,
 medián {EUR(metrics["orders_2018"]["gmv"].median(), 1)}.</li>
 <li><b>Rok {C.PARTIAL_YEAR} je nekompletný</b> (do
@@ -107,7 +104,7 @@ aspoň N mesiacov pred <i>t</i>.</li>
 
 
 def trend_section(metrics):
-    """Trend GMV a sezonalita."""
+    """Trend GMV a sezónnosť."""
     yearly = metrics["yearly"]
     seasonality = metrics["seasonality"]
     peak_month = seasonality.idxmax()
@@ -136,7 +133,7 @@ def trend_section(metrics):
 {_fig(figures, "seasonality")}
 <p>Najsilnejší mesiac je {peak_month}. ({PCT(seasonality.max())} ročného GMV), najslabší
 {low_month}. ({PCT(seasonality.min())}). Rozdiel medzi špičkou a dnom je len
-{PCT(seasonality.max() - seasonality.min())} — sezonalita je mierna a rozhodnutia
+{PCT(seasonality.max() - seasonality.min())} — sezónnosť je mierna a rozhodnutia
 sa na ňu nedajú zvaľovať.</p>
 """
     return html, figures
@@ -253,8 +250,7 @@ def concentration_section(metrics):
 {concentration_table}
 <p>Podiel top 5 zákazníkov sa zmenil z {PCT(first["top5_pct"])} ({first["label"]}) na
 {PCT(last["top5_pct"])} ({last["label"]}). Na 80 % GMV dnes stačí
-{NUM(last["customers_for_80pct"])} zákazníkov, HHI je {NUM(last["hhi"])} a Gini
-{NUM(last["gini"], 2)}.</p>
+{NUM(last["customers_for_80pct"])} zákazníkov.</p>
 {_fig(figures, "portfolio_structure")}
 {structure_table}
 <p>Pásmo {biggest_band} tvorí {PCT(structure.loc[biggest_band, "gmv_pct"])} GMV pri
@@ -301,9 +297,7 @@ je zásadný: {top_two.index[0]} {EUR(top_two.iloc[0]["gmv_per_customer"])} opro
 <p>Kategória {C.OTHER_MARKET_LABEL} je najzreteľnejší prípad rozdielu medzi počtom
 a hodnotou: {NUM(other["customers"])} zákazníkov, teda
 {PCT(other["customers"] / summary["customers"].sum() * 100)} celej bázy, ale len
-{PCT(other["share_pct"])} GMV. Mediánová objednávka {EUR(other["median_order"])} je
-retailová — nie sú to B2B partneri, ale drobní odberatelia, ktorí v metrikách
-„na zákazníka“ vážia rovnako ako key accounty.</p>
+{PCT(other["share_pct"])} GMV.</p>
 """
     return html, figures
 
@@ -392,10 +386,6 @@ def account_growth_section(metrics):
 
 <h3>Kde je rozdiel</h3>
 {_account_growth_breakdown_html(metrics, figures)}
-
-<h3>Citlivosť na definíciu</h3>
-{_account_growth_sensitivity_table(metrics)}
-{_account_growth_sensitivity_text(metrics, summary)}
 """
     return html, figures
 
@@ -406,8 +396,7 @@ def _account_growth_definition(summary):
 <p>KPI porovnáva GMV účtu za posledné {C.GMV_WINDOW_MONTHS} mesiace s GMV za to isté okno
 o rok skôr. Účet rastie, ak je aktuálne GMV vyššie. Do menovateľa patrí účet, ktorý je
 starší ako {C.ACCOUNT_GROWTH_MIN_AGE_MONTHS} mesiacov <b>a</b> bol aktívny aspoň v jednom
-z dvoch okien. Vekový filter nie je voľný parameter — 12 + {C.GMV_WINDOW_MONTHS} zaručuje,
-že každý účet v menovateli mal plné minuloročné okno.</p>
+z dvoch okien.</p>
 {R.render_note(
     f"<b>Aktuálna hodnota: {PCT(summary['growing_pct'])}</b> "
     f"({NUM(summary['growing'])} z {NUM(summary['accounts'])} účtov). "
@@ -458,16 +447,20 @@ def _account_growth_composition_text(composition, summary):
     binary_share = reactivated["share_pct"] + dropped["share_pct"]
 
     return f"""
-<p><b>{PCT(binary_share)} menovateľa je rozhodnuté binárne</b> — účet buď v okne nakúpil
-alebo nenakúpil. {NUM(reactivated["customers"])} reaktivovaných účtov je rastúcich
-automaticky (z nuly rastie čokoľvek), {NUM(dropped["customers"])} odídených je automaticky
-klesajúcich. Len {NUM(both["customers"])} účtov aktívnych v oboch oknách naozaj meria zmenu
-objemu, a tam je podiel rastúcich {PCT(both["growing_pct"])}, teda takmer presne pol na pol.</p>
-<p>Z toho vyplýva, kde je páka: s odídenými účtami zmizlo
-{EUR(dropped["previous_gmv"])} z minuloročného okna. <b>KPI sa nezvýši tým, že účty
-prinútime rásť — zvýši sa tým, že ich nedopustíme spadnúť do nuly.</b> Zároveň to je jeho
-najväčšia slabina: {NUM(summary["accounts_needed_for_target"])} chýbajúcich rastúcich účtov
-sa dá „splniť“ reaktiváciou drobných dormantných účtov s takmer nulovým vplyvom na tržby.</p>
+<p>Menovateľ nie je homogénny — sedia v ňom tri rôzne situácie.
+<b>Pri {PCT(binary_share)} účtov je výsledok rozhodnutý už tým, či účet v okne vôbec
+nakúpil.</b> {NUM(reactivated["customers"])} reaktivovaných účtov (pred rokom nenakúpili,
+teraz áno) je rastúcich automaticky, lebo z nuly rastie čokoľvek.
+{NUM(dropped["customers"])} odídených účtov (pred rokom nakúpili, teraz už nie) je
+z rovnakého dôvodu automaticky klesajúcich. Skutočnú zmenu objemu meria len zvyšných
+{NUM(both["customers"])} účtov aktívnych v oboch oknách — a tam rastie
+{PCT(both["growing_pct"])}, teda takmer presne pol na pol.</p>
+<p>KPI sa preto hýbe hlavne cez pády do nuly, nie cez rast existujúcich účtov:
+s odídenými účtami zmizlo {EUR(dropped["previous_gmv"])} z minuloročného okna.
+<b>KPI sa nezvýši tým, že účty prinútime rásť — zvýši sa tým, že ich nedopustíme spadnúť
+do nuly.</b> Rub tej istej mince je, že {NUM(summary["accounts_needed_for_target"])}
+chýbajúcich rastúcich účtov sa dá „splniť“ reaktiváciou drobných dormantných účtov
+s takmer nulovým dopadom na tržby.</p>
 """
 
 
@@ -537,37 +530,6 @@ def _breakdown_comment(breakdown):
             f'{NUM(spread, 1)} p. b.</p>')
 
 
-def _account_growth_sensitivity_table(metrics):
-    """Tabuľka citlivosti KPI na parametre definície."""
-    return R.render_table(
-        metrics["account_growth_sensitivity"],
-        [("accounts", "Účty v menovateli", NUM),
-         ("growing_pct", "% rastúcich", PCT),
-         ("gmv_growing_pct", "% GMV v rastúcich", PCT)],
-        index_label="Variant definície",
-    )
-
-
-def _account_growth_sensitivity_text(metrics, summary):
-    """Odstavec o tom, koľko z hodnoty KPI je vlastnosť definície."""
-    sensitivity = metrics["account_growth_sensitivity"]
-    windows = sensitivity.loc[[f"{months}-mes. okno"
-                               for months in C.ACCOUNT_GROWTH_WINDOW_VARIANTS]]
-    shortest = windows.iloc[0]
-    longest = windows.iloc[-1]
-
-    return f"""
-<p>Dĺžka okna mení KPI o desiatky percentuálnych bodov:
-{C.ACCOUNT_GROWTH_WINDOW_VARIANTS[0]}-mesačné okno dáva {PCT(shortest["growing_pct"])},
-{C.ACCOUNT_GROWTH_WINDOW_VARIANTS[-1]}-mesačné {PCT(longest["growing_pct"])}. Zvolené
-{C.GMV_WINDOW_MONTHS} mesiace teda číslu <b>lichotia</b> — čím dlhšie okno, tým viac
-účtov sa do menovateľa dostane a tým nižší podiel rastie. Kratšie okno zároveň znamená
-menej objednávok na účet, takže väčší podiel KPI je časovanie objednávok.
-Pred stanovením cieľa {C.ACCOUNT_GROWTH_TARGET_PCT} % treba zafixovať, ktorá z týchto
-hodnôt je „account growth“ — inak je cieľ nastavený na neurčenú metriku.</p>
-"""
-
-
 def loyalty_section(metrics):
     """Zákazníci s jednou objednávkou a frekvencia objednávania."""
     single = metrics["single_order"]
@@ -591,7 +553,6 @@ def loyalty_section(metrics):
     mature = single.loc[~single["is_immature"]]
     first = mature.iloc[0]
     last = mature.iloc[-1]
-    dormant = frequency.loc["0"]
     one_order = frequency.loc["1"]
     two_orders = frequency.loc["2"]
     top_bucket = frequency.iloc[-1]
@@ -607,19 +568,18 @@ objednávok za život klesol z {NUM(first["median_orders"])} na {NUM(last["media
 a medián LTV z {EUR(first["median_ltv"])} na {EUR(last["median_ltv"])}. Akvizícia rastie
 v počte a klesá v kvalite.</p>
 {_fig(figures, "frequency_histogram")}
-<p>Menovateľom je celá databáza, {NUM(total_base)} zákazníkov. Najväčšia skupina za
-posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov <b>nenakúpila vôbec</b> —
-{NUM(dormant["customers"])} zákazníkov, teda {PCT(dormant["share_pct"])} bázy.
-Druhá najväčšia má jedinú objednávku: {NUM(one_order["customers"])}
-({PCT(one_order["share_pct"])}). Dve objednávky má {NUM(two_orders["customers"])}
-zákazníkov ({PCT(two_orders["share_pct"])}).</p>
-<p>Histogram nemá tvar zvonu — rozdelenie je monotónne klesajúce s modusom na nule.
-Reverzný kumulatív to ukazuje presne: aspoň jednu objednávku má
-{PCT(one_order["share_at_or_above_pct"])} bázy, aspoň desať už len
-{PCT(frequency.loc["10"]["share_at_or_above_pct"])} a v poslednom koši
+<p>Menovateľom sú zákazníci, ktorí za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov
+aspoň raz nakúpili — {NUM(total_base)} zákazníkov. <b>Najväčšia skupina má jedinú
+objednávku</b>: {NUM(one_order["customers"])} ({PCT(one_order["share_pct"])}).
+Dve objednávky má {NUM(two_orders["customers"])} zákazníkov
+({PCT(two_orders["share_pct"])}).</p>
+<p>Rozdelenie je monotónne klesajúce — čím vyššia frekvencia, tým menej zákazníkov,
+bez akéhokoľvek typického nákupného rytmu, okolo ktorého by sa báza zhlukovala.
+Reverzný kumulatív to ukazuje presne: aspoň desať objednávok má už len
+{PCT(frequency.loc["10"]["share_at_or_above_pct"])} bázy a v poslednom koši
 ({top_bucket.name} objednávok) je {NUM(top_bucket["customers"])} zákazníkov, teda
-{PCT(top_bucket["share_pct"])}. Práve tí sú ale celý biznis — väčšina databázy nemá
-nákupný rytmus, len jednorazový kontakt.</p>
+{PCT(top_bucket["share_pct"])}. Práve tí sú ale celý biznis — väčšina nakupujúcich má
+s nami len jednorazový kontakt.</p>
 """
     return html, figures
 
@@ -689,6 +649,7 @@ def conclusions(metrics):
     top_band = growth.iloc[-1]
     main = f"churn_{C.CHURN_MAIN_THRESHOLD_MONTHS}m"
     mature = single.loc[~single["is_immature"]]
+    one_order_share = frequency.loc["1"]["share_pct"]
 
     markets = metrics["market_summary"]
     top_two_share = markets.head(2)["share_pct"].sum()
@@ -713,10 +674,10 @@ zákazníkov nie je chyba merania — je to štruktúra portfólia.</li>
 na {PCT(curves.iloc[-1][main])}. Reaktivácia je pritom vzácna a jednorazová, takže
 odchod je v praxi definitívny.</li>
 
-<li><b>Akvizícia klesá v kvalite.</b> Podiel zákazníkov s jedinou objednávkou stúpol na
-{PCT(mature.iloc[-1]["single_order_pct"])} a {PCT(frequency.loc["0"]["share_pct"])} celej bázy
-za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov nenakúpilo vôbec.
-Do B2B kanálu tečú drobní odberatelia.</li>
+<li><b>Akvizícia klesá v kvalite.</b> Podiel zákazníkov s jedinou objednávkou za život
+stúpol na {PCT(mature.iloc[-1]["single_order_pct"])} a z tých, čo za posledných
+{C.FREQUENCY_WINDOW_MONTHS} mesiacov vôbec nakúpili, má {PCT(one_order_share)} jedinú
+objednávku. Do B2B kanálu tečú drobní odberatelia.</li>
 
 <li><b>Rast je geograficky úzky.</b> Dva najväčšie trhy tvoria {PCT(top_two_share)} GMV.
 Kategória {C.OTHER_MARKET_LABEL} má {PCT(small_customer_share)} zákazníkov, ale len

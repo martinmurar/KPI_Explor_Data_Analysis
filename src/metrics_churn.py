@@ -288,21 +288,11 @@ def orders_per_customer_last_year(df):
     return window.groupby("cust").size()
 
 
-def _order_counts_with_dormant(df):
-    """Počet objednávok za okno pre všetkých zákazníkov, dormantní ako nula.
-
-    Zákazník, ktorý v okne nenakúpil, patrí do koša 0 — bez neho by histogram
-    zamlčal najväčšiu skupinu v databáze.
-    """
-    all_customers = pd.Index(df["cust"].unique(), name="cust")
-    counts = orders_per_customer_last_year(df)
-    return counts.reindex(all_customers, fill_value=0)
-
-
 def frequency_histogram(df):
     """Histogram frekvencie: počet zákazníkov pre každý počet objednávok.
 
-    Jednotkové koše od 0, posledný kôš zlučuje FREQUENCY_TOP_BUCKET a vyššie.
+    Menovateľom sú len zákazníci s aspoň jednou objednávkou v okne, takže
+    koše idú od 1. Posledný kôš zlučuje FREQUENCY_TOP_BUCKET a vyššie.
     Stĺpec customers_at_or_above je reverzný kumulatív — počet zákazníkov
     s danou frekvenciou a vyššou.
     """
@@ -310,7 +300,7 @@ def frequency_histogram(df):
     total = len(counts)
 
     rows = []
-    for orders in range(0, C.FREQUENCY_TOP_BUCKET):
+    for orders in range(C.FREQUENCY_FIRST_BUCKET, C.FREQUENCY_TOP_BUCKET):
         rows.append(_frequency_row(str(orders), (counts == orders).sum(), orders, counts, total))
 
     top_label = f"{C.FREQUENCY_TOP_BUCKET}+"
@@ -335,4 +325,4 @@ def _frequency_row(label, customers, threshold, counts, total):
 
 def max_frequency(df):
     """Najvyššia frekvencia objednávania v okne."""
-    return int(_order_counts_with_dormant(df).max())
+    return int(orders_per_customer_last_year(df).max())

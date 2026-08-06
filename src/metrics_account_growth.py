@@ -324,29 +324,3 @@ def _sort_breakdown(result, order):
         return result.sort_values("growing_pct", ascending=False)
     present = [segment for segment in order if segment in result.index]
     return result.loc[present]
-
-
-# ── vplyv parametrov definície ────────────────────────────────────────────────
-def definition_sensitivity(df):
-    """Ako sa KPI mení s dĺžkou okna a s vekovým filtrom.
-
-    Slúži na to, aby bolo vidieť, koľko z hodnoty KPI je vlastnosť biznisu
-    a koľko je vlastnosť zvolených parametrov.
-    """
-    rows = []
-    for months in C.ACCOUNT_GROWTH_WINDOW_VARIANTS:
-        label = f"{months}-mes. okno"
-        rows.append(_sensitivity_row(df, label, window_months=months))
-    for age in C.ACCOUNT_GROWTH_AGE_VARIANTS:
-        label = f"vek ≥ {age} mes."
-        rows.append(_sensitivity_row(df, label, min_age_months=age))
-    return pd.DataFrame(rows).set_index("variant")
-
-
-def _sensitivity_row(df, label, window_months=None, min_age_months=None):
-    """Jeden variant definície KPI."""
-    table = account_table(df, C.AS_OF, window_months=window_months,
-                          min_age_months=min_age_months)
-    summary = kpi_summary(table)
-    summary["variant"] = label
-    return summary

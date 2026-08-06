@@ -364,24 +364,14 @@ def repeat_reactivation(by_year):
 
 
 def frequency_histogram(histogram, highest_frequency):
-    """Histogram frekvencie objednávania: počet zákazníkov podľa počtu objednávok.
-
-    Kôš 0 je odlíšený farbou — sú to dormantní zákazníci, teda iná kategória
-    ako zákazníci s nejakou frekvenciou.
-    """
-    colors = []
-    for label in histogram.index:
-        if label == "0":
-            colors.append(C.COLOR_GREY)
-        else:
-            colors.append(C.COLOR_BLUE)
-
+    """Histogram frekvencie objednávania: počet zákazníkov podľa počtu objednávok."""
     caption = (
         f"Na osi x počet objednávok za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov, "
-        f"na osi y počet zákazníkov. Menovateľom je celá databáza — kôš 0 sú dormantní "
-        f"zákazníci. Posledný kôš zlučuje {C.FREQUENCY_TOP_BUCKET} a viac objednávok "
-        f"(maximum je {highest_frequency}). V hover je aj reverzný kumulatív, teda počet "
-        f"zákazníkov s danou frekvenciou a vyššou."
+        f"na osi y počet zákazníkov. Menovateľom sú zákazníci s aspoň jednou objednávkou "
+        f"v okne — dormantní v grafe nie sú. Posledný kôš zlučuje "
+        f"{C.FREQUENCY_TOP_BUCKET} a viac objednávok (maximum je {highest_frequency}). "
+        f"V hover je aj reverzný kumulatív, teda počet zákazníkov s danou frekvenciou "
+        f"a vyššou."
     )
 
     return _figure(
@@ -390,7 +380,7 @@ def frequency_histogram(histogram, highest_frequency):
         caption,
         "bar",
         histogram.index,
-        [_series("Zákazníci", histogram["customers"], C.COLOR_BLUE, point_colors=colors)],
+        [_series("Zákazníci", histogram["customers"], C.COLOR_BLUE)],
         height=360,
         value_format="count",
         hover_extras=_frequency_hover_lines(histogram),

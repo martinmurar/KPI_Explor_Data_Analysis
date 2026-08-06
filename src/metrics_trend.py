@@ -11,11 +11,14 @@ def monthly_gmv(df):
     """Mesačné GMV s klzavým priemerom.
 
     Vracia DataFrame indexovaný mesiacom so stĺpcami gmv a moving_average.
+    Prvých MOVING_AVERAGE_MONTHS mesiacov sa vynecháva — klzavý priemer pre
+    ne ešte nie je definovaný (chýba mu plná 12-mesačná história), takže by
+    v grafe zbytočne trčal ako medzera pred začiatkom trendovej čiary.
     """
     monthly = df.loc[df["year"] >= C.FIRST_TREND_YEAR].groupby("month")["gmv"].sum()
     table = pd.DataFrame({"gmv": monthly})
     table["moving_average"] = monthly.rolling(C.MOVING_AVERAGE_MONTHS).mean()
-    return table
+    return table.dropna(subset=["moving_average"])
 
 
 def seasonality(df):

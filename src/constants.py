@@ -23,7 +23,7 @@ HIDDEN_CHARTS = {
 AS_OF = pd.Timestamp("2026-07-31")
 
 # 2018 je pilot (146 objednávok, medián 16,8 €) — vylúčené z trendov.
-FIRST_TREND_YEAR = 2019
+FIRST_TREND_YEAR = 2023
 
 # Rok, ktorý je v dátach nekompletný. V grafoch sa značí hviezdičkou.
 PARTIAL_YEAR = 2026
@@ -33,7 +33,7 @@ PARTIAL_YEAR_LAST_MONTH = 7
 GMV_WINDOW_MONTHS = 3
 
 # Roky, z ktorých sa počíta priemerná sezonalita (len kompletné roky).
-SEASONALITY_YEARS = (2022, 2025)
+SEASONALITY_YEARS = (2023, 2025)
 
 # Šírka klzavého priemeru v mesačnom trende.
 MOVING_AVERAGE_MONTHS = 12
@@ -76,10 +76,6 @@ ACCOUNT_GROWTH_MIN_SEGMENT_SIZE = 15
 ACCOUNT_GROWTH_ORDER_EDGES = [0, 1, 2, 5]
 ACCOUNT_GROWTH_ORDER_BUCKETS = ["0", "1", "2", "3–5", "6+"]
 
-# Varianty definície, na ktorých sa meria citlivosť KPI.
-ACCOUNT_GROWTH_WINDOW_VARIANTS = (1, 3, 6, 12)
-ACCOUNT_GROWTH_AGE_VARIANTS = (15, 24, 36, 48)
-
 # ── veľkostné pásma zákazníkov ────────────────────────────────────────────────
 # Podľa GMV v porovnávacom období.
 BAND_EDGES = [0, 500, 2000, 10000, 50000, float("inf")]
@@ -101,8 +97,11 @@ MARKET_ORDER = REPORTED_COUNTRIES + [OTHER_MARKET_LABEL]
 # Okno, za ktoré sa meria frekvencia objednávania.
 FREQUENCY_WINDOW_MONTHS = 12
 
-# Histogram frekvencie má jednotkové koše od 0 po FREQUENCY_TOP_BUCKET - 1.
-# Posledný kôš zlučuje túto frekvenciu a všetky vyššie a nesie označenie "30+".
+# Histogram frekvencie má jednotkové koše od FREQUENCY_FIRST_BUCKET
+# po FREQUENCY_TOP_BUCKET - 1. Dormantní zákazníci v ňom nie sú, preto sa
+# začína na 1. Posledný kôš zlučuje FREQUENCY_TOP_BUCKET a všetky vyššie
+# frekvencie a nesie označenie "30+".
+FREQUENCY_FIRST_BUCKET = 1
 FREQUENCY_TOP_BUCKET = 30
 
 # Koše histogramu počtu reaktivácií za život zákazníka.
