@@ -96,51 +96,37 @@ ACCOUNT_GROWTH_ORDER_EDGES = [0, 1, 2, 5]
 ACCOUNT_GROWTH_ORDER_BUCKETS = ["0", "1", "2", "3–5", "6+"]
 
 # ── diagnostika KPI account growth (druhý report) ─────────────────────────────
-# Koľko mesiacov dozadu sa KPI meria s posunutým oknom. Rozptyl týchto meraní
-# je dolná hranica šumu metriky.
-KPI_DIAG_NOISE_MONTHS = 12
-
-# Dlhé okno, proti ktorému sa testuje, či je dĺžka okna voľbou merania alebo
-# voľbou populácie.
-KPI_DIAG_LONG_WINDOW_MONTHS = 12
-
 # Účet s najviac týmto počtom objednávok v oboch oknách je porovnávaný na
 # základe jednotiek udalostí — tam KPI meria hlavne časovanie.
 KPI_DIAG_THIN_ORDERS = 2
 
-# Hranica medzi „nakúpil nedávno“ a „nakúpil pred časom“ u padnutých účtov.
-KPI_DIAG_RECENT_MONTHS = 6
+# Po koľkých dňoch bez objednávky sa účet v diagnostike považuje za churnutý.
+# Kto nakúpil neskôr, je živý — len neobjednal práve v porovnávanom okne.
+KPI_DIAG_CHURN_DAYS = 180
 
-# Popisky troch skupín padnutých účtov. Posledná je jediná preukázateľne mŕtva.
-KPI_DIAG_RECENCY_LABELS = [
-    f"Nakúpili za posledných {KPI_DIAG_RECENT_MONTHS} mes.",
-    "Nakúpili skôr, ale po minuloročnom okne",
-    "Nenakúpili od konca minuloročného okna",
+# Popisky troch skupín, na ktoré sa delí celý menovateľ KPI. Prostredná skupina
+# je jadro problému — sú to živé účty, ktoré len netrafili okno.
+KPI_DIAG_ACTIVITY_LABELS = [
+    "Nakúpili v aktuálnom okne",
+    f"Nakúpili za posledných {KPI_DIAG_CHURN_DAYS} dní, ale mimo okna",
+    f"Churnuté — {KPI_DIAG_CHURN_DAYS}+ dní bez objednávky",
 ]
 
-# Popisky dvoch variantov KPI v teste na živé účty mimo okna.
-KPI_DIAG_ALIVE_LABELS = ["KPI ako sa vykazuje", "KPI bez živých účtov mimo okna"]
-
-# Hranice košov histogramu medziročnej zmeny GMV v %. Krajné hodnoty sa orežú.
-KPI_DIAG_CHANGE_EDGES = [-100, -75, -50, -25, -10, 0, 10, 25, 50, 100, 200]
-
-# Popisky troch samostatných ciest k cieľu.
-KPI_DIAG_PATH_LABELS = [
-    "Len prevencia pádov do nuly",
-    "Len zosilnenie aktívnych účtov",
-    "Len reaktivácia dormantných",
+# Popisky scenára pravidelného objednávania.
+KPI_DIAG_REGULAR_LABELS = [
+    "KPI ako sa vykazuje",
+    f"KPI, ak by živé účty objednávali aspoň raz za {GMV_WINDOW_MONTHS} mesiace",
 ]
 
-# Aký podiel pádov do nuly rebrík pák považuje za zachrániteľný.
-KPI_DIAG_SAVED_SHARE = 0.5
+# Pravdepodobnosti rastu, ktoré sa v scenári zabráneného churnu skúšajú.
+# Nie je to rozdelenie odhadnuté z dát, ale citlivosť na jeden predpoklad:
+# 0 = zachránený účet nikdy nerastie (= dnešný stav), 1 = rastie vždy.
+KPI_DIAG_CHURN_PROBABILITIES = (0.0, 0.5, 1.0)
 
-# Popisky krokov rebríka pák. Poradie je zámerné — reaktivácia je posledná.
-KPI_DIAG_LADDER_LABELS = [
-    "Východzí stav",
-    "+ udržať frekvenciu",
-    "+ zachrániť polovicu pádov",
-    "+ reaktivovať dormantné",
-]
+# Stredný predpoklad použitý v kombinovanom scenári. Účet, ktorý by v okne
+# nakúpil, sa dostane medzi účty aktívne v oboch oknách — a tam je rast
+# v podstate hod mincou, preto 0,5.
+KPI_DIAG_CHURN_PREVENTED_GROWTH_RATE = 0.5
 
 # ── veľkostné pásma zákazníkov ────────────────────────────────────────────────
 # Podľa GMV v porovnávacom období.

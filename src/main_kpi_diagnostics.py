@@ -27,19 +27,14 @@ def compute_metrics(df):
     každé číslo v reporte je konzistentné s hlavným reportom.
     """
     table = metrics_account_growth.account_table(df, C.AS_OF)
-    dormant = len(metrics_kpi_diagnostics.dormant_accounts(df))
     return {
         "quality": data.data_quality(df),
         "diag_summary": metrics_kpi_diagnostics.diagnostics_summary(table, df),
         "diag_frequency": metrics_kpi_diagnostics.frequency_effect(table),
-        "diag_dropped_recency": metrics_kpi_diagnostics.dropped_recency(table, df),
-        "diag_alive_effect": metrics_kpi_diagnostics.alive_effect(table, df),
-        "diag_noise": metrics_kpi_diagnostics.monthly_noise(df),
-        "diag_window": metrics_kpi_diagnostics.window_vs_population(df),
-        "diag_change_histogram": metrics_kpi_diagnostics.change_histogram(table),
-        "diag_wall": metrics_kpi_diagnostics.retention_wall(table),
-        "diag_paths": metrics_kpi_diagnostics.paths_to_target(table, dormant),
-        "diag_ladder": metrics_kpi_diagnostics.lever_ladder(table, df),
+        "diag_activity_split": metrics_kpi_diagnostics.activity_split(table, df),
+        "diag_regular_scenario": metrics_kpi_diagnostics.regular_ordering_scenario(table, df),
+        "diag_churn_sensitivity": metrics_kpi_diagnostics.churn_prevented_sensitivity(table, df),
+        "diag_combined_pct": metrics_kpi_diagnostics.combined_scenario_pct(table, df),
     }
 
 

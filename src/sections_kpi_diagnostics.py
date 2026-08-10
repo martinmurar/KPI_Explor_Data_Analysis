@@ -36,23 +36,24 @@ def header(metrics):
 
     cards = [
         ("Account growth", PCT(summary["growing_pct"], 1)),
-        ("Cieľ", f"{C.ACCOUNT_GROWTH_TARGET_PCT} %"),
+        ("Cieľ", f"{C.ACCOUNT_GROWTH_TARGET_PCT} %"),
+        ("Rastúcich medzi účtami aktívnymi v okne", PCT(summary["in_window_growing_pct"], 1)),
         ("GMV v rastúcich účtoch", PCT(summary["gmv_growing_pct"], 0)),
-        ("Šum metriky", f"±{NUM(summary['noise_sd'], 1)} p. b."),
     ]
 
     html = f"""
 <h1>Account growth — čo drží KPI pod cieľom</h1>
 <p class="lead">Diagnostika interného KPI · okno {C.GMV_WINDOW_MONTHS} mesiace medziročne
-k {C.AS_OF:%-d. %-m. %Y} · menovateľ {NUM(summary["accounts"])} účtov ·
+k {C.AS_OF:%-d. %-m. %Y} · menovateľ {NUM(summary["accounts"])} účtov ·
 zdroj <code>{C.INPUT_XLSX}</code> · {NUM(quality["orders"])} objednávok</p>
 {R.render_kpi_cards(cards)}
 {R.render_note(
-    f"<b>Téza.</b> Z odstupu od cieľa nie je všetko biznis. Časť je vlastnosť "
-    f"definície metriky — {PCT(summary['thin_pct'], 0)} menovateľa má v oboch oknách "
-    f"najviac {C.KPI_DIAG_THIN_ORDERS} objednávky, takže KPI z veľkej časti meria "
-    f"časovanie objednávok. A časť cieľa je aritmeticky nedosiahnuteľná retenciou, "
-    f"o čom je sekcia 5.")}
+    f"<b>Téza.</b> Medzi účtami, ktoré v okne nakúpili, je KPI na "
+    f"{PCT(summary['in_window_growing_pct'])} — takmer na cieli. Celkových "
+    f"{PCT(summary['growing_pct'])} vzniká tým, že sa k nim priráta "
+    f"{NUM(summary['cannot_grow'])} účtov, ktoré v okne nenakúpili a rastúce teda "
+    f"nemôžu byť z definície. Otázka preto nie je „prečo účty nerastú“, ale "
+    f"<b>„prečo {NUM(summary['cannot_grow'])} účtov v okne nenakúpilo“</b>.")}
 """
     return html, []
 
@@ -95,237 +96,159 @@ s ročným odstupom.</p>
     return html, figures
 
 
-# ── 2. živé účty mimo okna ────────────────────────────────────────────────────
-def dropped_section(metrics):
-    """Padnuté účty: koľko z nich je naozaj mŕtvych."""
-    recency = metrics["diag_dropped_recency"]
-    effect = metrics["diag_alive_effect"]
-    summary = metrics["diag_summary"]
+# ── 2. kedy účty naposledy nakúpili ───────────────────────────────────────────
+def activity_section(metrics):
+    """Rozdelenie menovateľa a scenár pravidelného objednávania."""
+    activity = metrics["diag_activity_split"]
+    scenario = metrics["diag_regular_scenario"]
 
     figures = [
-        charts.kpi_dropped_recency(recency),
-        charts.kpi_alive_effect(effect),
+        charts.kpi_activity_split(activity),
+        charts.kpi_regular_ordering(scenario),
     ]
 
     table = R.render_table(
-        recency,
+        activity,
         [("customers", "Účty", NUM),
+         ("share_pct", "% menovateľa", PCT),
+         ("growing_pct", "% rastúcich", PCT),
          ("previous_gmv", "GMV pred rokom", EUR)],
-        index_label="Posledná objednávka",
+        index_label="Kedy naposledy nakúpili",
     )
 
-    alive = recency.loc[recency["is_alive"], "customers"].sum()
-    dead = recency.loc[~recency["is_alive"], "customers"].sum()
-    reported = effect["growing_pct"].iloc[0]
-    adjusted = effect["growing_pct"].iloc[1]
+    in_window = activity.iloc[0]
+    outside = activity.iloc[1]
+    churned = activity.iloc[2]
+    reported = scenario["growing_pct"].iloc[0]
+    scenario_pct = scenario["growing_pct"].iloc[1]
 
     html = f"""
-<h2>2. Väčšina „padnutých“ účtov je živá</h2>
-{_fig(figures, "kpi_dropped_recency")}
+<h2>2. Časť účtov nie je churnutá, len netrafila okno</h2>
+{_fig(figures, "kpi_activity_split")}
 {table}
-<p>Z {NUM(summary["dropped"])} účtov s nulovým GMV v aktuálnom okne nakúpilo
-<b>{NUM(alive)}</b> po skončení minuloročného okna. Nie sú churnuté — len neobjednali
-práve v porovnávanom okne. Preukázateľne mŕtvych je {NUM(dead)}.</p>
-{_fig(figures, "kpi_alive_effect")}
-<p>Keď tie živé účty z metriky vynechám, KPI stúpne z {PCT(reported)} na
-{PCT(adjusted)}, teda o {NUM(adjusted - reported, 1)} p. b. To nie je zlepšenie
-biznisu, je to <b>meranie toho, koľko z odstupu od cieľa vyrába samotné okno</b>.</p>
+<p>V aktuálnom okne nakúpilo {NUM(in_window["customers"])} účtov
+({PCT(in_window["share_pct"])} menovateľa) a rastie z nich
+{PCT(in_window["growing_pct"])}. Ostatné dve skupiny majú
+{PCT(0)} rastúcich z definície — bez objednávky v okne nemá čo rásť.</p>
+<p>Medzi nimi leží <b>{NUM(outside["customers"])} účtov</b>, ktoré nakúpili za
+posledných {C.KPI_DIAG_CHURN_DAYS} dní, ale mimo {C.GMV_WINDOW_MONTHS}-mesačného
+okna. Nie sú churnuté a predstavujú {EUR(outside["previous_gmv"])} minuloročného
+GMV — KPI ich napriek tomu počíta ako klesajúce, do jednej. Churnutých, teda bez
+objednávky {C.KPI_DIAG_CHURN_DAYS} a viac dní, je {NUM(churned["customers"])}.</p>
+{_fig(figures, "kpi_regular_ordering")}
+<p>Ak by tých {NUM(outside["customers"])} účtov objednávalo aspoň raz za
+{C.GMV_WINDOW_MONTHS} mesiace, KPI by bolo {PCT(scenario_pct)} namiesto
+{PCT(reported)} — <b>o {NUM(scenario_pct - reported, 1)} p. b. vyššie bez toho, aby
+sa získal jediný nový zákazník</b>. Nie je to rast tržieb, je to pravidelnosť
+objednávania.</p>
+{R.render_note(
+    f"<b>Je to horná hranica, nie prognóza.</b> Scenár počíta všetkých "
+    f"{NUM(outside['customers'])} týchto účtov ako rastúce. V skutočnosti má každý "
+    f"z nich nenulové minuloročné GMV, takže rastúcim sa stane len ten, ktorý ho "
+    f"prekročí. Číslo hovorí, koľko priestoru v KPI leží v časovaní objednávok, "
+    f"nie koľko sa z neho podarí získať.")}
 """
     return html, figures
 
 
-# ── 3. šum ────────────────────────────────────────────────────────────────────
-def noise_section(metrics):
-    """Koľko sa KPI hýbe bez toho, aby sa hýbal biznis."""
-    noise = metrics["diag_noise"]
-    summary = metrics["diag_summary"]
+# ── 3. zabránenie churnu ──────────────────────────────────────────────────────
+def churn_prevented_section(metrics):
+    """Scenár, v ktorom churnuté účty zostanú aktívne."""
+    sensitivity = metrics["diag_churn_sensitivity"]
+    activity = metrics["diag_activity_split"]
 
-    figures = [charts.kpi_monthly_noise(noise)]
-
-    html = f"""
-<h2>3. Šum: to isté KPI merané o mesiac inak</h2>
-{_fig(figures, "kpi_noise")}
-<p>Za posledných {C.KPI_DIAG_NOISE_MONTHS} mesiacov sa KPI pohybovalo medzi
-{PCT(summary["noise_min"])} a {PCT(summary["noise_max"])} pri smerodajnej odchýlke
-{NUM(summary["noise_sd"], 1)} p. b. <b>Rozdiel dvoch susedných meraní v tomto
-rozpätí nie je signál.</b> Pri stanovovaní cieľa a pri jeho vyhodnocovaní treba
-s týmto pásmom počítať, inak sa bude reagovať na šum.</p>
-"""
-    return html, figures
-
-
-# ── 4. okno vs populácia ──────────────────────────────────────────────────────
-def window_section(metrics):
-    """Čo naozaj mení dĺžka okna."""
-    variants = metrics["diag_window"]
-    summary = metrics["diag_summary"]
-
-    figures = [charts.kpi_window_vs_population(variants, summary["growing_pct"])]
+    figures = [charts.kpi_churn_sensitivity(sensitivity)]
 
     table = R.render_table(
-        variants,
-        [("customers", "Menovateľ", NUM),
-         ("growing_pct", "% rastúcich", PCT)],
-        index_label="Variant",
+        sensitivity,
+        [("probability_pct", "Predpoklad rastu", lambda v: PCT(v, 0)),
+         ("growing_pct", "Account growth", PCT)],
+        index_label="Scenár",
     )
 
-    short = variants["growing_pct"].iloc[0]
-    long_same = variants["growing_pct"].iloc[1]
-    long_own = variants["growing_pct"].iloc[2]
-    extra = variants.iloc[3]
+    churned = activity.iloc[2]
+    prevented = int(sensitivity["prevented"].iloc[0])
+    lowest = sensitivity["growing_pct"].iloc[0]
+    middle = sensitivity["growing_pct"].iloc[1]
+    highest = sensitivity["growing_pct"].iloc[-1]
 
     html = f"""
-<h2>4. Dĺžka okna nie je voľba merania, ale voľba populácie</h2>
-{_fig(figures, "kpi_window_population")}
+<h2>3. Čo ak by sme zabránili churnu?</h2>
+{_fig(figures, "kpi_churn_sensitivity")}
 {table}
-<p>Intuícia hovorí, že dlhšie okno odstráni artefakt zo sekcie 2. Odstráni —
-ale číslo tým nestúpne. Na tých istých účtoch dá {C.KPI_DIAG_LONG_WINDOW_MONTHS}-mesačné
-okno {PCT(long_same)} namiesto {PCT(short)}, teda rozdiel
-{NUM(long_same - short, 1)} p. b. Celý prepad na {PCT(long_own)} robí
-{NUM(extra["customers"])} účtov, ktoré krátke okno do menovateľa vôbec nevpustí —
-a tie rastú len na {PCT(extra["growing_pct"])}.</p>
+<p>Scenár berie všetkých {NUM(prevented)} churnutých účtov ako aktívnych
+v aktuálnom okne a mení jediný predpoklad: aký podiel z nich rastie. Rozsah je
+<b>{PCT(lowest)} až {PCT(highest)}</b> — celý zvyšok odstupu od cieľa
+{C.ACCOUNT_GROWTH_TARGET_PCT} % sa teda dá vysvetliť samotným churnom, ale len
+v tom najoptimistickejšom bode.</p>
+<p>Najbližšie realite je stredný scenár. Zachránený účet sa dostane medzi účty
+aktívne v oboch oknách a tam rastie
+{PCT(metrics["diag_summary"]["active_in_both_growing_pct"])} — teda de facto hod
+mincou, čo tých {PCT(50, 0)} v predpoklade zdôvodňuje. Prevencia churnu potom dá
+{PCT(middle)}.</p>
+<p>S churnutými účtami pritom odišlo {EUR(churned["previous_gmv"])} minuloročného
+GMV. Na rozdiel od pravidelnosti objednávania zo sekcie 2 je toto <b>skutočná
+strata tržieb, nie chyba merania</b> — prevencia churnu sa vyplatí aj keby žiadne
+KPI neexistovalo.</p>
 {R.render_note(
-    f"<b>Neexistuje okno, ktoré zároveň zníži šum a zvýši číslo.</b> Kratšie okno "
-    f"zamlčí slabé účty, dlhšie ich vpustí. Číslo je nízke preto, že báza je plochá — "
-    f"nie preto, že okno je krátke. Pred stanovením cieľa "
-    f"{C.ACCOUNT_GROWTH_TARGET_PCT} % treba zafixovať, ktorá z hodnôt v tabuľke je "
-    f"„account growth“.")}
+    f"<b>Ani jedna z týchto pák sama cieľ spoľahlivo nedosiahne.</b> Pravidelnosť "
+    f"dá {PCT(metrics['diag_regular_scenario']['growing_pct'].iloc[1])}, prevencia "
+    f"churnu {PCT(middle)} pri strednom predpoklade, cieľ je "
+    f"{C.ACCOUNT_GROWTH_TARGET_PCT} %. Sú to však dve disjunktné skupiny účtov — "
+    f"živý mimo okna a churnutý sú vzájomne vylučujúce stavy — takže sa efekty "
+    f"sčítajú. Spolu dávajú <b>{PCT(metrics['diag_combined_pct'])}</b>.")}
 """
     return html, figures
 
 
-# ── 5. distribúcia a aritmetická stena ────────────────────────────────────────
-def wall_section(metrics):
-    """Prečo je cieľ nedosiahnuteľný samotnou retenciou."""
-    histogram = metrics["diag_change_histogram"]
-    wall = metrics["diag_wall"]
-    paths = metrics["diag_paths"]
-    summary = metrics["diag_summary"]
-
-    figures = [
-        charts.kpi_change_histogram(histogram),
-        charts.kpi_retention_wall(wall, summary["growing_pct"]),
-    ]
-
-    paths_table = R.render_table(
-        paths,
-        [("needed", "Potrebné", lambda v: NUM(v, 0)),
-         ("available", "Dostupné", lambda v: NUM(v, 0)),
-         ("unit", "Jednotka", str),
-         ("feasible", "Stačí materiál?", _yes_no)],
-        index_label="Samostatná cesta k cieľu",
-    )
-
-    today = wall["growing_pct"].iloc[0]
-    zero_churn = wall["growing_pct"].iloc[1]
-
-    html = f"""
-<h2>5. Aritmetická stena: cieľ sa retenciou dosiahnuť nedá</h2>
-{_fig(figures, "kpi_change_histogram")}
-<p>Distribúcia je takmer symetrická okolo nuly, medián
-{SIGNED_PCT(histogram["median_change_pct"].iloc[0])}. Preto je podiel rastúcich medzi
-aktívnymi účtami {PCT(summary["active_growing_pct"])} — typický aktívny účet je plochý
-a o jeho zaradení rozhoduje maličkosť.</p>
-{_fig(figures, "kpi_retention_wall")}
-<p>Ak by ani jeden účet nespadol do nuly a všetky by sa chovali ako priemerný aktívny
-účet, KPI by bolo {PCT(zero_churn)}, nie {C.ACCOUNT_GROWTH_TARGET_PCT} %. Dôvod je
-subtílny: <b>zachránený pád sa nestane rastúcim účtom automaticky</b> — presunie sa
-do skupiny, kde má {PCT(summary["active_growing_pct"], 0)} šancu na rast.</p>
-{paths_table}
-<p>Reaktivácia dormantných účtov je jediná samostatne funkčná cesta, lebo dormantný
-účet sa po jednej objednávke stane rastúcim automaticky. Kandidátov je
-{NUM(summary["dormant"])}. Ich medián životného GMV je však
-{EUR(summary["dormant_median_ltv"])}, takže je to
-<b>cesta, ktorá cieľ splní a tržbám nedá takmer nič</b>.</p>
-"""
-    return html, figures
-
-
-def _yes_no(value):
-    """Áno/nie pre stĺpec s realizovateľnosťou cesty."""
-    if bool(value):
-        return "áno"
-    return "nie"
-
-
-# ── 6. rebrík pák ─────────────────────────────────────────────────────────────
-def ladder_section(metrics):
-    """Kombinácia pák, ktorá cieľ dosiahne."""
-    ladder = metrics["diag_ladder"]
-    summary = metrics["diag_summary"]
-
-    figures = [charts.kpi_lever_ladder(ladder)]
-
-    table = R.render_table(
-        ladder,
-        [("gain", "Prírastok rastúcich účtov", lambda v: NUM(v, 0)),
-         ("growing_pct", "KPI po kroku", PCT)],
-        index_label="Krok",
-    )
-
-    reactivations = int(ladder["reactivations"].iloc[0])
-    saved = int(ladder["saved"].iloc[0])
-    fewer = int(ladder["fewer_accounts"].iloc[0])
-    addressable = summary["fewer_delta"] - summary["dropped_gmv"]
-
-    html = f"""
-<h2>6. Kombinácia, ktorá cieľ dosiahne</h2>
-{_fig(figures, "kpi_lever_ladder")}
-{table}
-<p>Udržať frekvenciu u {NUM(fewer)} účtov, ktoré objednali menejkrát, a zachrániť
-polovicu pádov do nuly ({NUM(saved)} účtov) posunie KPI natoľko, že na cieľ stačí
-{NUM(reactivations)} reaktivácií namiesto niekoľkých stoviek.
-<b>Poradie je jednoznačné: frekvencia → prevencia pádov → reaktivácia ako doplnok,
-nie ako stratégia.</b></p>
-{R.render_note(
-    f"Prvé dva kroky sa vyplatia aj keby žiadne KPI neexistovalo. "
-    f"{NUM(fewer)} účtov s nižšou frekvenciou stratilo "
-    f"{SIGNED_EUR(summary['fewer_delta'])}, {NUM(summary['dropped'])} pádov do nuly "
-    f"{SIGNED_EUR(-summary['dropped_gmv'])}. Spolu <b>{SIGNED_EUR(addressable)}</b> "
-    f"medziročne.")}
-"""
-    return html, figures
-
-
-# ── 7. odporúčania ────────────────────────────────────────────────────────────
+# ── 4. odporúčania ────────────────────────────────────────────────────────────
 def recommendations(metrics):
     """Čo z toho vyplýva pre metriku aj pre biznis."""
     summary = metrics["diag_summary"]
-    variants = metrics["diag_window"]
+    activity = metrics["diag_activity_split"]
+
+    outside = activity.iloc[1]
+    churned = activity.iloc[2]
 
     html = f"""
-<h2>7. Odporúčania</h2>
+<h2>4. Odporúčania</h2>
 <h3>K metrike</h3>
 <ol>
-<li><b>Zafixovať definíciu pred cieľom.</b> Tá istá báza dá
-{PCT(variants["growing_pct"].iloc[0])} pri {C.GMV_WINDOW_MONTHS}-mesačnom okne a
-{PCT(variants["growing_pct"].iloc[2])} pri {C.KPI_DIAG_LONG_WINDOW_MONTHS}-mesačnom.
-Cieľ {C.ACCOUNT_GROWTH_TARGET_PCT} % dnes visí na neurčenej metrike.</li>
-<li><b>Nastaviť cieľ na tú časť, ktorá je riadená</b> — napríklad na podiel rastúcich
-medzi účtami aktívnymi v oboch oknách (dnes {PCT(summary["active_growing_pct"])}).
-Tam je {C.ACCOUNT_GROWTH_TARGET_PCT} % ambiciózne, ale dosiahnuteľné, a nedá sa to
-splniť reaktivačnou kampaňou.</li>
+<li><b>Rozdeliť KPI na dve čísla.</b> Dnes v jednom čísle sedia dve nezávislé
+veci: koľko účtov v okne vôbec nakúpilo ({PCT(activity.iloc[0]["share_pct"])}) a
+koľko z nich rástlo ({PCT(summary["in_window_growing_pct"])}). Prvé je otázka
+pravidelnosti a retencie, druhé otázka rastu objemu. Riadia sa inak a merať ich
+jedným číslom znamená nevedieť, ktorá polovica sa zhoršila.</li>
+<li><b>Nastaviť cieľ na tú časť, ktorá je riadená.</b> Na podiele rastúcich medzi
+účtami aktívnymi v okne je {C.ACCOUNT_GROWTH_TARGET_PCT} % takmer dosiahnutých —
+a nedá sa to splniť kampaňou, ktorá len rozhýbe objednávky.</li>
 <li><b>Vykazovať vedľa neváženého KPI aj GMV-vážený variant.</b> Dnes je
 {PCT(summary["gmv_growing_pct"])} tržieb v rastúcich účtoch oproti
 {PCT(summary["growing_pct"])} účtov — nevážené KPI a tržby nehovoria to isté.</li>
-<li><b>Uvádzať pásmo šumu.</b> ±{NUM(summary["noise_sd"], 1)} p. b. znamená, že na
-zmenu do 2 p. b. sa nemá reagovať.</li>
 </ol>
 
 <h3>K biznisu</h3>
 <ol>
 <li><b>Sledovať počet objednávok na účet ako predstihový indikátor.</b> Je to
-najsilnejší vzťah v dátach a jediný, ktorý sa dá riadiť v priebehu kvartálu.</li>
+najsilnejší vzťah v dátach a jediný, ktorý sa dá riadiť v priebehu kvartálu —
+účet, ktorý objedná menejkrát, je pre KPI stratený takmer isto.</li>
+<li><b>Rozhýbať {NUM(outside["customers"])} účtov, ktoré len netrafili okno.</b>
+Sú živé, nakúpili za posledných {C.KPI_DIAG_CHURN_DAYS} dní a je to najlacnejšia
+páka na KPI. Konkrétne: dostať ich na interval objednávania kratší ako
+{C.GMV_WINDOW_MONTHS} mesiace.</li>
+<li><b>Prevencia churnu má prioritu podľa GMV, nie podľa počtu účtov.</b>
+S {NUM(churned["customers"])} churnutými účtami odišlo
+{EUR(churned["previous_gmv"])} — to je skutočná strata a vyplatí sa aj bez ohľadu
+na KPI.</li>
 <li><b>Zamerať prevenciu na účty, ktoré strácajú frekvenciu</b>, nie na tie, ktoré
-už spadli do nuly. Do nuly padá účet až po tom, čo mu najprv klesne frekvencia.</li>
-<li><b>Reaktivačné kampane nepoužívať na plnenie KPI.</b> Fungujú na číslo, nie na
-tržby — medián životného GMV dormantného účtu je
-{EUR(summary["dormant_median_ltv"])}.</li>
+už odišli. Do churnu padá účet až po tom, čo mu najprv klesne frekvencia, takže
+signál je k dispozícii vopred.</li>
 </ol>
 
 <p class="small" style="margin-top:48px;border-top:1px solid var(--bd);padding-top:16px">
 Grafy sú interaktívne — prejdi kurzorom pre presné hodnoty. Všetky tabuľky a čísla
-v texte sú generované z dát. Dátum analýzy {C.AS_OF:%-d. %-m. %Y}.</p>
+v texte sú generované z dát. Scenáre sú kontrafaktuálna aritmetika, nie prognózy.
+Dátum analýzy {C.AS_OF:%-d. %-m. %Y}.</p>
 """
     return html, []
 
@@ -333,11 +256,8 @@ v texte sú generované z dát. Dátum analýzy {C.AS_OF:%-d. %-m. %Y}.</p>
 SECTION_BUILDERS = [
     header,
     frequency_section,
-    dropped_section,
-    noise_section,
-    window_section,
-    wall_section,
-    ladder_section,
+    activity_section,
+    churn_prevented_section,
     recommendations,
 ]
 
