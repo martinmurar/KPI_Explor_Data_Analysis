@@ -43,7 +43,14 @@ def _series(label, values, color, chart_type="bar", dashed=False,
 
 
 def _clean(value):
-    """Nahradí NaN hodnotou None, aby prežila serializáciu do JSON."""
+    """Nahradí NaN hodnotou None, aby prežila serializáciu do JSON.
+
+    Dvojica [od, do] sa čistí po prvkoch — Chart.js z nej kreslí plávajúci
+    stĺpec, čo potrebuje waterfall v diagnostickom reporte. V hlavnom reporte
+    žiadna séria dvojice neobsahuje, takže tá vetva sa tam nikdy nepoužije.
+    """
+    if isinstance(value, (list, tuple)):
+        return [_clean(item) for item in value]
     try:
         if value != value:
             return None
@@ -524,3 +531,250 @@ def net_gmv_by_band(growth):
         value_format="k_eur",
         y_begin_at_zero=False,
     )
+
+
+# ── diagnostika KPI account growth (druhý report) ─────────────────────────────
+# Tieto grafy kreslí len main_kpi_diagnostics.py. Hlavný report ich nevolá,
+# takže jeho výstup zostáva nezmenený.
+def _kpi_status_colors(values, reference_pct):
+    """Zelená nad cieľom, červená pod referenčnou hodnotou, inak modrá."""
+    colors = []
+    for value in values:
+        if value >= C.ACCOUNT_GROWTH_TARGET_PCT:
+            colors.append(C.KPI_DIAG_COLOR_GOOD)
+        elif value < reference_pct:
+            colors.append(C.KPI_DIAG_COLOR_BAD)
+        else:
+            colors.append(C.KPI_DIAG_COLOR_NEUTRAL)
+    return colors
+
+
+def _kpi_hover(rows, lines_fn):
+    """Riadky do hover pre každý riadok tabuľky rezu."""
+    lines = []
+    for _, row in rows.iterrows():
+        lines.append(lines_fn(row))
+    return lines
+
+
+def kpi_frequency_effect(frequency, reference_pct):
+    """Podiel rastúcich podľa zmeny počtu objednávok."""
+    values = list(frequency["growing_pct"])
+    return _figure(
+        "kpi_frequency",
+        "Rast účtu podľa zmeny počtu objednávok",
+        f"V %, len {int(frequency['customers'].sum())} účtov aktívnych v oboch oknách. "
+        f"Zelená je nad cieľom {C.ACCOUNT_GROWTH_TARGET_PCT} %, červená pod celkovým KPI.",
+        "bar",
+        frequency.index,
+        [_series("% rastúcich účtov", values, C.KPI_DIAG_COLOR_NEUTRAL,
+                 point_colors=_kpi_status_colors(values, reference_pct))],
+        height=210,
+        index_axis="y",
+        value_format="pct",
+        y_max=100,
+        hover_extras=_kpi_hover(frequency, lambda row: [
+            f"Účtov: {formatting.format_number(row['customers'])}",
+            f"Netto zmena GMV: {formatting.format_signed_eur(row['net_delta'])}",
+        ]),
+    )
+
+
+def kpi_dropped_recency(recency):
+    """Padnuté účty podľa toho, kedy naposledy nakúpili."""
+    colors = []
+    for is_alive in recency["is_alive"]:
+        if is_alive:
+            colors.append(C.KPI_DIAG_COLOR_NEUTRAL)
+        else:
+            colors.append(C.KPI_DIAG_COLOR_BAD)
+
+    return _figure(
+        "kpi_dropped_recency",
+        "Účty s nulovým GMV v aktuálnom okne",
+        "Počet účtov. Modré účty nakúpili po skončení minuloročného okna — nie sú "
+        "churnuté, len neobjednali práve v porovnávanom okne. KPI ich aj tak "
+        "počíta ako klesajúce.",
+        "bar",
+        recency.index,
+        [_series("Počet účtov", recency["customers"], C.KPI_DIAG_COLOR_NEUTRAL,
+                 point_colors=colors)],
+        height=210,
+        index_axis="y",
+        value_format="count",
+        hover_extras=_kpi_hover(recency, lambda row: [
+            f"GMV pred rokom: {formatting.format_eur(row['previous_gmv'])}",
+        ]),
+    )
+
+
+def kpi_alive_effect(effect):
+    """KPI ako sa vykazuje vs KPI bez živých účtov mimo okna."""
+    excluded = int(effect["excluded"].iloc[0])
+    return _figure(
+        "kpi_alive_effect",
+        "Koľko KPI stoja živé účty mimo okna",
+        f"V %. Druhý stĺpec vynecháva {excluded} účtov, ktoré nakúpili po skončení "
+        f"minuloročného okna, ale nie v tom aktuálnom.",
+        "bar",
+        effect.index,
+        [_series("% rastúcich účtov", effect["growing_pct"], C.KPI_DIAG_COLOR_NEUTRAL)],
+        height=160,
+        index_axis="y",
+        value_format="pct",
+        y_max=100,
+        hover_extras=_kpi_hover(effect, lambda row: [
+            f"Menovateľ: {formatting.format_number(row['customers'])} účtov",
+        ]),
+    )
+
+
+def kpi_monthly_noise(noise):
+    """KPI merané s oknom posunutým po mesiacoch."""
+    target = [C.ACCOUNT_GROWTH_TARGET_PCT] * len(noise)
+    labels = [f"{date:%Y-%m}" for date in noise.index]
+
+    return _figure(
+        "kpi_noise",
+        "To isté KPI merané o mesiac inak",
+        f"V %. Rovnaká definícia, len okno posunuté po mesiacoch. Rozptyl týchto "
+        f"meraní je dolná hranica šumu metriky — biznis sa medzi dvoma susednými "
+        f"mesiacmi nemení tak, ako sa mení toto číslo.",
+        "line",
+        labels,
+        [
+            _series(f"Cieľ {C.ACCOUNT_GROWTH_TARGET_PCT} %", target,
+                    C.KPI_DIAG_COLOR_TARGET, chart_type="line", dashed=True),
+            _series("% rastúcich účtov", noise["growing_pct"],
+                    C.KPI_DIAG_COLOR_NEUTRAL, chart_type="line"),
+        ],
+        height=280,
+        value_format="pct",
+        y_max=70,
+        hover_extras=_kpi_hover(noise, lambda row: [
+            f"Menovateľ: {formatting.format_number(row['accounts'])} účtov",
+        ]),
+    )
+
+
+def kpi_window_vs_population(variants, reference_pct):
+    """Rozklad efektu dlhšieho okna na efekt merania a efekt populácie."""
+    values = list(variants["growing_pct"])
+    return _figure(
+        "kpi_window_population",
+        "Dĺžka okna: voľba merania alebo voľba populácie?",
+        f"V %. Dlhé okno je {C.KPI_DIAG_LONG_WINDOW_MONTHS}-mesačné, krátke "
+        f"{C.GMV_WINDOW_MONTHS}-mesačné. Ak dlhé okno pustím na tých istých účtoch, "
+        f"zmení sa takmer nič — prepad robia účty, ktoré krátke okno do menovateľa "
+        f"vôbec nevpustí.",
+        "bar",
+        variants.index,
+        [_series("% rastúcich účtov", values, C.KPI_DIAG_COLOR_NEUTRAL,
+                 point_colors=_kpi_status_colors(values, reference_pct))],
+        height=230,
+        index_axis="y",
+        value_format="pct",
+        y_max=100,
+        hover_extras=_kpi_hover(variants, lambda row: [
+            f"Menovateľ: {formatting.format_number(row['customers'])} účtov",
+        ]),
+    )
+
+
+def kpi_change_histogram(histogram):
+    """Distribúcia medziročnej zmeny GMV u účtov aktívnych v oboch oknách."""
+    colors = []
+    for is_positive in histogram["is_positive"]:
+        if is_positive:
+            colors.append(C.KPI_DIAG_COLOR_NEUTRAL)
+        else:
+            colors.append(C.KPI_DIAG_COLOR_BAD)
+
+    median = histogram["median_change_pct"].iloc[0]
+    return _figure(
+        "kpi_change_histogram",
+        "Distribúcia medziročnej zmeny GMV",
+        f"Počet účtov aktívnych v oboch oknách podľa medziročnej zmeny GMV v %. "
+        f"Krajné hodnoty sú orezané na hranice krajných košov. Medián "
+        f"{formatting.format_signed_pct(median)}.",
+        "bar",
+        histogram.index,
+        [_series("Počet účtov", histogram["customers"], C.KPI_DIAG_COLOR_NEUTRAL,
+                 point_colors=colors)],
+        height=280,
+        value_format="count",
+    )
+
+
+def kpi_retention_wall(wall, reference_pct):
+    """KPI dnes, pri nulovom churne a cieľ."""
+    values = list(wall["growing_pct"])
+    return _figure(
+        "kpi_retention_wall",
+        "Aritmetická stena retencie",
+        f"V %. Scenár nulový churn znamená, že ani jeden účet nespadol do nuly a "
+        f"všetky sa chovajú ako priemerný účet aktívny v oboch oknách. Je to horná "
+        f"hranica toho, čo dokáže čistá retencia.",
+        "bar",
+        wall.index,
+        [_series("% rastúcich účtov", values, C.KPI_DIAG_COLOR_NEUTRAL,
+                 point_colors=_kpi_status_colors(values, reference_pct))],
+        height=190,
+        index_axis="y",
+        value_format="pct",
+        y_max=100,
+    )
+
+
+def kpi_lever_ladder(ladder):
+    """Kumulatívny efekt pák ako waterfall."""
+    target = [C.ACCOUNT_GROWTH_TARGET_PCT] * len(ladder)
+    spans = _ladder_spans(ladder)
+    colors = _ladder_colors(ladder)
+
+    return _figure(
+        "kpi_lever_ladder",
+        "Rebrík pák k cieľu",
+        f"V %. Každý stĺpec je prírastok KPI oproti predchádzajúcemu kroku. Nie je "
+        f"to prognóza — je to kontrafaktuálna aritmetika, ktorá ukazuje pomer sily "
+        f"pák. Posledný krok je zámerne tenký.",
+        "bar",
+        ladder.index,
+        [
+            _series(f"Cieľ {C.ACCOUNT_GROWTH_TARGET_PCT} %", target,
+                    C.KPI_DIAG_COLOR_TARGET, chart_type="line", dashed=True),
+            _series("KPI po kroku", spans, C.KPI_DIAG_COLOR_NEUTRAL, point_colors=colors),
+        ],
+        height=280,
+        value_format="pct",
+        y_max=70,
+        hover_extras=_kpi_hover(ladder, lambda row: [
+            f"Prírastok: {formatting.format_signed_pct(row['gain'], 0)} rastúcich účtov"
+            if row["gain"] else "Východzí stav",
+        ]),
+    )
+
+
+def _ladder_spans(ladder):
+    """Dvojice [od, do] pre plávajúce stĺpce waterfallu."""
+    values = list(ladder["growing_pct"])
+    spans = []
+    for index, value in enumerate(values):
+        if index == 0:
+            spans.append([0, value])
+        else:
+            spans.append([values[index - 1], value])
+    return spans
+
+
+def _ladder_colors(ladder):
+    """Prvý krok je stav, posledný nad cieľom je zelený, ostatné modré."""
+    colors = []
+    for index, value in enumerate(ladder["growing_pct"]):
+        if index == 0:
+            colors.append(C.KPI_DIAG_COLOR_MUTED)
+        elif value >= C.ACCOUNT_GROWTH_TARGET_PCT:
+            colors.append(C.KPI_DIAG_COLOR_GOOD)
+        else:
+            colors.append(C.KPI_DIAG_COLOR_NEUTRAL)
+    return colors

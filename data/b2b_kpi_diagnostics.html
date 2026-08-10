@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="sk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Account growth — diagnostika KPI</title>
+<style>
+:root{--ink:#141413;--ink2:#52514e;--mut:#898781;--bd:#e1e0d9;--bg:#faf9f5;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:400 16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+ -webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:48px 28px 80px}
+h1{font-size:30px;font-weight:500;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:21px;font-weight:500;margin:56px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--bd)}
+h3{font-size:16px;font-weight:500;margin:32px 0 10px}
+p{margin:0 0 14px}
+.lead{color:var(--ink2);font-size:15px;margin-bottom:28px}
+.small{font-size:13px;color:var(--mut)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:14px 0 22px}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--bd)}
+th{font-weight:500;color:var(--ink2);background:#f3f2ec}
+th:first-child,td:first-child{text-align:left}
+tr:hover td{background:#f7f6f1}
+.fig{background:var(--card);border:1px solid var(--bd);border-radius:12px;
+ padding:18px 20px 20px;margin:20px 0 28px}
+.fig h4{margin:0 0 2px;font-size:14.5px;font-weight:500}
+.fig .cap{font-size:12.5px;color:var(--mut);margin:0 0 14px}
+.cv{position:relative;width:100%}
+.lg{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 12px;font-size:12px;color:var(--ink2)}
+.lg span{display:flex;align-items:center;gap:5px}
+.lg i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0 8px}
+.kpi div{background:#f3f2ec;border-radius:8px;padding:14px 16px}
+.kpi .l{font-size:12.5px;color:var(--mut);margin:0 0 4px}
+.kpi .v{font-size:23px;font-weight:500;margin:0}
+.note{background:#f3f2ec;border-left:3px solid #eb6834;padding:14px 18px;margin:20px 0;
+ font-size:14.5px;border-radius:0 8px 8px 0}
+ol,ul{margin:0 0 14px;padding-left:22px}
+li{margin-bottom:7px}
+.neg{color:#a32d2d}.pos{color:#0f6e56}
+</style></head>
+<body><div class="wrap">
+
+<h1>Account growth — čo drží KPI pod cieľom</h1>
+<p class="lead">Diagnostika interného KPI · okno 3 mesiace medziročne
+k 31. 7. 2026 · menovateľ 673 účtov ·
+zdroj <code>../data/b2b_orders_cleaned_w_company_name_2.xlsx</code> · 59 719 objednávok</p>
+<div class="kpi"><div><p class="l">Account growth</p><p class="v">41,8 %</p></div><div><p class="l">Cieľ</p><p class="v">60 %</p></div><div><p class="l">GMV v rastúcich účtoch</p><p class="v">79 %</p></div><div><p class="l">Šum metriky</p><p class="v">±1,9 p. b.</p></div></div>
+<div class="note"><b>Téza.</b> Z odstupu od cieľa nie je všetko biznis. Časť je vlastnosť definície metriky — 57 % menovateľa má v oboch oknách najviac 2 objednávky, takže KPI z veľkej časti meria časovanie objednávok. A časť cieľa je aritmeticky nedosiahnuteľná retenciou, o čom je sekcia 5.</div>
+
+
+<h2>1. Rast účtu je o počte objednávok, nie o ich veľkosti</h2>
+<div class="fig"><h4>Rast účtu podľa zmeny počtu objednávok</h4><p class="cap">V %, len 368 účtov aktívnych v oboch oknách. Zelená je nad cieľom 60 %, červená pod celkovým KPI.</p><div class="lg"><span><i style="background:#2a78d6"></i>% rastúcich účtov</span></div><div class="cv" style="height:210px"><canvas id="kpi_frequency"></canvas></div></div>
+<table><thead><tr><th>Zmena počtu objednávok</th><th>Účty</th><th>Z toho rastúcich</th><th>% rastúcich</th><th>Netto zmena GMV</th></tr></thead><tbody><tr><td>Viac objednávok</td><td>128</td><td>112</td><td>87,5 %</td><td>+1 278 125 €</td></tr><tr><td>Rovnaký počet</td><td>110</td><td>56</td><td>50,9 %</td><td>+23 272 €</td></tr><tr><td>Menej objednávok</td><td>130</td><td>11</td><td>8,5 %</td><td><span class="neg">-202 321 €</span></td></tr></tbody></table>
+<p>Vzťah je takmer deterministický. Účet, ktorý objedná rovnaký počet krát, je
+coin flip (50,9 %). Účet, ktorý objedná menejkrát, je odpísaný
+(8,5 %). Účet, ktorý objedná viackrát, rastie takmer vždy
+(87,5 %).</p>
+<p>Pri 3-mesačnom okne je „o jednu objednávku menej“ bežná vec —
+57 % menovateľa má v oboch oknách najviac
+2 objednávky. <b>Frekvencia je zároveň najlepší predstihový
+indikátor tohto KPI</b>: dá sa sledovať týždenne, kým samotné KPI sa dá zmerať až
+s ročným odstupom.</p>
+
+
+<h2>2. Väčšina „padnutých“ účtov je živá</h2>
+<div class="fig"><h4>Účty s nulovým GMV v aktuálnom okne</h4><p class="cap">Počet účtov. Modré účty nakúpili po skončení minuloročného okna — nie sú churnuté, len neobjednali práve v porovnávanom okne. KPI ich aj tak počíta ako klesajúce.</p><div class="lg"><span><i style="background:#2a78d6"></i>Počet účtov</span></div><div class="cv" style="height:210px"><canvas id="kpi_dropped_recency"></canvas></div></div>
+<table><thead><tr><th>Posledná objednávka</th><th>Účty</th><th>GMV pred rokom</th></tr></thead><tbody><tr><td>Nakúpili za posledných 6 mes.</td><td>70</td><td>110 498 €</td></tr><tr><td>Nakúpili skôr, ale po minuloročnom okne</td><td>60</td><td>95 619 €</td></tr><tr><td>Nenakúpili od konca minuloročného okna</td><td>73</td><td>79 510 €</td></tr></tbody></table>
+<p>Z 203 účtov s nulovým GMV v aktuálnom okne nakúpilo
+<b>130</b> po skončení minuloročného okna. Nie sú churnuté — len neobjednali
+práve v porovnávanom okne. Preukázateľne mŕtvych je 73.</p>
+<div class="fig"><h4>Koľko KPI stoja živé účty mimo okna</h4><p class="cap">V %. Druhý stĺpec vynecháva 130 účtov, ktoré nakúpili po skončení minuloročného okna, ale nie v tom aktuálnom.</p><div class="lg"><span><i style="background:#2a78d6"></i>% rastúcich účtov</span></div><div class="cv" style="height:160px"><canvas id="kpi_alive_effect"></canvas></div></div>
+<p>Keď tie živé účty z metriky vynechám, KPI stúpne z 41,8 % na
+51,7 %, teda o 10,0 p. b. To nie je zlepšenie
+biznisu, je to <b>meranie toho, koľko z odstupu od cieľa vyrába samotné okno</b>.</p>
+
+
+<h2>3. Šum: to isté KPI merané o mesiac inak</h2>
+<div class="fig"><h4>To isté KPI merané o mesiac inak</h4><p class="cap">V %. Rovnaká definícia, len okno posunuté po mesiacoch. Rozptyl týchto meraní je dolná hranica šumu metriky — biznis sa medzi dvoma susednými mesiacmi nemení tak, ako sa mení toto číslo.</p><div class="lg"><span><i style="background:#898781"></i>Cieľ 60 %</span><span><i style="background:#2a78d6"></i>% rastúcich účtov</span></div><div class="cv" style="height:280px"><canvas id="kpi_noise"></canvas></div></div>
+<p>Za posledných 12 mesiacov sa KPI pohybovalo medzi
+36,1 % a 41,8 % pri smerodajnej odchýlke
+1,9 p. b. <b>Rozdiel dvoch susedných meraní v tomto
+rozpätí nie je signál.</b> Pri stanovovaní cieľa a pri jeho vyhodnocovaní treba
+s týmto pásmom počítať, inak sa bude reagovať na šum.</p>
+
+
+<h2>4. Dĺžka okna nie je voľba merania, ale voľba populácie</h2>
+<div class="fig"><h4>Dĺžka okna: voľba merania alebo voľba populácie?</h4><p class="cap">V %. Dlhé okno je 12-mesačné, krátke 3-mesačné. Ak dlhé okno pustím na tých istých účtoch, zmení sa takmer nič — prepad robia účty, ktoré krátke okno do menovateľa vôbec nevpustí.</p><div class="lg"><span><i style="background:#2a78d6"></i>% rastúcich účtov</span></div><div class="cv" style="height:230px"><canvas id="kpi_window_population"></canvas></div></div>
+<table><thead><tr><th>Variant</th><th>Menovateľ</th><th>% rastúcich</th></tr></thead><tbody><tr><td>Krátke okno, vlastný menovateľ</td><td>673</td><td>41,8 %</td></tr><tr><td>Dlhé okno, len tie isté účty</td><td>673</td><td>44,0 %</td></tr><tr><td>Dlhé okno, vlastný menovateľ</td><td>1 266</td><td>31,1 %</td></tr><tr><td>Účty, ktoré pridá až dlhé okno</td><td>593</td><td>16,5 %</td></tr></tbody></table>
+<p>Intuícia hovorí, že dlhšie okno odstráni artefakt zo sekcie 2. Odstráni —
+ale číslo tým nestúpne. Na tých istých účtoch dá 12-mesačné
+okno 44,0 % namiesto 41,8 %, teda rozdiel
+2,2 p. b. Celý prepad na 31,1 % robí
+593 účtov, ktoré krátke okno do menovateľa vôbec nevpustí —
+a tie rastú len na 16,5 %.</p>
+<div class="note"><b>Neexistuje okno, ktoré zároveň zníži šum a zvýši číslo.</b> Kratšie okno zamlčí slabé účty, dlhšie ich vpustí. Číslo je nízke preto, že báza je plochá — nie preto, že okno je krátke. Pred stanovením cieľa 60 % treba zafixovať, ktorá z hodnôt v tabuľke je „account growth“.</div>
+
+
+<h2>5. Aritmetická stena: cieľ sa retenciou dosiahnuť nedá</h2>
+<div class="fig"><h4>Distribúcia medziročnej zmeny GMV</h4><p class="cap">Počet účtov aktívnych v oboch oknách podľa medziročnej zmeny GMV v %. Krajné hodnoty sú orezané na hranice krajných košov. Medián -1,4 %.</p><div class="lg"><span><i style="background:#2a78d6"></i>Počet účtov</span></div><div class="cv" style="height:280px"><canvas id="kpi_change_histogram"></canvas></div></div>
+<p>Distribúcia je takmer symetrická okolo nuly, medián
+-1,4 %. Preto je podiel rastúcich medzi
+aktívnymi účtami 48,6 % — typický aktívny účet je plochý
+a o jeho zaradení rozhoduje maličkosť.</p>
+<div class="fig"><h4>Aritmetická stena retencie</h4><p class="cap">V %. Scenár nulový churn znamená, že ani jeden účet nespadol do nuly a všetky sa chovajú ako priemerný účet aktívny v oboch oknách. Je to horná hranica toho, čo dokáže čistá retencia.</p><div class="lg"><span><i style="background:#2a78d6"></i>% rastúcich účtov</span></div><div class="cv" style="height:190px"><canvas id="kpi_retention_wall"></canvas></div></div>
+<p>Ak by ani jeden účet nespadol do nuly a všetky by sa chovali ako priemerný aktívny
+účet, KPI by bolo 56,4 %, nie 60 %. Dôvod je
+subtílny: <b>zachránený pád sa nestane rastúcim účtom automaticky</b> — presunie sa
+do skupiny, kde má 49 % šancu na rast.</p>
+<table><thead><tr><th>Samostatná cesta k cieľu</th><th>Potrebné</th><th>Dostupné</th><th>Jednotka</th><th>Stačí materiál?</th></tr></thead><tbody><tr><td>Len prevencia pádov do nuly</td><td>252</td><td>203</td><td>účtov</td><td>nie</td></tr><tr><td>Len zosilnenie aktívnych účtov</td><td>82</td><td>49</td><td>% rastúcich</td><td>nie</td></tr><tr><td>Len reaktivácia dormantných</td><td>307</td><td>2 110</td><td>účtov</td><td>áno</td></tr></tbody></table>
+<p>Reaktivácia dormantných účtov je jediná samostatne funkčná cesta, lebo dormantný
+účet sa po jednej objednávke stane rastúcim automaticky. Kandidátov je
+2 110. Ich medián životného GMV je však
+810 €, takže je to
+<b>cesta, ktorá cieľ splní a tržbám nedá takmer nič</b>.</p>
+
+
+<h2>6. Kombinácia, ktorá cieľ dosiahne</h2>
+<div class="fig"><h4>Rebrík pák k cieľu</h4><p class="cap">V %. Každý stĺpec je prírastok KPI oproti predchádzajúcemu kroku. Nie je to prognóza — je to kontrafaktuálna aritmetika, ktorá ukazuje pomer sily pák. Posledný krok je zámerne tenký.</p><div class="lg"><span><i style="background:#898781"></i>Cieľ 60 %</span><span><i style="background:#2a78d6"></i>KPI po kroku</span></div><div class="cv" style="height:280px"><canvas id="kpi_lever_ladder"></canvas></div></div>
+<table><thead><tr><th>Krok</th><th>Prírastok rastúcich účtov</th><th>KPI po kroku</th></tr></thead><tbody><tr><td>Východzí stav</td><td>0</td><td>41,8 %</td></tr><tr><td>+ udržať frekvenciu</td><td>55</td><td>50,0 %</td></tr><tr><td>+ zachrániť polovicu pádov</td><td>49</td><td>57,3 %</td></tr><tr><td>+ reaktivovať dormantné</td><td>47</td><td>60,0 %</td></tr></tbody></table>
+<p>Udržať frekvenciu u 130 účtov, ktoré objednali menejkrát, a zachrániť
+polovicu pádov do nuly (101 účtov) posunie KPI natoľko, že na cieľ stačí
+47 reaktivácií namiesto niekoľkých stoviek.
+<b>Poradie je jednoznačné: frekvencia → prevencia pádov → reaktivácia ako doplnok,
+nie ako stratégia.</b></p>
+<div class="note">Prvé dva kroky sa vyplatia aj keby žiadne KPI neexistovalo. 130 účtov s nižšou frekvenciou stratilo -202 321 €, 203 pádov do nuly -285 627 €. Spolu <b>-487 948 €</b> medziročne.</div>
+
+
+<h2>7. Odporúčania</h2>
+<h3>K metrike</h3>
+<ol>
+<li><b>Zafixovať definíciu pred cieľom.</b> Tá istá báza dá
+41,8 % pri 3-mesačnom okne a
+31,1 % pri 12-mesačnom.
+Cieľ 60 % dnes visí na neurčenej metrike.</li>
+<li><b>Nastaviť cieľ na tú časť, ktorá je riadená</b> — napríklad na podiel rastúcich
+medzi účtami aktívnymi v oboch oknách (dnes 48,6 %).
+Tam je 60 % ambiciózne, ale dosiahnuteľné, a nedá sa to
+splniť reaktivačnou kampaňou.</li>
+<li><b>Vykazovať vedľa neváženého KPI aj GMV-vážený variant.</b> Dnes je
+78,7 % tržieb v rastúcich účtoch oproti
+41,8 % účtov — nevážené KPI a tržby nehovoria to isté.</li>
+<li><b>Uvádzať pásmo šumu.</b> ±1,9 p. b. znamená, že na
+zmenu do 2 p. b. sa nemá reagovať.</li>
+</ol>
+
+<h3>K biznisu</h3>
+<ol>
+<li><b>Sledovať počet objednávok na účet ako predstihový indikátor.</b> Je to
+najsilnejší vzťah v dátach a jediný, ktorý sa dá riadiť v priebehu kvartálu.</li>
+<li><b>Zamerať prevenciu na účty, ktoré strácajú frekvenciu</b>, nie na tie, ktoré
+už spadli do nuly. Do nuly padá účet až po tom, čo mu najprv klesne frekvencia.</li>
+<li><b>Reaktivačné kampane nepoužívať na plnenie KPI.</b> Fungujú na číslo, nie na
+tržby — medián životného GMV dormantného účtu je
+810 €.</li>
+</ol>
+
+<p class="small" style="margin-top:48px;border-top:1px solid var(--bd);padding-top:16px">
+Grafy sú interaktívne — prejdi kurzorom pre presné hodnoty. Všetky tabuľky a čísla
+v texte sú generované z dát. Dátum analýzy 31. 7. 2026.</p>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>const SPECS = [{"id": "kpi_frequency", "title": "Rast účtu podľa zmeny počtu objednávok", "caption": "V %, len 368 účtov aktívnych v oboch oknách. Zelená je nad cieľom 60 %, červená pod celkovým KPI.", "type": "bar", "labels": ["Viac objednávok", "Rovnaký počet", "Menej objednávok"], "datasets": [{"label": "% rastúcich účtov", "data": [87.5, 50.9091, 8.4615], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#1a9268", "#2a78d6", "#e34948"], "value_format": null}], "height": 210, "stacked": false, "index_axis": "y", "value_format": "pct", "y_max": 100, "y_begin_at_zero": true, "hover_extras": [["Účtov: 128", "Netto zmena GMV: +1 278 125 €"], ["Účtov: 110", "Netto zmena GMV: +23 272 €"], ["Účtov: 130", "Netto zmena GMV: -202 321 €"]]}, {"id": "kpi_dropped_recency", "title": "Účty s nulovým GMV v aktuálnom okne", "caption": "Počet účtov. Modré účty nakúpili po skončení minuloročného okna — nie sú churnuté, len neobjednali práve v porovnávanom okne. KPI ich aj tak počíta ako klesajúce.", "type": "bar", "labels": ["Nakúpili za posledných 6 mes.", "Nakúpili skôr, ale po minuloročnom okne", "Nenakúpili od konca minuloročného okna"], "datasets": [{"label": "Počet účtov", "data": [70.0, 60.0, 73.0], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#2a78d6", "#2a78d6", "#e34948"], "value_format": null}], "height": 210, "stacked": false, "index_axis": "y", "value_format": "count", "y_max": null, "y_begin_at_zero": true, "hover_extras": [["GMV pred rokom: 110 498 €"], ["GMV pred rokom: 95 619 €"], ["GMV pred rokom: 79 510 €"]]}, {"id": "kpi_alive_effect", "title": "Koľko KPI stoja živé účty mimo okna", "caption": "V %. Druhý stĺpec vynecháva 130 účtov, ktoré nakúpili po skončení minuloročného okna, ale nie v tom aktuálnom.", "type": "bar", "labels": ["KPI ako sa vykazuje", "KPI bez živých účtov mimo okna"], "datasets": [{"label": "% rastúcich účtov", "data": [41.7533, 51.7495], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": null, "value_format": null}], "height": 160, "stacked": false, "index_axis": "y", "value_format": "pct", "y_max": 100, "y_begin_at_zero": true, "hover_extras": [["Menovateľ: 673 účtov"], ["Menovateľ: 543 účtov"]]}, {"id": "kpi_noise", "title": "To isté KPI merané o mesiac inak", "caption": "V %. Rovnaká definícia, len okno posunuté po mesiacoch. Rozptyl týchto meraní je dolná hranica šumu metriky — biznis sa medzi dvoma susednými mesiacmi nemení tak, ako sa mení toto číslo.", "type": "line", "labels": ["2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07"], "datasets": [{"label": "Cieľ 60 %", "data": [60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0], "color": "#898781", "type": "line", "dashed": true, "point_colors": null, "value_format": null}, {"label": "% rastúcich účtov", "data": [36.6129, 36.5506, 36.0502, 38.3412, 41.6388, 37.9019, 39.3204, 38.4615, 40.2941, 39.6501, 39.7341, 41.7533], "color": "#2a78d6", "type": "line", "dashed": false, "point_colors": null, "value_format": null}], "height": 280, "stacked": false, "index_axis": "x", "value_format": "pct", "y_max": 70, "y_begin_at_zero": true, "hover_extras": [["Menovateľ: 620 účtov"], ["Menovateľ: 632 účtov"], ["Menovateľ: 638 účtov"], ["Menovateľ: 639 účtov"], ["Menovateľ: 598 účtov"], ["Menovateľ: 591 účtov"], ["Menovateľ: 618 účtov"], ["Menovateľ: 663 účtov"], ["Menovateľ: 680 účtov"], ["Menovateľ: 686 účtov"], ["Menovateľ: 677 účtov"], ["Menovateľ: 673 účtov"]]}, {"id": "kpi_window_population", "title": "Dĺžka okna: voľba merania alebo voľba populácie?", "caption": "V %. Dlhé okno je 12-mesačné, krátke 3-mesačné. Ak dlhé okno pustím na tých istých účtoch, zmení sa takmer nič — prepad robia účty, ktoré krátke okno do menovateľa vôbec nevpustí.", "type": "bar", "labels": ["Krátke okno, vlastný menovateľ", "Dlhé okno, len tie isté účty", "Dlhé okno, vlastný menovateľ", "Účty, ktoré pridá až dlhé okno"], "datasets": [{"label": "% rastúcich účtov", "data": [41.7533, 43.9822, 31.1216, 16.5261], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#2a78d6", "#2a78d6", "#e34948", "#e34948"], "value_format": null}], "height": 230, "stacked": false, "index_axis": "y", "value_format": "pct", "y_max": 100, "y_begin_at_zero": true, "hover_extras": [["Menovateľ: 673 účtov"], ["Menovateľ: 673 účtov"], ["Menovateľ: 1 266 účtov"], ["Menovateľ: 593 účtov"]]}, {"id": "kpi_change_histogram", "title": "Distribúcia medziročnej zmeny GMV", "caption": "Počet účtov aktívnych v oboch oknách podľa medziročnej zmeny GMV v %. Krajné hodnoty sú orezané na hranice krajných košov. Medián -1,4 %.", "type": "bar", "labels": ["−100 až −75", "−75 až −50", "−50 až −25", "−25 až −10", "−10 až +0", "+0 až +10", "+10 až +25", "+25 až +50", "+50 až +100", "+100 až +200"], "datasets": [{"label": "Počet účtov", "data": [16.0, 48.0, 62.0, 40.0, 23.0, 32.0, 32.0, 30.0, 41.0, 44.0], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#e34948", "#e34948", "#e34948", "#e34948", "#e34948", "#2a78d6", "#2a78d6", "#2a78d6", "#2a78d6", "#2a78d6"], "value_format": null}], "height": 280, "stacked": false, "index_axis": "x", "value_format": "count", "y_max": null, "y_begin_at_zero": true, "hover_extras": null}, {"id": "kpi_retention_wall", "title": "Aritmetická stena retencie", "caption": "V %. Scenár nulový churn znamená, že ani jeden účet nespadol do nuly a všetky sa chovajú ako priemerný účet aktívny v oboch oknách. Je to horná hranica toho, čo dokáže čistá retencia.", "type": "bar", "labels": ["Dnes", "Scenár nulový churn", "Cieľ"], "datasets": [{"label": "% rastúcich účtov", "data": [41.7533, 56.4252, 60.0], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#2a78d6", "#2a78d6", "#1a9268"], "value_format": null}], "height": 190, "stacked": false, "index_axis": "y", "value_format": "pct", "y_max": 100, "y_begin_at_zero": true, "hover_extras": null}, {"id": "kpi_lever_ladder", "title": "Rebrík pák k cieľu", "caption": "V %. Každý stĺpec je prírastok KPI oproti predchádzajúcemu kroku. Nie je to prognóza — je to kontrafaktuálna aritmetika, ktorá ukazuje pomer sily pák. Posledný krok je zámerne tenký.", "type": "bar", "labels": ["Východzí stav", "+ udržať frekvenciu", "+ zachrániť polovicu pádov", "+ reaktivovať dormantné"], "datasets": [{"label": "Cieľ 60 %", "data": [60.0, 60.0, 60.0, 60.0], "color": "#898781", "type": "line", "dashed": true, "point_colors": null, "value_format": null}, {"label": "KPI po kroku", "data": [[0.0, 41.7533], [41.7533, 49.9527], [49.9527, 57.2525], [57.2525, 60.043]], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#898781", "#2a78d6", "#2a78d6", "#1a9268"], "value_format": null}], "height": 280, "stacked": false, "index_axis": "x", "value_format": "pct", "y_max": 70, "y_begin_at_zero": true, "hover_extras": [["Východzí stav"], ["Prírastok: +55 % rastúcich účtov"], ["Prírastok: +49 % rastúcich účtov"], ["Prírastok: +47 % rastúcich účtov"]]}];
+
+const GRID = {color:'#e1e0d9', drawTicks:false};
+const NO_GRID = {display:false};
+
+Chart.defaults.font.family = '-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif';
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#898781';
+
+const FORMATTERS = {
+  mil_eur: {tick: v => v.toFixed(1), tip: v => v.toFixed(2) + ' mil. €'},
+  k_eur:   {tick: v => v + 'k',      tip: v => Math.round(v).toLocaleString('sk-SK') + ' tis. €'},
+  eur:     {tick: v => v.toLocaleString('sk-SK'), tip: v => Math.round(v).toLocaleString('sk-SK') + ' €'},
+  pct:     {tick: v => v + ' %',     tip: v => v.toFixed(1) + ' %'},
+  count:   {tick: v => v.toLocaleString('sk-SK'), tip: v => Math.round(v).toLocaleString('sk-SK')}
+};
+
+function buildDataset(series, spec) {
+  const isLine = series.type === 'line';
+  const dataset = {
+    type: series.type,
+    label: series.label,
+    data: series.data,
+    valueFormat: series.value_format || spec.value_format
+  };
+  if (isLine) {
+    dataset.borderColor = series.color;
+    dataset.borderWidth = 2.5;
+    dataset.pointRadius = 3;
+    dataset.pointBackgroundColor = series.color;
+    dataset.tension = 0.25;
+    dataset.fill = false;
+    dataset.order = 0;
+    if (series.dashed) { dataset.borderDash = [6, 4]; dataset.borderWidth = 2; }
+    // V stohovanom grafe Chart.js stohuje aj línie. Vlastná stack skupina pre
+    // každú líniu ich drží nezávislé — bez toho sa druhá línia vykreslí ako
+    // súčet s prvou a pri y_max = 100 vypadne z grafu.
+    if (spec.stacked) { dataset.stack = 'line-' + series.label; }
+  } else {
+    dataset.backgroundColor = series.point_colors || series.color;
+    dataset.borderRadius = 3;
+    dataset.order = 1;
+    if (spec.stacked) { dataset.stack = 'total'; }
+  }
+  return dataset;
+}
+
+function buildValueAxis(spec) {
+  const formatter = FORMATTERS[spec.value_format];
+  return {
+    stacked: spec.stacked,
+    beginAtZero: spec.y_begin_at_zero,
+    max: spec.y_max,
+    grid: GRID,
+    border: {display: false},
+    ticks: {callback: formatter.tick}
+  };
+}
+
+function buildCategoryAxis(spec) {
+  return {
+    stacked: spec.stacked,
+    grid: NO_GRID,
+    border: {color: '#c3c2b7'},
+    ticks: {autoSkip: spec.labels.length > 24, maxRotation: 60, maxTicksLimit: 26}
+  };
+}
+
+function buildChart(spec) {
+  const horizontal = spec.index_axis === 'y';
+  const valueAxis = buildValueAxis(spec);
+  const categoryAxis = buildCategoryAxis(spec);
+
+  new Chart(document.getElementById(spec.id), {
+    data: {
+      labels: spec.labels,
+      datasets: spec.datasets.map(series => buildDataset(series, spec))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: spec.index_axis,
+      plugins: {
+        legend: {display: false},
+        tooltip: {callbacks: {
+          label: item => {
+            const value = horizontal ? item.parsed.x : item.parsed.y;
+            const format = item.dataset.valueFormat;
+            return item.dataset.label + ': ' + FORMATTERS[format].tip(value);
+          },
+          afterBody: items => {
+            if (!spec.hover_extras) { return []; }
+            return spec.hover_extras[items[0].dataIndex] || [];
+          }
+        }}
+      },
+      scales: horizontal
+        ? {x: valueAxis, y: categoryAxis}
+        : {x: categoryAxis, y: valueAxis}
+    }
+  });
+}
+
+SPECS.forEach(buildChart);
+</script>
+</body></html>

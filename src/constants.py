@@ -8,6 +8,10 @@ import pandas as pd
 INPUT_XLSX = "../data/b2b_orders_cleaned_w_company_name_2.xlsx"
 OUTPUT_HTML = "../data/b2b_gmv_eda.html"
 
+# Druhý, samostatný report — diagnostika KPI account growth. Má vlastný vstupný
+# bod (main_kpi_diagnostics.py) a hlavného reportu sa nedotýka.
+OUTPUT_HTML_KPI_DIAGNOSTICS = "../data/b2b_kpi_diagnostics.html"
+
 # ── viditeľnosť grafov ────────────────────────────────────────────────────────
 # ID grafov, ktoré sa v reporte nevykresľujú (text okolo nich zostáva).
 # ID zodpovedá figure_id/id z charts.py — pri hľadaní ID grafu, ktorý chceš
@@ -91,6 +95,53 @@ ACCOUNT_GROWTH_MIN_SEGMENT_SIZE = 15
 ACCOUNT_GROWTH_ORDER_EDGES = [0, 1, 2, 5]
 ACCOUNT_GROWTH_ORDER_BUCKETS = ["0", "1", "2", "3–5", "6+"]
 
+# ── diagnostika KPI account growth (druhý report) ─────────────────────────────
+# Koľko mesiacov dozadu sa KPI meria s posunutým oknom. Rozptyl týchto meraní
+# je dolná hranica šumu metriky.
+KPI_DIAG_NOISE_MONTHS = 12
+
+# Dlhé okno, proti ktorému sa testuje, či je dĺžka okna voľbou merania alebo
+# voľbou populácie.
+KPI_DIAG_LONG_WINDOW_MONTHS = 12
+
+# Účet s najviac týmto počtom objednávok v oboch oknách je porovnávaný na
+# základe jednotiek udalostí — tam KPI meria hlavne časovanie.
+KPI_DIAG_THIN_ORDERS = 2
+
+# Hranica medzi „nakúpil nedávno“ a „nakúpil pred časom“ u padnutých účtov.
+KPI_DIAG_RECENT_MONTHS = 6
+
+# Popisky troch skupín padnutých účtov. Posledná je jediná preukázateľne mŕtva.
+KPI_DIAG_RECENCY_LABELS = [
+    f"Nakúpili za posledných {KPI_DIAG_RECENT_MONTHS} mes.",
+    "Nakúpili skôr, ale po minuloročnom okne",
+    "Nenakúpili od konca minuloročného okna",
+]
+
+# Popisky dvoch variantov KPI v teste na živé účty mimo okna.
+KPI_DIAG_ALIVE_LABELS = ["KPI ako sa vykazuje", "KPI bez živých účtov mimo okna"]
+
+# Hranice košov histogramu medziročnej zmeny GMV v %. Krajné hodnoty sa orežú.
+KPI_DIAG_CHANGE_EDGES = [-100, -75, -50, -25, -10, 0, 10, 25, 50, 100, 200]
+
+# Popisky troch samostatných ciest k cieľu.
+KPI_DIAG_PATH_LABELS = [
+    "Len prevencia pádov do nuly",
+    "Len zosilnenie aktívnych účtov",
+    "Len reaktivácia dormantných",
+]
+
+# Aký podiel pádov do nuly rebrík pák považuje za zachrániteľný.
+KPI_DIAG_SAVED_SHARE = 0.5
+
+# Popisky krokov rebríka pák. Poradie je zámerné — reaktivácia je posledná.
+KPI_DIAG_LADDER_LABELS = [
+    "Východzí stav",
+    "+ udržať frekvenciu",
+    "+ zachrániť polovicu pádov",
+    "+ reaktivovať dormantné",
+]
+
 # ── veľkostné pásma zákazníkov ────────────────────────────────────────────────
 # Podľa GMV v porovnávacom období.
 BAND_EDGES = [0, 500, 2000, 10000, 50000, float("inf")]
@@ -172,3 +223,15 @@ ACCOUNT_GROWTH_COLOR_DECLINING = COLOR_RED
 ACCOUNT_GROWTH_COLOR_GMV = COLOR_INK
 ACCOUNT_GROWTH_COLOR_TARGET = COLOR_GREY
 ACCOUNT_GROWTH_COLOR_ABOVE_TARGET = COLOR_TEAL
+
+# Tmavšia zelená pre diagnostický report. COLOR_TEAL nemá voči pozadiu kontrast
+# 3:1 a od COLOR_RED sa pri deuteranopii odlíši len s ΔE 6,9 — tento odtieň
+# prejde oboma kontrolami. V hlavnom reporte zámerne nemeníme nič.
+COLOR_TEAL_DARK = "#1a9268"
+
+# Farby v grafoch diagnostiky KPI.
+KPI_DIAG_COLOR_GOOD = COLOR_TEAL_DARK
+KPI_DIAG_COLOR_NEUTRAL = COLOR_BLUE
+KPI_DIAG_COLOR_BAD = COLOR_RED
+KPI_DIAG_COLOR_MUTED = COLOR_GREY
+KPI_DIAG_COLOR_TARGET = COLOR_GREY
