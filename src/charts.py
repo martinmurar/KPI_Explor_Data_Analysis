@@ -72,6 +72,16 @@ def _figure(figure_id, title, caption, chart_type, labels, datasets, **options):
     return figure
 
 
+def _population_note(count, unit):
+    """Veta na konec popisu: s akou populáciou graf pracuje.
+
+    Každý graf v reporte stojí na inej skupine (všetci zákazníci / posudzované
+    účty / účty aktívne v oboch oknách) a bez tejto vety to čitateľ z grafu
+    nevyčíta — rozdielne počty potom vyzerajú ako chyba.
+    """
+    return f"Graf pracuje s {formatting.format_number(count)} {unit}."
+
+
 def _diverging_colors(values):
     """Modrá pre kladné hodnoty, červená pre záporné."""
     colors = []
@@ -84,15 +94,16 @@ def _diverging_colors(values):
 
 
 # ── analýza ───────────────────────────────────────────────────────────────────
-def monthly_trend(monthly):
+def monthly_trend(monthly, customers):
     """Mesačné GMV so 12-mesačným klzavým priemerom."""
     millions = monthly["gmv"] / 1e6
     average = monthly["moving_average"] / 1e6
     return _figure(
         "monthly_trend",
         "Mesačné GMV a 12-mesačný klzavý priemer",
-        f"V mil. €. Klzavý priemer vyhladzuje sezonalitu — stúpa bez prerušenia, "
-        f"ale mesačné stĺpce kolíšu čoraz viac.",
+        f"V mil. €. Klzavý priemer vyhladzuje sezónnosť — stúpa bez prerušenia, "
+        f"ale mesačné stĺpce kolíšu čoraz viac. "
+        f"{_population_note(customers, 'zákazníkmi')}",
         "bar",
         [str(period) for period in monthly.index],
         [
@@ -104,7 +115,7 @@ def monthly_trend(monthly):
     )
 
 
-def seasonality(shares):
+def seasonality(shares, customers):
     """Priemerný podiel mesiaca na ročnom GMV."""
     month_names = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"]
     colors = []
@@ -117,9 +128,9 @@ def seasonality(shares):
     first_year, last_year = C.SEASONALITY_YEARS
     return _figure(
         "seasonality",
-        "Sezonalita",
+        "Sezónnosť",
         f"Priemerný podiel mesiaca na ročnom GMV, {first_year}–{last_year} "
-        f"(len kompletné roky).",
+        f"(len kompletné roky). {_population_note(customers, 'zákazníkmi')}",
         "bar",
         month_names,
         [_series("Podiel na ročnom GMV", shares.values, C.COLOR_BLUE, point_colors=colors)],
@@ -127,7 +138,7 @@ def seasonality(shares):
     )
 
 
-def yearly_bridge(bridge):
+def yearly_bridge(bridge, customers):
     """Komponenty medziročnej zmeny GMV po rokoch."""
     datasets = []
     for component in C.BRIDGE_COMPONENTS:
@@ -142,7 +153,8 @@ def yearly_bridge(bridge):
         "yearly_bridge",
         "Komponenty medziročnej zmeny GMV",
         "V mil. €, kalendárne roky. Stĺpec 2026* porovnáva Jan–Júl 2026 s Jan–Júl 2025 — "
-        "porovnávať čiastočný rok s celým by nemalo zmysel.",
+        "porovnávať čiastočný rok s celým by nemalo zmysel. "
+        f"{_population_note(customers, 'zákazníkmi')}",
         "bar",
         bridge["label"],
         datasets,
@@ -153,17 +165,18 @@ def yearly_bridge(bridge):
     )
 
 
-def order_value(summary):
+def order_value(summary, orders):
     """Priemerná vs mediánová hodnota objednávky."""
     return _figure(
         "order_value",
         "Priemerná vs mediánová hodnota objednávky",
-        "V €. Priemer rastie, medián je plochý — celý rast sedí v pravom chvoste "
-        "distribúcie. p95 je uvedený ako kontext.",
+        "V €. Medián je „prostredná“ objednávka — polovica objednávok je menšia, "
+        "polovica väčšia. Priemer rastie, medián je plochý, takže celý rast sedí "
+        "vo veľkých objednávkach. "
+        f"{_population_note(orders, 'objednávkami')}",
         "line",
         summary["label"],
         [
-            _series("p95", summary["p95_order"], C.COLOR_GREY, chart_type="line", dashed=True),
             _series("Priemer", summary["mean_order"], C.COLOR_BLUE, chart_type="line"),
             _series("Medián", summary["median_order"], C.COLOR_ORANGE, chart_type="line"),
         ],
@@ -187,7 +200,13 @@ def concentration_shares(concentration):
         "concentration_shares",
         "Podiel top N zákazníkov na GMV",
         "V %. Rastúca koncentrácia znamená, že celkový rast závisí od stále menšieho "
-        "počtu účtov.",
+        "počtu účtov. Každý rok pracuje so svojimi zákazníkmi — "
+        f"{formatting.format_number(concentration['customers'].iloc[-1])} "
+        f"v {concentration['label'].iloc[-1]}, počty za ostatné roky sú v tabuľke "
+        f"nižšie. Rok {data.year_label(C.PARTIAL_YEAR)} je nekompletný "
+        f"({C.PARTIAL_YEAR_LAST_MONTH} mesiacov namiesto 12), a keďže za kratšie "
+        f"okno majú zákazníci menej času objednávky rozložiť, koncentrácia v ňom "
+        f"môže byť umelo navýšená.",
         "line",
         concentration["label"],
         datasets,
@@ -294,7 +313,10 @@ def single_order_by_cohort(single_order):
         "single_order",
         "Podiel zákazníkov s jedinou objednávkou za život",
         "V %, podľa roku prvej objednávky. Kohorta 2026* je sivá — ešte nemala čas "
-        "objednať druhýkrát, jej hodnota nie je porovnateľná.",
+        "objednať druhýkrát, jej hodnota nie je porovnateľná. "
+        f"{_population_note(int(single_order['customers'].sum()), 'zákazníkmi')} "
+        "Sú to len zákazníci s prvou objednávkou v zobrazovanom období; kto "
+        "nakúpil prvýkrát skôr, do žiadnej z týchto kohort nepatrí.",
         "bar",
         single_order["label"],
         [_series("% s jedinou objednávkou", single_order["single_order_pct"],
@@ -320,7 +342,7 @@ def churn_over_time(curves):
         "churn_over_time",
         "Churn v čase",
         "V %. V každom bode: podiel zákazníkov, od ktorých poslednej objednávky prešlo "
-        "viac ako 3 / 6 / 12 mesiacov. Menovateľ = zákazníci akvirovaní aspoň N mesiacov "
+        "viac ako 3 / 6 / 12 mesiacov. Počíta sa zo zákazníkov akvirovaných aspoň N mesiacov "
         "pred daným bodom. Budúce objednávky sa neberú do úvahy.",
         "line",
         labels,
@@ -363,15 +385,13 @@ def repeat_reactivation(by_year):
     )
 
 
-def frequency_histogram(histogram, highest_frequency):
+def frequency_histogram(histogram):
     """Histogram frekvencie objednávania: počet zákazníkov podľa počtu objednávok."""
     caption = (
         f"Na osi x počet objednávok za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov, "
-        f"na osi y počet zákazníkov. Menovateľom sú zákazníci s aspoň jednou objednávkou "
-        f"v okne — dormantní v grafe nie sú. Posledný kôš zlučuje "
-        f"{C.FREQUENCY_TOP_BUCKET} a viac objednávok (maximum je {highest_frequency}). "
-        f"V hover je aj reverzný kumulatív, teda počet zákazníkov s danou frekvenciou "
-        f"a vyššou."
+        f"na osi y počet zákazníkov. Zahrnutí sú zákazníci s aspoň jednou objednávkou "
+        f"v okne. "
+        f"{_population_note(int(histogram['customers'].sum()), 'zákazníkmi')}"
     )
 
     return _figure(
@@ -398,7 +418,8 @@ def _frequency_hover_lines(histogram):
         threshold = int(row["order_count"])
         customers = formatting.format_number(row["customers_at_or_above"])
         share = formatting.format_pct(row["share_at_or_above_pct"])
-        lines.append([f"Frekvencia {threshold} a vyššia: {customers} zákazníkov ({share} bázy)"])
+        lines.append([f"Frekvencia {threshold} a vyššia: {customers} zákazníkov "
+                      f"({share} všetkých účtov)"])
     return lines
 
 
@@ -411,10 +432,13 @@ def account_growth_over_time(history):
     return _figure(
         "account_growth_over_time",
         "Account growth v čase",
-        f"V %, klzavé {C.GMV_WINDOW_MONTHS} mesiace medziročne, body sú konce kvartálov. "
-        f"Zvyšok stĺpca do 100 % menovateľa sú klesajúce účty. Čierna línia je GMV-vážený variant: "
+        f"V %, klzavé {C.GMV_WINDOW_MONTHS} mesiace medziročne, body sú "
+        f"{C.GMV_WINDOW_MONTHS}-mesačné kroky (konce januára, apríla, júla a októbra). "
+        f"Zvyšok stĺpca do 100 % posudzovaných účtov sú klesajúce. Čierna línia je GMV-vážený variant: "
         f"podiel tržieb, ktoré ležia v rastúcich účtoch. Prerušovaná čiara je cieľ "
-        f"{C.ACCOUNT_GROWTH_TARGET_PCT} %.",
+        f"{C.ACCOUNT_GROWTH_TARGET_PCT} %. Populácia je v každom bode iná — v poslednom bode "
+        f"{formatting.format_number(history['accounts'].iloc[-1])} posudzovaných účtov, "
+        f"počty za ostatné body sú v hover.",
         "bar",
         labels,
         [
@@ -433,22 +457,23 @@ def account_growth_over_time(history):
 
 
 def _account_count_hover(history):
-    """Riadky do hover: veľkosť menovateľa v danom bode."""
+    """Riadky do hover: počet posudzovaných účtov v danom bode."""
     lines = []
     for _, row in history.iterrows():
         accounts = formatting.format_number(row["accounts"])
-        lines.append([f"Menovateľ: {accounts} účtov"])
+        lines.append([f"Posudzovaných účtov: {accounts}"])
     return lines
 
 
 def account_growth_composition(composition):
-    """Rozklad menovateľa na reaktivované, odídené a aktívne v oboch oknách."""
+    """Rozklad posudzovaných účtov na tri skupiny podľa aktivity v oknách."""
     return _figure(
         "account_growth_composition",
-        "Z čoho sa skladá menovateľ KPI",
+        "Z čoho sa skladajú posudzované účty",
         "Počet účtov. Prvé dve skupiny nie sú rozhodnuté rastom, ale tým, či účet "
-        "v okne vôbec nakúpil — reaktivované sú rastúce automaticky, odídené "
-        "klesajúce automaticky. Len tretia skupina meria skutočnú zmenu objemu.",
+        "v okne vôbec nakúpil — bez GMV pred rokom rastie účet automaticky, odídené "
+        "do nuly klesajú automaticky. Len tretia skupina meria skutočnú zmenu objemu. "
+        f"{_population_note(int(composition['customers'].sum()), 'posudzovanými účtami')}",
         "bar",
         composition.index,
         [
@@ -509,14 +534,21 @@ def _breakdown_hover(breakdown):
     return lines
 
 
-def net_gmv_by_band(growth):
+def net_gmv_by_band(growth, window):
     """Netto medziročná zmena GMV podľa pásma."""
     values = list(growth["net_delta"] / 1000)
     return _figure(
         "net_gmv_by_band",
         "Netto medziročná zmena GMV podľa pásma",
-        f"V tis. €, {C.GMV_WINDOW_MONTHS} mesiace medziročne. Pásmo je určené podľa GMV "
-        f"v porovnávacom období.",
+        f"V tis. €. Porovnáva sa {C.GMV_WINDOW_MONTHS}-mesačné okno "
+        f"{window['current_start']:%-d. %-m. %Y} – {window['current_end']:%-d. %-m. %Y} "
+        f"s rovnakým oknom o rok skôr "
+        f"({window['previous_start']:%-d. %-m. %Y} – {window['previous_end']:%-d. %-m. %Y}). "
+        f"Pásmo je určené podľa GMV v staršom okne. V grafe sú len účty, ktoré "
+        f"v staršom okne nakúpili a sú staršie ako "
+        f"{C.ACCOUNT_GROWTH_MIN_AGE_MONTHS} mesiacov — rovnaká populácia ako "
+        f"v account growth KPI. "
+        f"{_population_note(int(growth['customers'].sum()), 'účtami')}",
         "bar",
         growth.index,
         [_series("Netto zmena", values, C.COLOR_BLUE, point_colors=_diverging_colors(values))],
@@ -556,7 +588,7 @@ def kpi_frequency_effect(frequency, reference_pct):
     return _figure(
         "kpi_frequency",
         "Rast účtu podľa zmeny počtu objednávok",
-        f"V %, len {int(frequency['customers'].sum())} účtov aktívnych v oboch oknách. "
+        f"V %. {_population_note(int(frequency['customers'].sum()), 'účtami aktívnymi v oboch oknách')} "
         f"Zelená je nad cieľom {C.ACCOUNT_GROWTH_TARGET_PCT} %, červená pod celkovým KPI.",
         "bar",
         frequency.index,
@@ -581,18 +613,21 @@ _ACTIVITY_COLORS = [
 
 
 def kpi_activity_split(activity):
-    """Celý menovateľ KPI podľa toho, kedy účet naposledy nakúpil."""
+    """Všetky posudzované účty podľa toho, kedy naposledy nakúpili."""
     colors = []
     for status in activity["status"]:
         colors.append(_ACTIVITY_COLORS[int(status)])
 
     return _figure(
         "kpi_activity_split",
-        "Kedy naposledy nakúpili účty v menovateli KPI",
-        f"Počet účtov. Za churnutý sa považuje účet, ktorý nenakúpil "
-        f"{C.KPI_DIAG_CHURN_DAYS} dní. Modrá skupina churnutá nie je — len "
-        f"neobjednala práve v {C.GMV_WINDOW_MONTHS}-mesačnom okne. KPI ju aj tak "
-        f"počíta ako klesajúcu.",
+        "Kedy naposledy nakúpili posudzované účty",
+        f"Počet účtov. Posudzujú sa účty staršie ako "
+        f"{C.ACCOUNT_GROWTH_MIN_AGE_MONTHS} mesiacov s nenulovým GMV aspoň v jednom "
+        f"z dvoch okien. Za churned sa považuje účet, ktorý "
+        f"nenakúpil {C.KPI_DIAG_CHURN_DAYS} dní. Modrá skupina "
+        f"nie je churned - len neobjednala práve v {C.GMV_WINDOW_MONTHS}-mesačnom "
+        f"okne, a KPI ju tak počíta ako klesajúcu. "
+        f"{_population_note(int(activity['customers'].sum()), 'posudzovanými účtami')}",
         "bar",
         activity.index,
         [_series("Počet účtov", activity["customers"], C.KPI_DIAG_COLOR_NEUTRAL,
@@ -601,7 +636,7 @@ def kpi_activity_split(activity):
         index_axis="y",
         value_format="count",
         hover_extras=_kpi_hover(activity, lambda row: [
-            f"Podiel menovateľa: {formatting.format_pct(row['share_pct'])}",
+            f"Podiel posudzovaných účtov: {formatting.format_pct(row['share_pct'])}",
             f"GMV pred rokom: {formatting.format_eur(row['previous_gmv'])}",
         ]),
     )
@@ -614,9 +649,10 @@ def kpi_regular_ordering(scenario):
     return _figure(
         "kpi_regular_ordering",
         f"KPI, keby živé účty objednávali aspoň raz za {C.GMV_WINDOW_MONTHS} mesiace",
-        f"V %. Menovateľ je v oboch stĺpcoch rovnaký. Druhý stĺpec počíta "
+        f"V %. Posudzuje sa v oboch stĺpcoch tá istá skupina účtov. Druhý stĺpec počíta "
         f"{converted} živých účtov, ktoré v aktuálnom okne nenakúpili, ako rastúce. "
-        f"Je to horná hranica scenára, nie prognóza.",
+        f"Je to horná hranica scenára, nie prognóza. "
+        f"{_population_note(int(scenario['customers'].iloc[0]), 'posudzovanými účtami')}",
         "bar",
         scenario.index,
         [_series("% rastúcich účtov", scenario["growing_pct"], C.KPI_DIAG_COLOR_NEUTRAL,
@@ -626,7 +662,7 @@ def kpi_regular_ordering(scenario):
         value_format="pct",
         y_max=100,
         hover_extras=_kpi_hover(scenario, lambda row: [
-            f"Menovateľ: {formatting.format_number(row['customers'])} účtov",
+            f"Posudzovaných účtov: {formatting.format_number(row['customers'])}",
         ]),
     )
 
@@ -641,8 +677,9 @@ def kpi_churn_sensitivity(sensitivity):
         "kpi_churn_sensitivity",
         "KPI pri zabránení churnu — citlivosť na predpoklad o raste",
         f"V %. Všetkých {prevented} churnutých účtov sa berie ako aktívnych v okne, "
-        f"mení sa len predpoklad, aký podiel z nich rastie. Menovateľ je vo všetkých "
-        f"stĺpcoch rovnaký. Prerušovaná čiara je cieľ "
+        f"mení sa len predpoklad, aký podiel z nich rastie. Posudzovaná skupina je vo "
+        f"všetkých stĺpcoch tá istá — {formatting.format_number(sensitivity['customers'].iloc[0])} "
+        f"posudzovaných účtov. Prerušovaná čiara je cieľ "
         f"{C.ACCOUNT_GROWTH_TARGET_PCT} %.",
         "bar",
         sensitivity.index,
@@ -656,7 +693,7 @@ def kpi_churn_sensitivity(sensitivity):
         value_format="pct",
         y_max=70,
         hover_extras=_kpi_hover(sensitivity, lambda row: [
-            f"Menovateľ: {formatting.format_number(row['customers'])} účtov",
+            f"Posudzovaných účtov: {formatting.format_number(row['customers'])}",
             f"Zachránených účtov: {formatting.format_number(row['prevented'])}",
         ]),
     )

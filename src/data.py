@@ -20,10 +20,26 @@ def load_orders(path):
     df["created_at"] = pd.to_datetime(df["created_at"])
     df["gmv"] = pd.to_numeric(df["gmv"])
     df["cust"] = df["customer_email"].str.strip().str.lower()
+    df = _drop_orders_after_as_of(df)
     df = _add_period_columns(df)
     df = _add_customer_columns(df)
     df["market"] = _market_group(df["country"])
     return df
+
+
+def _drop_orders_after_as_of(df):
+    """Odreže objednávky novšie ako C.AS_OF.
+
+    Export môže obsahovať aj niekoľko dní po C.AS_OF a tie by inak pretiekli do
+    metrík, ktoré samy podľa dátumu nefiltrujú — mesačný trend by mal nekompletný
+    mesiac navyše, ročné súčty a koncentrácia by počítali s dátami, ktoré vôbec
+    nie sú vo vykazovanom období.
+
+    Reže sa na koniec dňa C.AS_OF, nie na jeho začiatok — objednávky z toho dňa
+    do vykazovaného obdobia patria.
+    """
+    cutoff = C.AS_OF + pd.Timedelta(days=1)
+    return df.loc[df["created_at"] < cutoff].copy()
 
 
 def _market_group(countries):

@@ -5,9 +5,9 @@ Definícia zhodná s firemným reportingom:
     GMV účtu za posledné GMV_WINDOW_MONTHS mesiacov sa porovná s GMV za to isté
     okno o rok skôr. Účet rastie, ak je aktuálne GMV vyššie, klesá ak nižšie.
 
-Menovateľ má dve podmienky:
+Posudzuje sa účet, ktorý splní dve podmienky:
     1. Účet je starší ako ACCOUNT_GROWTH_MIN_AGE_MONTHS. Hodnota 15 nie je
-       náhodná — je to 12 + GMV_WINDOW_MONTHS, teda každý účet v menovateli mal
+       náhodná — je to 12 + GMV_WINDOW_MONTHS, teda každý posudzovaný účet mal
        k dispozícii plné minuloročné okno.
     2. Účet bol aktívny aspoň v jednom z dvoch okien. Kto nenakúpil ani v jednom,
        nie je ani rastúci ani klesajúci a do KPI nepatrí.
@@ -23,12 +23,18 @@ import data
 import metrics_bridge
 
 
-# Skupiny, na ktoré sa rozpadá menovateľ. Prvé dve sú rozhodnuté binárne —
+# Skupiny, na ktoré sa rozpadajú posudzované účty. Prvé dve sú rozhodnuté binárne —
 # účet nakúpil alebo nenakúpil — a o rast v nich vôbec nejde.
-COMPOSITION_REACTIVATED = "Reaktivované (0 → +)"
+#
+# Prvá skupina sa zámerne nenazýva „reaktivované“. Jediná podmienka je nulové
+# GMV v minuloročnom okne, čo o dĺžke medzery nehovorí nič — medián medzery je
+# okolo štyroch mesiacov a väčšina týchto účtov nakúpila krátko pred oknom.
+# Skutočná reaktivácia je definovaná v metrics_churn ako medzera dlhšia než
+# C.REACTIVATION_GAP_MONTHS.
+COMPOSITION_NO_PREVIOUS = "Bez GMV v minuloročnom okne (0 → +)"
 COMPOSITION_DROPPED = "Odišli do nuly (+ → 0)"
 COMPOSITION_BOTH = "Aktívne v oboch oknách"
-COMPOSITION_ORDER = [COMPOSITION_REACTIVATED, COMPOSITION_DROPPED, COMPOSITION_BOTH]
+COMPOSITION_ORDER = [COMPOSITION_NO_PREVIOUS, COMPOSITION_DROPPED, COMPOSITION_BOTH]
 
 # Názvy skupín zákazníkov. Mapa nepokrýva všetky id v dátach — nepokryté
 # zostávajú v reze pod svojím číslom, aby ticho nevypadli.
@@ -54,7 +60,7 @@ CUSTOMER_GROUP_ID_TO_NAME_MAP = {
 
 # ── základná tabuľka ──────────────────────────────────────────────────────────
 def account_table(df, as_of, window_months=None, min_age_months=None):
-    """Tabuľka účtov v menovateli KPI s ich GMV v oboch oknách.
+    """Tabuľka posudzovaných účtov s ich GMV v oboch oknách.
 
     window_months a min_age_months sú parametrizovateľné pre prípadné ad-hoc
     porovnanie s inou definíciou KPI — report už takú tabuľku nemá, ale
@@ -116,7 +122,7 @@ def _latest_value_per_customer(df, column):
 
 
 def _apply_denominator(table, as_of, min_age_months):
-    """Nechá len účty, ktoré patria do menovateľa KPI."""
+    """Nechá len účty, ktoré sa do KPI posudzujú."""
     age_cutoff = as_of - pd.DateOffset(months=min_age_months)
     is_mature = table["first_order"] <= age_cutoff
     is_active = (table["previous"] > 0) | (table["current"] > 0)
@@ -156,11 +162,11 @@ def _gmv_growing_pct(table):
     return table.loc[table["growing"], "current"].sum() / total * 100
 
 
-# ── rozklad menovateľa ────────────────────────────────────────────────────────
+# ── rozklad posudzovaných účtov ───────────────────────────────────────────────
 def composition(table):
-    """Rozdelí menovateľ na reaktivované, odídené a aktívne v oboch oknách."""
+    """Rozdelí posudzované účty na tri skupiny podľa aktivity v oknách."""
     groups = {
-        COMPOSITION_REACTIVATED: table.loc[table["previous"] == 0],
+        COMPOSITION_NO_PREVIOUS: table.loc[table["previous"] == 0],
         COMPOSITION_DROPPED: table.loc[table["current"] == 0],
         COMPOSITION_BOTH: table.loc[(table["previous"] > 0) & (table["current"] > 0)],
     }
@@ -172,7 +178,7 @@ def composition(table):
 
 
 def _composition_row(label, members, total_accounts):
-    """Jeden riadok rozkladu menovateľa."""
+    """Jeden riadok rozkladu posudzovaných účtov."""
     growing = int(members["growing"].sum())
     return {
         "group": label,

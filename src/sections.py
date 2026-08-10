@@ -5,10 +5,13 @@ Každá funkcia vytvorí HTML jednej sekcie a zoznam grafov, ktoré v nej sú.
 Čísla v texte sa vkladajú z metrík — nikde nie sú napísané natvrdo.
 """
 
+import pandas as pd
+
 from src import constants as C
 import charts
 import data
 import metrics_account_growth
+import metrics_kpi_diagnostics as MD
 import report as R
 
 EUR = R.format_eur
@@ -34,85 +37,46 @@ def _fig(figures, figure_id):
 
 def header(metrics):
     """Nadpis, prehľadové karty a hlavný nález."""
-    quality = metrics["quality"]
+    quality = metrics["quality_displayed"]
     yearly = metrics["yearly"]
-    growth = metrics["growth_by_band"]
-    concentration = metrics["concentration"]
     churn = metrics["churn_curves"]
     account_growth = metrics["account_growth_summary"]
 
     partial = yearly.loc[C.PARTIAL_YEAR]
     yoy = metrics["yoy_growth"].loc[C.PARTIAL_YEAR, "growth_pct"]
-    top10 = concentration.loc[C.PARTIAL_YEAR, "top10_pct"]
     churn_now = churn[f"churn_{C.CHURN_MAIN_THRESHOLD_MONTHS}m"].iloc[-1]
-    top_band = growth.iloc[-1]
-    smaller_bands_delta = growth.iloc[:-1]["net_delta"].sum()
-    top_band_companies = metrics["top_band_companies"]
 
     cards = [
-        (f"GMV {data.year_label(C.PARTIAL_YEAR)}", EUR(partial["gmv"] / 1e6, 2).replace("\u00a0€", "\u00a0mil.\u00a0€")),
+        (f"GMV {data.year_label(C.PARTIAL_YEAR)}",
+         EUR(partial["gmv"] / 1e6, 2).replace("\u00a0€", "\u00a0mil.\u00a0€")),
         ("Medziročný rast", SIGNED_PCT(yoy, 0)),
-        ("Medián objednávky", EUR(partial["median_order"])),
-        ("Top 10 účtov", PCT(top10, 0)),
-        (f"Churn {C.CHURN_MAIN_THRESHOLD_MONTHS} mes.", PCT(churn_now, 0)),
-        ("Account growth", PCT(account_growth["growing_pct"], 0)),
+        (f"Medián objednávky {data.year_label(C.PARTIAL_YEAR)}",
+         EUR(partial["median_order"])),
+        (f"Churn (od {C.DISPLAY_START_YEAR})",
+         PCT(churn_now, 0)),
+        ("Account growth", PCT(account_growth["growing_pct"], 1)),
     ]
 
     html = f"""
-<h1>EDA — rast GMV v B2B</h1>
-<p class="lead">Zdroj: <code>{C.INPUT_XLSX}</code> · {NUM(quality["orders"])} objednávok ·
-{NUM(quality["customers"])} zákazníkov ·
-{quality["date_min"]:%-d.\u00a0%-m.\u00a0%Y} – {quality["date_max"]:%-d.\u00a0%-m.\u00a0%Y} ·
-GMV {EUR(quality["gmv"] / 1e6, 2).replace("\u00a0€", "\u00a0mil.\u00a0€")}</p>
+<h1>Exploratívna dátová analýza — account growth B2B</h1>
+{_header_facts(quality)}
 {R.render_kpi_cards(cards)}
-{R.render_note(
-    f"<b>Hlavný nález.</b> GMV rastie o {SIGNED_PCT(yoy, 0)} medziročne, ale rast nie je "
-    f"v báze — je v hrsti účtov. Za posledné {C.GMV_WINDOW_MONTHS} mesiace pásmo "
-    f"{growth.index[-1]} pridalo {SIGNED_EUR(top_band['net_delta'])} pri "
-    f"{int(top_band['customers'])} zákazníkoch, kým všetky menšie pásmá spolu "
-    f"{SIGNED_EUR(smaller_bands_delta)}. Zároveň "
-    f"{PCT(churn_now, 0)} akvirovanej bázy nenakúpilo posledných "
-    f"{C.CHURN_MAIN_THRESHOLD_MONTHS} mesiacov.")}
-{_top_band_companies_text(top_band_companies, growth.index[-1])}
 """
     return html, []
 
 
-def _top_band_companies_text(companies, band_label):
-    """Veta so zoznamom firiem v najvyššom GMV pásme.
+def _header_facts(quality):
+    """Odrážky so zdrojom dát a rozsahom zobrazovaného obdobia."""
+    start = pd.Timestamp(year=C.DISPLAY_START_YEAR, month=1, day=1)
 
-    Bodka na konci sa nepridáva, ak už tam nejaká je (napr. skratka "s.r.o.").
-    """
-    names = ", ".join(R.escape(name) for name in companies)
-    ending = "" if names.endswith(".") else "."
-    return f'<p class="small">Účty v pásme {band_label}: {names}{ending}</p>'
-
-
-def methodology(metrics):
-    """Kvalita dát a metodické rozhodnutia."""
-    quality = metrics["quality"]
-    statuses = metrics["status_table"]
-    complete_share = statuses.loc[statuses.index.isin(["complete", "complete_no_invoice"]), "share_pct"].sum()
-
-    html = f"""
-<h2>Kvalita dát a metodika</h2>
-<ul>
-<li>Chýbajúce hodnoty: {NUM(quality["missing_values"])}. Duplicitné <code>entity_id</code>:
-{NUM(quality["duplicate_ids"])}. Objednávky s GMV = 0: {NUM(quality["zero_gmv_orders"])}.</li>
-<li><b>Rok 2018 je vylúčený z trendov</b> — pilot, {NUM(len(metrics["orders_2018"]))} objednávok,
-medián {EUR(metrics["orders_2018"]["gmv"].median(), 1)}.</li>
-<li><b>Rok {C.PARTIAL_YEAR} je nekompletný</b> (do
-{C.AS_OF:%-d.\u00a0%-m.\u00a0%Y}) a v grafoch je označený hviezdičkou. Medziročné porovnania
-používajú rovnaké okno (Jan–Júl vs Jan–Júl).</li>
-<li><b>Zákazník = <code>customer_email</code>.</b> Ak firma nakupuje z viacerých e-mailov,
-je v dátach ako viac zákazníkov — to nadhodnocuje nových, churn aj reaktivácie.</li>
-<li><b>Churn:</b> v časovom bode <i>t</i> je zákazník churned, ak od jeho poslednej objednávky
-prešlo viac ako N mesiacov. Budúce objednávky sa ignorujú. Menovateľ = zákazníci akvirovaní
-aspoň N mesiacov pred <i>t</i>.</li>
-<li><b>Reaktivácia:</b> objednávka po medzere dlhšej ako {C.REACTIVATION_GAP_MONTHS} mesiacov.</li>
+    return f"""
+<ul class="lead">
+<li>Zdroj: <code>{C.INPUT_XLSX}</code></li>
+<li>Zobrazované obdobie: {start:%-d.\u00a0%-m.\u00a0%Y} – {C.AS_OF:%-d.\u00a0%-m.\u00a0%Y}</li>
+<li>Objednávky: {NUM(quality["orders"])}</li>
+<li>Zákazníci: {NUM(quality["customers"])}</li>
 </ul>
 """
-    return html, []
 
 
 def trend_section(metrics):
@@ -122,9 +86,10 @@ def trend_section(metrics):
     peak_month = seasonality.idxmax()
     low_month = seasonality.idxmin()
 
+    quality = metrics["quality_displayed"]
     figures = [
-        charts.monthly_trend(metrics["monthly"]),
-        charts.seasonality(seasonality),
+        charts.monthly_trend(metrics["monthly"], quality["customers"]),
+        charts.seasonality(seasonality, metrics["seasonality_customers"]),
     ]
 
     table = R.render_table(
@@ -142,45 +107,48 @@ def trend_section(metrics):
 <h2>1. Trend GMV</h2>
 {_fig(figures, "monthly_trend")}
 {table}
+{_partial_year_note()}
 {_fig(figures, "seasonality")}
 <p>Najsilnejší mesiac je {peak_month}. ({PCT(seasonality.max())} ročného GMV), najslabší
 {low_month}. ({PCT(seasonality.min())}). Rozdiel medzi špičkou a dnom je len
-{PCT(seasonality.max() - seasonality.min())} — sezónnosť je mierna a rozhodnutia
-sa na ňu nedajú zvaľovať.</p>
+{NUM(seasonality.max() - seasonality.min(), 1)} p. b. — sezónnosť je mierna.
+Percentuálny bod je aritmetický rozdiel dvoch podielov; relatívne je najsilnejší
+mesiac o {SIGNED_PCT(seasonality.max() / seasonality.min() * 100 - 100, 0)} silnejší
+než najslabší.</p>
 """
     return html, figures
+
+
+def _partial_year_note():
+    """Prečo sa hodnoty „na zákazníka" za nekompletný rok nedajú porovnávať."""
+    return R.render_note(
+        f"<b>Rok {data.year_label(C.PARTIAL_YEAR)} je nekompletný</b> — "
+        f"{C.PARTIAL_YEAR_LAST_MONTH} mesiacov namiesto 12. Objednávky a GMV sú "
+        f"preto nižšie, než bude celý rok, a stĺpce „Obj./zákazník\u201c "
+        f"a „GMV/zákazník\u201c nie sú porovnateľné s predchádzajúcimi rokmi: "
+        f"zákazník má v kratšom okne menej času objednať. Nečítaj z nich pokles.")
 
 
 def bridge_section(metrics):
     """Komponenty medziročnej zmeny GMV."""
     bridge = metrics["bridge"]
-    figure = charts.yearly_bridge(bridge)
+    figure = charts.yearly_bridge(bridge, metrics["quality_displayed"]["customers"])
 
     columns = [("label", "Rok", str), ("delta", "Netto zmena", SIGNED_EUR)]
     for component in C.BRIDGE_COMPONENTS:
         columns.append((component, C.BRIDGE_LABELS_SK[component], SIGNED_EUR))
     table = R.render_table(bridge, columns, show_index=False)
 
-    last = bridge.iloc[-1]
-    gross_gains = last["expansion"] + last["reactivated"] + last["new"]
-    gross_losses = last["contraction"] + last["churn"]
-
     html = f"""
 <h2>2. Komponenty medziročnej zmeny GMV</h2>
 {_fig([figure], "yearly_bridge")}
 {table}
-<p>V období {last["label"]} sú hrubé prírastky {SIGNED_EUR(gross_gains)} a hrubé straty
-{SIGNED_EUR(gross_losses)} — na každé euro prírastku sa stratí
-{NUM(abs(gross_losses) / gross_gains, 2)} €. Netto zmena
-{SIGNED_EUR(last["delta"])} je teda výsledkom veľkého obratu na oboch stranách,
-nie plynulého rastu bázy.</p>
 {R.render_note(
     "<b>Pozor na interpretáciu položky Reaktivovaní pri ročných oknách.</b> "
-    f"Pri celých rokoch znamená „nenakúpil celý predchádzajúci rok\u201c, čo je "
-    f"blízke definícii reaktivácie ({C.REACTIVATION_GAP_MONTHS} mesiacov). Stĺpec "
+    f"Pri celých rokoch znamená „nenakúpil celý predchádzajúci rok\u201c. Stĺpec "
     f"{data.year_label(C.PARTIAL_YEAR)} však porovnáva len Jan–Júl, takže sa doň dostanú aj "
     "zákazníci, ktorí nakúpili v druhej polovici predchádzajúceho roku. Jeho hodnota preto "
-    "nie je porovnateľná s predchádzajúcimi rokmi — skutočný počet reaktivácií je v sekcii 9.")}
+    "nie je porovnateľná s predchádzajúcimi rokmi a nemá sa z nej čítať počet reaktivácií.")}
 """
     return html, [figure]
 
@@ -188,14 +156,13 @@ nie plynulého rastu bázy.</p>
 def order_value_section(metrics):
     """Priemerná vs mediánová hodnota objednávky."""
     yearly = metrics["yearly"]
-    figure = charts.order_value(yearly)
+    figure = charts.order_value(yearly, metrics["quality_displayed"]["orders"])
 
     table = R.render_table(
         yearly,
         [("label", "Rok", str),
          ("mean_order", "Priemer", EUR),
          ("median_order", "Medián", EUR),
-         ("p95_order", "p95", EUR),
          ("mean_to_median", "Priemer / medián", lambda v: NUM(v, 2))],
         show_index=False,
     )
@@ -220,13 +187,8 @@ Typická objednávka sa nezmenila; zmenil sa chvost.</p>
 def concentration_section(metrics):
     """Koncentrácia portfólia."""
     concentration = metrics["concentration"]
-    structure = metrics["portfolio_structure"]
 
-    figures = [
-        charts.concentration_shares(concentration),
-        charts.concentration_threshold(concentration),
-        charts.portfolio_structure(structure),
-    ]
+    figures = [charts.concentration_shares(concentration)]
 
     concentration_table = R.render_table(
         concentration,
@@ -242,181 +204,190 @@ def concentration_section(metrics):
         show_index=False,
     )
 
-    structure_table = R.render_table(
-        structure,
-        [("customers", "Zákazníci", NUM),
-         ("customer_pct", "% zákazníkov", PCT),
-         ("gmv", "GMV", EUR),
-         ("gmv_pct", "% GMV", PCT)],
-        index_label="Pásmo",
-    )
-
     first = concentration.iloc[0]
     last = concentration.iloc[-1]
-    biggest_band = structure["gmv_pct"].idxmax()
 
     html = f"""
 <h2>4. Koncentrácia portfólia</h2>
 {_fig(figures, "concentration_shares")}
-{_fig(figures, "concentration_threshold")}
 {concentration_table}
 <p>Podiel top 5 zákazníkov sa zmenil z {PCT(first["top5_pct"])} ({first["label"]}) na
-{PCT(last["top5_pct"])} ({last["label"]}). Na 80 % GMV dnes stačí
-{NUM(last["customers_for_80pct"])} zákazníkov.</p>
-{_fig(figures, "portfolio_structure")}
-{structure_table}
-<p>Pásmo {biggest_band} tvorí {PCT(structure.loc[biggest_band, "gmv_pct"])} GMV pri
-{PCT(structure.loc[biggest_band, "customer_pct"])} zákazníkov.</p>
-"""
-    return html, figures
-
-
-def markets_section(metrics):
-    """Rozdelenie trhov."""
-    by_market = metrics["market_gmv"]
-    summary = metrics["market_summary"]
-    growth = metrics["market_growth"]
-
-    figures = [
-        charts.market_gmv(by_market),
-        charts.market_growth(growth),
-    ]
-
-    table = R.render_table(
-        summary,
-        [("gmv", "GMV", EUR),
-         ("share_pct", "Podiel", PCT),
-         ("growth_pct", "Rast YoY", SIGNED_PCT),
-         ("customers", "Zákazníci", NUM),
-         ("median_order", "Medián obj.", EUR),
-         ("gmv_per_customer", "GMV/zákazník", EUR)],
-        index_label="Trh",
-    )
-
-    top_two = summary.head(2)
-    top_two_share = top_two["share_pct"].sum()
-    weakest = summary["gmv_per_customer"].idxmin()
-    other = summary.loc[C.OTHER_MARKET_LABEL]
-
-    html = f"""
-<h2>5. Rozdelenie trhov</h2>
-{_fig(figures, "market_gmv")}
-{table}
-<p>{" + ".join(top_two.index)} tvoria {PCT(top_two_share)} GMV. Rozdiel v GMV na zákazníka
-je zásadný: {top_two.index[0]} {EUR(top_two.iloc[0]["gmv_per_customer"])} oproti
-{weakest} {EUR(summary.loc[weakest, "gmv_per_customer"])}.</p>
-{_fig(figures, "market_growth")}
-<p>Kategória {C.OTHER_MARKET_LABEL} je najzreteľnejší prípad rozdielu medzi počtom
-a hodnotou: {NUM(other["customers"])} zákazníkov, teda
-{PCT(other["customers"] / summary["customers"].sum() * 100)} celej bázy, ale len
-{PCT(other["share_pct"])} GMV.</p>
-"""
-    return html, figures
-
-
-def churn_section(metrics):
-    """Churn v čase a podľa pásma."""
-    curves = metrics["churn_curves"]
-    growth = metrics["growth_by_band"]
-    churn_bands = metrics["churn_by_band"]
-
-    figures = [
-        charts.churn_over_time(curves),
-        charts.growth_and_churn_by_band(growth, churn_bands),
-        charts.net_gmv_by_band(growth),
-    ]
-
-    band_table = R.render_table(
-        growth.join(churn_bands[["churn_pct", "gmv_churn_pct"]], rsuffix="_churn"),
-        [("customers", "Zákazníci", NUM),
-         ("growing_pct", "% rastúcich", PCT),
-         ("median_change_pct", "Mediánová zmena", SIGNED_PCT),
-         ("churn_pct", f"% churn ({C.CHURN_MAIN_THRESHOLD_MONTHS} mes.)", PCT),
-         ("net_delta", "Netto zmena GMV", SIGNED_EUR)],
-        index_label="Pásmo",
-    )
-
-    main = f"churn_{C.CHURN_MAIN_THRESHOLD_MONTHS}m"
-    first_point = curves.iloc[0]
-    last_point = curves.iloc[-1]
-    top_band = growth.iloc[-1]
-    smaller = growth.iloc[:-1]
-
-    html = f"""
-<h2>6. Churn</h2>
-{_fig(figures, "churn_over_time")}
-<p>Churn rastie na všetkých troch prahoch. {C.CHURN_MAIN_THRESHOLD_MONTHS}-mesačný churn stúpol
-z {PCT(first_point[main])} ({curves.index[0]:%-m/%Y}) na {PCT(last_point[main])}
-({curves.index[-1]:%-m/%Y}). Krivky sú blízko seba
-({PCT(last_point["churn_3m"])} / {PCT(last_point["churn_6m"])} / {PCT(last_point["churn_12m"])}),
-čo znamená, že väčšina neaktívnych zákazníkov nie je dočasne stíchnutá — je dávno mimo.
-Rozdiel medzi 3- a 12-mesačným churnom, teda pásmo zákazníkov, ktorých sa ešte dá vrátiť,
-je len {PCT(last_point["churn_3m"] - last_point["churn_12m"])} bázy.</p>
-
-<h3>Rast a churn podľa veľkostného pásma</h3>
-{_fig(figures, "band_growth_churn")}
-{band_table}
-<p>Podiel rastúcich stúpa s veľkosťou zákazníka z {PCT(growth.iloc[0]["growing_pct"])} na
-{PCT(top_band["growing_pct"])}, churn klesá z {PCT(churn_bands.iloc[0]["churn_pct"])} na
-{PCT(churn_bands.iloc[-1]["churn_pct"])}. Mediánová zmena GMV je pritom negatívna vo
-<b>všetkých</b> pásmach — vrátane najväčšieho ({SIGNED_PCT(top_band["median_change_pct"])}).
-Typický zákazník neklesá len v dlhom chvoste; klesá všade, a agregát ťahá nahor niekoľko
-výnimiek.</p>
-
-<h3>Netto GMV podľa pásma</h3>
-{_fig(figures, "net_gmv_by_band")}
-<p>Pásmo {growth.index[-1]} pridalo {SIGNED_EUR(top_band["net_delta"])} pri
-{int(top_band["customers"])} zákazníkoch. Všetky ostatné pásma spolu
-{SIGNED_EUR(smaller["net_delta"].sum())} pri {int(smaller["customers"].sum())} zákazníkoch.
-Celý rast portfólia je záležitosťou {int(top_band["customers"])} účtov.</p>
+{PCT(last["top5_pct"])} ({last["label"]}). 80 % GMV dnes tvorí iba
+{NUM(last["customers_for_80pct"])} zákazníkov oproti
+{NUM(first["customers_for_80pct"])} v roku {first["label"]}.</p>
 """
     return html, figures
 
 
 def account_growth_section(metrics):
-    """Interné KPI account growth a hľadanie dôvodu jeho nízkej hodnoty."""
+    """Interné KPI account growth, jeho príčiny a štruktúra rastu GMV."""
     summary = metrics["account_growth_summary"]
     history = metrics["account_growth_history"]
     composition = metrics["account_growth_composition"]
+    diag = metrics["diag_summary"]
 
     figures = [
         charts.account_growth_over_time(history),
         charts.account_growth_composition(composition),
+        charts.kpi_frequency_effect(metrics["diag_frequency"], diag["growing_pct"]),
+        charts.kpi_activity_split(metrics["diag_activity_split"]),
+        charts.kpi_regular_ordering(metrics["diag_regular_scenario"]),
+        charts.kpi_churn_sensitivity(metrics["diag_churn_sensitivity"]),
+        charts.net_gmv_by_band(metrics["growth_by_band"], metrics["band_window"]),
     ]
-    figures.extend(_account_growth_breakdown_figures(metrics))
 
     html = f"""
-<h2>7. Account growth (interné KPI)</h2>
+<h2>5. Account growth a štruktúra rastu</h2>
 {_account_growth_definition(summary)}
 {_fig(figures, "account_growth_over_time")}
 {_account_growth_trend_text(history, summary)}
 
-<h3>Z čoho sa skladá menovateľ</h3>
+<h3>Z čoho sa skladajú posudzované účty</h3>
 {_fig(figures, "account_growth_composition")}
 {_account_growth_composition_table(composition)}
 {_account_growth_composition_text(composition, summary)}
 
-<h3>Kde je rozdiel</h3>
-{_account_growth_breakdown_html(metrics, figures)}
+<h3>Čím je rozhodnuté, či účet rastie</h3>
+{_fig(figures, "kpi_frequency")}
+{_frequency_text(metrics)}
+
+<h3>Kedy účty naposledy nakúpili</h3>
+{_fig(figures, "kpi_activity_split")}
+{_activity_text(metrics)}
+{_fig(figures, "kpi_regular_ordering")}
+{_regular_ordering_text(metrics)}
+
+<h3>Čo ak by sme zabránili churnu</h3>
+{_fig(figures, "kpi_churn_sensitivity")}
+{_churn_sensitivity_text(metrics)}
+
+<h3>Netto GMV podľa veľkostného pásma</h3>
+{_fig(figures, "net_gmv_by_band")}
+{_band_gmv_text(metrics)}
+{_top_band_table(metrics)}
 """
     return html, figures
+
+
+def _band_gmv_text(metrics):
+    """Odstavec k netto zmene GMV podľa pásma."""
+    growth = metrics["growth_by_band"]
+
+    top_band = growth.iloc[-1]
+    smaller = growth.iloc[:-1]
+
+    return f"""
+<p>Pásmo {growth.index[-1]} pridalo {SIGNED_EUR(top_band["net_delta"])} pri
+{int(top_band["customers"])} účtoch. Všetky ostatné pásma spolu
+{SIGNED_EUR(smaller["net_delta"].sum())} pri {int(smaller["customers"].sum())} účtoch.</p>
+"""
+
+
+def _top_band_table(metrics):
+    """Tabuľka účtov v najvyššom pásme."""
+    growth = metrics["growth_by_band"]
+    table = R.render_table(
+        metrics["top_band_detail"],
+        [("previous", "GMV pred rokom", EUR),
+         ("current", "GMV teraz", EUR),
+         ("delta", "Netto zmena", SIGNED_EUR)],
+        index_label="Účet",
+    )
+
+    return f"""
+<h4 style="font-size:14px;font-weight:500;margin:24px 0 8px">Účty v pásme
+{R.escape(growth.index[-1])}</h4>
+{table}
+<p class="small">Zoradené podľa netto zmeny. Účet bez vyplneného
+<code>company_bill</code> je uvedený e-mailom. Tá istá firma sa môže objaviť
+viackrát, ak nakupuje z viacerých e-mailov.</p>
+"""
+
+
+def _frequency_text(metrics):
+    """Odstavec k rastu podľa počtu objednávok."""
+    frequency = metrics["diag_frequency"]
+    more = frequency.loc[MD.FREQUENCY_MORE]
+    same = frequency.loc[MD.FREQUENCY_SAME]
+    fewer = frequency.loc[MD.FREQUENCY_FEWER]
+
+    return f"""
+<p>Vzťah je takmer deterministický: účet, ktorý objedná viackrát než pred rokom,
+rastie v {PCT(more["growing_pct"])} prípadov, pri rovnakom počte je to coin flip
+({PCT(same["growing_pct"])}) a pri nižšom počte je účet odpísaný
+({PCT(fewer["growing_pct"])}). <b>Rast účtu v tomto KPI je o frekvencii, nie
+o veľkosti objednávky.</b></p>
+"""
+
+
+def _activity_text(metrics):
+    """Odstavec k rozdeleniu posudzovaných účtov podľa poslednej objednávky."""
+    activity = metrics["diag_activity_split"]
+    in_window = activity.iloc[0]
+    outside = activity.iloc[1]
+    churned = activity.iloc[2]
+
+    diag = metrics["diag_summary"]
+    composition = metrics["account_growth_composition"]
+    automatic = int(composition.loc[metrics_account_growth.COMPOSITION_NO_PREVIOUS, "customers"])
+    both = int(composition.loc[metrics_account_growth.COMPOSITION_BOTH, "customers"])
+
+    return f"""
+<p>V aktuálnom okne nakúpilo {NUM(in_window["customers"])} účtov
+({PCT(in_window["share_pct"])} posudzovaných účtov) a rastie z nich
+{PCT(in_window["growing_pct"])}. To číslo je ale nadhodnotené — {NUM(automatic)}
+z tých {NUM(in_window["customers"])} účtov malo pred rokom nulové GMV a je rastúcich
+automaticky. Z {NUM(both)} účtov, ktoré nakúpili v oboch oknách, rastie
+{PCT(diag["active_in_both_growing_pct"])}. Ostatné dve skupiny majú
+{PCT(0)} rastúcich z definície. Medzi nimi leží {NUM(outside["customers"])} účtov,
+ktoré nakúpili za posledných {C.KPI_DIAG_CHURN_DAYS} dní, ale mimo okna: nie sú
+churnuté a predstavujú {EUR(outside["previous_gmv"])} minuloročného GMV.
+Churnutých je {NUM(churned["customers"])}.</p>
+"""
+
+
+def _regular_ordering_text(metrics):
+    """Odstavec k scenáru pravidelného objednávania."""
+    scenario = metrics["diag_regular_scenario"]
+    outside = int(scenario["converted"].iloc[0])
+    reported = scenario["growing_pct"].iloc[0]
+    scenario_pct = scenario["growing_pct"].iloc[1]
+
+    return f"""
+<p>Ak by tých {NUM(outside)} účtov objednávalo aspoň raz za
+{C.GMV_WINDOW_MONTHS} mesiace, KPI by bolo {PCT(scenario_pct)} namiesto
+{PCT(reported)}, teda o {NUM(scenario_pct - reported, 1)} p. b. vyššie bez jediného
+nového zákazníka. Je to <b>horná hranica, nie prognóza</b> — každý z tých účtov má
+nenulové minuloročné GMV, takže rastúcim sa stane len ten, ktorý ho prekročí.</p>
+"""
+
+
+def _churn_sensitivity_text(metrics):
+    """Odstavec k scenáru zabráneného churnu."""
+    sensitivity = metrics["diag_churn_sensitivity"]
+    prevented = int(sensitivity["prevented"].iloc[0])
+    lowest = sensitivity["growing_pct"].iloc[0]
+    highest = sensitivity["growing_pct"].iloc[-1]
+
+    return f"""
+<p>Ak by všetkých {NUM(prevented)} churnutých účtov bolo aktívnych v okne, KPI by
+podľa predpokladu o ich raste bolo {PCT(lowest)} až {PCT(highest)}.</p>
+"""
 
 
 def _account_growth_definition(summary):
     """Úvodný odstavec: definícia KPI a jeho aktuálna hodnota."""
     return f"""
 <p>KPI porovnáva GMV účtu za posledné {C.GMV_WINDOW_MONTHS} mesiace s GMV za to isté okno
-o rok skôr. Účet rastie, ak je aktuálne GMV vyššie. Do menovateľa patrí účet, ktorý je
+o rok skôr. Účet rastie, ak je aktuálne GMV vyššie. Posudzuje sa účet, ktorý je
 starší ako {C.ACCOUNT_GROWTH_MIN_AGE_MONTHS} mesiacov <b>a</b> bol aktívny aspoň v jednom
 z dvoch okien.</p>
 {R.render_note(
     f"<b>Aktuálna hodnota: {PCT(summary['growing_pct'])}</b> "
-    f"({NUM(summary['growing'])} z {NUM(summary['accounts'])} účtov). "
-    f"Klesá {PCT(summary['declining_pct'])}. Do cieľa "
+    f"({NUM(summary['growing'])} z {NUM(summary['accounts'])} účtov). Do cieľa "
     f"{C.ACCOUNT_GROWTH_TARGET_PCT} % chýba {NUM(summary['accounts_needed_for_target'])} "
     f"ďalších rastúcich účtov. Zároveň ale "
-    f"<b>{PCT(summary['gmv_growing_pct'])} tržieb už v rastúcich účtoch leží</b> — "
-    f"nevážené KPI a tržby nehovoria to isté.")}
+    f"<b>{PCT(summary['gmv_growing_pct'])} tržieb už v rastúcich účtoch leží</b>.")}
 """
 
 
@@ -429,21 +400,21 @@ def _account_growth_trend_text(history, summary):
 
     return f"""
 <p>KPI nie je v prepade. Od dna {PCT(trough)} ({trough_date:%-m/%Y}) sa vrátilo na
-{PCT(summary["growing_pct"])} a posledné štyri kvartály rastie. <b>Maximum celého radu je
-{PCT(peak)} ({peak_date:%-m/%Y}), teda cieľ {C.ACCOUNT_GROWTH_TARGET_PCT} % sa v tomto
-rozsahu dát nikdy nedosiahol</b> — nie je to návrat do normálu, ale nová hodnota, a to
-by malo vstúpiť do rozhovoru o tom, či je cieľ realistický.</p>
+{PCT(summary["growing_pct"])} a posledné štyri kvartály rastie. <b>KPI je práve teraz na
+maxime celého radu ({PCT(peak)}, {peak_date:%-m/%Y}) — cieľ {C.ACCOUNT_GROWTH_TARGET_PCT} %
+sa v tomto rozsahu dát nikdy nedosiahol.</b> Nie je to teda návrat do normálu, ale nová
+hodnota, a to by malo vstúpiť do rozhovoru o tom, či je cieľ realistický.</p>
 <p>GMV-vážená línia je celý čas výrazne vyššia než stĺpce. Rozdiel medzi nimi je mierou
 toho, ako silno nevážené KPI váži drobné účty rovnako ako strategické.</p>
 """
 
 
 def _account_growth_composition_table(composition):
-    """Tabuľka rozkladu menovateľa."""
+    """Tabuľka rozkladu posudzovaných účtov."""
     return R.render_table(
         composition,
         [("customers", "Účty", NUM),
-         ("share_pct", "% menovateľa", PCT),
+         ("share_pct", "% posudzovaných účtov", PCT),
          ("growing_pct", "% rastúcich", PCT),
          ("previous_gmv", "GMV pred rokom", EUR),
          ("current_gmv", "GMV teraz", EUR)],
@@ -452,17 +423,19 @@ def _account_growth_composition_table(composition):
 
 
 def _account_growth_composition_text(composition, summary):
-    """Odstavec k rozkladu menovateľa."""
-    reactivated = composition.loc[metrics_account_growth.COMPOSITION_REACTIVATED]
+    """Odstavec k rozkladu posudzovaných účtov."""
+    no_previous = composition.loc[metrics_account_growth.COMPOSITION_NO_PREVIOUS]
     dropped = composition.loc[metrics_account_growth.COMPOSITION_DROPPED]
     both = composition.loc[metrics_account_growth.COMPOSITION_BOTH]
-    binary_share = reactivated["share_pct"] + dropped["share_pct"]
+    binary_share = no_previous["share_pct"] + dropped["share_pct"]
 
     return f"""
-<p>Menovateľ nie je homogénny — sedia v ňom tri rôzne situácie.
+<p>Posudzované účty nie sú homogénne — sedia v nich tri rôzne situácie.
 <b>Pri {PCT(binary_share)} účtov je výsledok rozhodnutý už tým, či účet v okne vôbec
-nakúpil.</b> {NUM(reactivated["customers"])} reaktivovaných účtov (pred rokom nenakúpili,
-teraz áno) je rastúcich automaticky, lebo z nuly rastie čokoľvek.
+nakúpil.</b> {NUM(no_previous["customers"])} účtov bez GMV v minuloročnom okne (pred rokom
+nenakúpili, teraz áno) je rastúcich automaticky, lebo z nuly rastie čokoľvek. Nie sú
+to nutne reaktivované účty — medián ich medzery je okolo štyroch mesiacov, väčšina
+z nich len jedno okno vynechala.
 {NUM(dropped["customers"])} odídených účtov (pred rokom nakúpili, teraz už nie) je
 z rovnakého dôvodu automaticky klesajúcich. Skutočnú zmenu objemu meria len zvyšných
 {NUM(both["customers"])} účtov aktívnych v oboch oknách — a tam rastie
@@ -470,76 +443,8 @@ z rovnakého dôvodu automaticky klesajúcich. Skutočnú zmenu objemu meria len
 <p>KPI sa preto hýbe hlavne cez pády do nuly, nie cez rast existujúcich účtov:
 s odídenými účtami zmizlo {EUR(dropped["previous_gmv"])} z minuloročného okna.
 <b>KPI sa nezvýši tým, že účty prinútime rásť — zvýši sa tým, že ich nedopustíme spadnúť
-do nuly.</b> Rub tej istej mince je, že {NUM(summary["accounts_needed_for_target"])}
-chýbajúcich rastúcich účtov sa dá „splniť“ reaktiváciou drobných dormantných účtov
-s takmer nulovým dopadom na tržby.</p>
+do nuly.</b></p>
 """
-
-
-def _account_growth_breakdown_specs(metrics):
-    """Definícia rezov: kľúč v metrikách, id grafu, nadpis a komentár."""
-    return [
-        ("account_growth_by_band", "ag_by_band", "Podľa veľkostného pásma",
-         "Pásmo je určené GMV v minuloročnom okne. Zelená = nad cieľom, "
-         "červená = pod celkovým KPI."),
-        ("account_growth_by_group", "ag_by_group", "Podľa customer_group_id",
-         f"Skupiny s menej ako {C.ACCOUNT_GROWTH_MIN_SEGMENT_SIZE} účtami sú vynechané. "
-         f"Čo skupiny znamenajú, v dátach nie je — bez doplnenia z e-shopu sa rez "
-         f"nedá interpretovať, hoci má najväčší rozptyl zo všetkých."),
-        ("account_growth_by_country", "ag_by_country", "Podľa krajiny",
-         f"Bez zlúčenej kategórie {C.OTHER_MARKET_LABEL}, ktorú používa zvyšok reportu — "
-         f"práve v jednotlivých krajinách je rozptyl najväčší."),
-        ("account_growth_by_cohort", "ag_by_cohort", "Podľa roku prvej objednávky",
-         "Vek účtu. Ukazuje, či nízke KPI nie je vlastnosť konkrétnych kohort."),
-        ("account_growth_by_orders", "ag_by_orders", "Podľa počtu objednávok pred rokom",
-         f"Len účty aktívne v minuloročnom okne — reaktivované sú rastúce automaticky "
-         f"a graf by skreslili. Účet s jednou objednávkou za {C.GMV_WINDOW_MONTHS} "
-         f"mesiace je porovnávaný na základe jedinej udalosti, takže KPI tam meria "
-         f"z veľkej časti časovanie objednávky, nie rast."),
-    ]
-
-
-def _account_growth_breakdown_figures(metrics):
-    """Grafy všetkých rezov.
-
-    Vytvoria sa všetky, aj tie skryté cez C.HIDDEN_CHARTS — nie sú výpočtovo
-    náročné a _account_growth_breakdown_html z nich aj tak vynechá celý rez
-    (graf i komentár), ak je jeho ID medzi skrytými.
-    """
-    overall = metrics["account_growth_summary"]["growing_pct"]
-    figures = []
-    for key, figure_id, title, caption in _account_growth_breakdown_specs(metrics):
-        figures.append(charts.account_growth_breakdown(
-            metrics[key], figure_id, title, caption, overall))
-    return figures
-
-
-def _account_growth_breakdown_html(metrics, figures):
-    """HTML rezov: graf a k nemu komentár so extrémami, skrytý rez sa vynechá celý."""
-    parts = []
-    for key, figure_id, _, _ in _account_growth_breakdown_specs(metrics):
-        if figure_id in C.HIDDEN_CHARTS:
-            continue
-        parts.append(_fig(figures, figure_id))
-        parts.append(_breakdown_comment(metrics[key]))
-    return "\n".join(parts)
-
-
-def _breakdown_comment(breakdown):
-    """Veta s najlepším a najhorším segmentom rezu.
-
-    Popisky segmentov idú cez escape — pásma začínajú znakom „<“ a bez escapu
-    by prehliadač zvyšok odstavca zjedol ako otvorenú značku.
-    """
-    best = breakdown["growing_pct"].idxmax()
-    worst = breakdown["growing_pct"].idxmin()
-    spread = breakdown.loc[best, "growing_pct"] - breakdown.loc[worst, "growing_pct"]
-    return (f'<p class="small">Najvyššie {R.escape(best)} '
-            f'({PCT(breakdown.loc[best, "growing_pct"])}, '
-            f'{NUM(breakdown.loc[best, "customers"])} účtov), najnižšie {R.escape(worst)} '
-            f'({PCT(breakdown.loc[worst, "growing_pct"])}, '
-            f'{NUM(breakdown.loc[worst, "customers"])} účtov). Rozptyl '
-            f'{NUM(spread, 1)} p. b.</p>')
 
 
 def loyalty_section(metrics):
@@ -549,7 +454,7 @@ def loyalty_section(metrics):
 
     figures = [
         charts.single_order_by_cohort(single),
-        charts.frequency_histogram(frequency, metrics["frequency_max"]),
+        charts.frequency_histogram(frequency),
     ]
 
     single_table = R.render_table(
@@ -571,181 +476,190 @@ def loyalty_section(metrics):
     total_base = int(frequency["customers_at_or_above"].iloc[0])
 
     html = f"""
-<h2>8. Lojalita a frekvencia</h2>
+<h2>6. Lojalita a frekvencia</h2>
 {_fig(figures, "single_order")}
 {single_table}
 <p>Podiel zákazníkov s jedinou objednávkou za život stúpol z {PCT(first["single_order_pct"])}
 (kohorta {first["label"]}) na {PCT(last["single_order_pct"])} ({last["label"]}). Medián
 objednávok za život klesol z {NUM(first["median_orders"])} na {NUM(last["median_orders"])}
-a medián LTV z {EUR(first["median_ltv"])} na {EUR(last["median_ltv"])}. Akvizícia rastie
-v počte a klesá v kvalite.</p>
+a medián LTV z {EUR(first["median_ltv"])} na {EUR(last["median_ltv"])}. <b>LTV</b> je tu
+celkové GMV, ktoré zákazník utratil od svojej prvej objednávky do
+{C.AS_OF:%-d.\u00a0%-m.\u00a0%Y} — teda doterajšia, nie predikovaná hodnota. Akvizícia
+rastie v počte a klesá v kvalite.</p>
 {_fig(figures, "frequency_histogram")}
-<p>Menovateľom sú zákazníci, ktorí za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov
+<p>Zahrnutí sú zákazníci, ktorí za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov
 aspoň raz nakúpili — {NUM(total_base)} zákazníkov. <b>Najväčšia skupina má jedinú
 objednávku</b>: {NUM(one_order["customers"])} ({PCT(one_order["share_pct"])}).
 Dve objednávky má {NUM(two_orders["customers"])} zákazníkov
 ({PCT(two_orders["share_pct"])}).</p>
 <p>Rozdelenie je monotónne klesajúce — čím vyššia frekvencia, tým menej zákazníkov,
-bez akéhokoľvek typického nákupného rytmu, okolo ktorého by sa báza zhlukovala.
-Reverzný kumulatív to ukazuje presne: aspoň desať objednávok má už len
-{PCT(frequency.loc["10"]["share_at_or_above_pct"])} bázy a v poslednom koši
+bez akéhokoľvek typického nákupného rytmu, okolo ktorého by sa účty zhlukovali.
+Aspoň desať objednávok má už len
+{PCT(frequency.loc["10"]["share_at_or_above_pct"])} všetkých účtov a v poslednom koši
 ({top_bucket.name} objednávok) je {NUM(top_bucket["customers"])} zákazníkov, teda
-{PCT(top_bucket["share_pct"])}. Práve tí sú ale celý biznis — väčšina nakupujúcich má
-s nami len jednorazový kontakt.</p>
+{PCT(top_bucket["share_pct"])}. Práve tí ale tvoria väčšinu tržieb —
+{PCT(top_bucket["gmv_share_at_or_above_pct"])} GMV za posledných
+{C.FREQUENCY_WINDOW_MONTHS} mesiacov. Väčšina nakupujúcich má s nami len jednorazový
+kontakt.</p>
+{_frequency_vs_concentration_note(metrics, top_bucket)}
 """
     return html, figures
 
 
-def reactivation_section(metrics):
-    """Reaktivovaní zákazníci."""
-    histogram = metrics["reactivation_histogram"]
-    by_year = metrics["repeat_reactivation"]
-    value = metrics["reactivation_value"]
+def _frequency_vs_concentration_note(metrics, top_bucket):
+    """Prečo sa toto číslo nerovná počtu účtov na 80 % GMV zo sekcie 4."""
+    concentration = metrics["concentration"].iloc[-1]
+    window = metrics["frequency_window"]
 
-    figures = [
-        charts.reactivation_histogram(histogram),
-        charts.repeat_reactivation(by_year),
-    ]
-
-    histogram_table = R.render_table(
-        histogram,
-        [("customers", "Zákazníci", NUM), ("share_pct", "Podiel", PCT)],
-        index_label="Počet reaktivácií",
-    )
-
-    value_table = R.render_table(
-        value,
-        [("customers", "Zákazníci", NUM),
-         ("median_orders", "Medián objednávok", lambda v: NUM(v, 0)),
-         ("median_ltv", "Medián LTV", EUR),
-         ("total_gmv", "GMV celkom", EUR)],
-        index_label="Skupina",
-    )
-
-    never = histogram.iloc[0]
-    once = histogram.iloc[1]
-    repeat = histogram.iloc[2:]["customers"].sum()
-    repeat_share = histogram.iloc[2:]["share_pct"].sum()
-    last_year = by_year.iloc[-1]
-
-    html = f"""
-<h2>9. Reaktivovaní zákazníci</h2>
-{_fig(figures, "reactivation_histogram")}
-{histogram_table}
-<p>Zo zákazníkov s aspoň dvoma objednávkami nebolo nikdy reaktivovaných
-{PCT(never["share_pct"])}. Raz {PCT(once["share_pct"])}, dvakrát a viackrát
-{PCT(repeat_share)}, čo je {NUM(repeat)} zákazníkov.</p>
-{_fig(figures, "repeat_reactivation")}
-<p><b>Odpoveď na otázku, či sa v reaktiváciách točia stále tí istí: nie.</b>
-V období {last_year["label"]} bolo {NUM(last_year["events"])} reaktivácií a len
-{PCT(last_year["repeat_pct"])} z nich pripadalo na zákazníkov, ktorí už raz reaktivovaní boli.
-Reaktivácia je jednorazová udalosť, nie kolotoč — a to je zlá správa: kto raz odíde,
-väčšinou sa nevráti ani raz.</p>
-{value_table}
-<p>Opakovane reaktivovaní zákazníci sú navyše malí — ich celkové GMV je
-{EUR(value.iloc[-1]["total_gmv"])}, teda zlomok toho, čo robia stabilní zákazníci
-({EUR(value.iloc[0]["total_gmv"])}). Reaktivácia nie je páka na rast; páka je nedopustiť odchod.</p>
-"""
-    return html, figures
+    return R.render_note(
+        f"<b>Prečo je tu {NUM(top_bucket['customers'])} účtov a v sekcii 4 stačí na "
+        f"80 % GMV len {NUM(concentration['customers_for_80pct'])}.</b> Nie je to "
+        f"rozpor — sú to iné skupiny účtov vybrané podľa iného kritéria. V sekcii 4 sa "
+        f"účty zoradia <b>podľa veľkosti GMV</b> a sčítavajú od najväčšieho, takže "
+        f"vznikne najmenšia možná skupina, ktorá tú hranicu prekročí. Tu sa vyberajú "
+        f"<b>podľa frekvencie nakupovania</b>, teda podľa počtu objednávok — a akékoľvek "
+        f"iné kritérium než veľkosť potrebuje na rovnaký podiel GMV viac účtov. "
+        f"Skupiny sa prekrývajú len z časti: nájdu sa veľkí zákazníci, ktorí nakupujú "
+        f"zriedka a vo veľkých dávkach, aj veľmi častí, ale drobní odberatelia. "
+        f"Líšia sa aj okná — sekcia 4 počíta kalendárny rok "
+        f"{data.year_label(C.PARTIAL_YEAR)}, tento graf posledných "
+        f"{C.FREQUENCY_WINDOW_MONTHS} mesiacov "
+        f"({window['start']:%-d.\u00a0%-m.\u00a0%Y} – {window['end']:%-d.\u00a0%-m.\u00a0%Y}).")
 
 
 def conclusions(metrics):
     """Zhrnutie a odporúčania."""
-    growth = metrics["growth_by_band"]
-    concentration = metrics["concentration"]
-    curves = metrics["churn_curves"]
-    single = metrics["single_order"]
-    frequency = metrics["frequency"]
-
-    last_concentration = concentration.iloc[-1]
-    top_band = growth.iloc[-1]
-    main = f"churn_{C.CHURN_MAIN_THRESHOLD_MONTHS}m"
-    mature = single.loc[~single["is_immature"]]
-    one_order_share = frequency.loc["1"]["share_pct"]
-
-    markets = metrics["market_summary"]
-    top_two_share = markets.head(2)["share_pct"].sum()
-    other_market = markets.loc[C.OTHER_MARKET_LABEL]
-    small_customer_share = other_market["customers"] / markets["customers"].sum() * 100
-    small_gmv_share = other_market["share_pct"]
-
     html = f"""
-<h2>10. Zhrnutie</h2>
-<ol>
-<li><b>Rast je koncentrovaný do {int(top_band["customers"])} účtov.</b> Pásmo
-{growth.index[-1]} pridalo {SIGNED_EUR(top_band["net_delta"])}, všetky ostatné pásma spolu
-{SIGNED_EUR(growth.iloc[:-1]["net_delta"].sum())}. Top 1 zákazník je
-{PCT(last_concentration["top1_pct"])} GMV, top 10 je {PCT(last_concentration["top10_pct"])}.
-Pri odchode jedného účtu padne ročné GMV o pätinu.</li>
+<h2>7. Zhrnutie</h2>
+{_summary_list(metrics)}
 
-<li><b>Typický zákazník nerastie.</b> Mediánová hodnota objednávky je plochá a mediánová
-medziročná zmena GMV je negatívna vo všetkých veľkostných pásmach. Nízky podiel rastúcich
-zákazníkov nie je chyba merania — je to štruktúra portfólia.</li>
-
-<li><b>Churn rastie a je nezvratný.</b> {C.CHURN_MAIN_THRESHOLD_MONTHS}-mesačný churn stúpol
-na {PCT(curves.iloc[-1][main])}. Reaktivácia je pritom vzácna a jednorazová, takže
-odchod je v praxi definitívny.</li>
-
-<li><b>Akvizícia klesá v kvalite.</b> Podiel zákazníkov s jedinou objednávkou za život
-stúpol na {PCT(mature.iloc[-1]["single_order_pct"])} a z tých, čo za posledných
-{C.FREQUENCY_WINDOW_MONTHS} mesiacov vôbec nakúpili, má {PCT(one_order_share)} jedinú
-objednávku. Do B2B kanálu tečú drobní odberatelia.</li>
-
-<li><b>Rast je geograficky úzky.</b> Dva najväčšie trhy tvoria {PCT(top_two_share)} GMV.
-Kategória {C.OTHER_MARKET_LABEL} má {PCT(small_customer_share)} zákazníkov, ale len
-{PCT(small_gmv_share)} GMV — a tým ťahá každú metriku „na zákazníka" dole.</li>
-</ol>
-
-<h3>Odporúčania k metrikám</h3>
-<ol>
-<li>Doplniť ku každej metrike „na zákazníka" jej <b>GMV-váženú verziu</b>. Nevážená verzia
-meria hlavne dlhý chvost drobných odberateľov.</li>
-<li>Merať rast a churn <b>oddelene pre strategické účty a transakčných kupujúcich</b>
-(hranica napríklad {EUR(C.BAND_EDGES[3])} ročne alebo aspoň 4 objednávky ročne).</li>
-<li>Zafixovať menovateľ v definícii churnu a rastu — v tomto reporte je to explicitne
-uvedené pri každom grafe, v internom KPI to chýba.</li>
-</ol>
-
-<h3>Odporúčania k biznisu</h3>
-<ol>
-<li><b>Znížiť závislosť na top účtoch</b> rozšírením mid-market pásma, ktoré je dnes
-netto negatívne.</li>
-<li><b>Zamerať sa na prvých 90 dní.</b> Rastúci podiel zákazníkov s jedinou objednávkou
-je najlacnejšia páka — druhá objednávka rozhoduje o celej kohorte.</li>
-<li><b>Kvalifikovať akvizíciu.</b> Buď oddeliť drobných odberateľov do samoobslužného
-segmentu bez account managementu, alebo zvýšiť vstupnú hranicu.</li>
-<li><b>Nestavať na win-back kampaniach.</b> Dáta hovoria, že odchod je definitívny;
-prevencia je jediná fungujúca stratégia.</li>
-</ol>
-
-<h3>Ďalšie kroky v analýze</h3>
-<ol>
-<li>Zjednotiť identitu zákazníka (viac e-mailov = jedna firma). Bez toho sú noví, churn
-aj reaktivácie nadhodnotené.</li>
-<li>Doplniť produktovú a maržovú dimenziu — rast priemernej objednávky môže byť mix efekt,
-nie skutočný rast hodnoty.</li>
-</ol>
-
-<p class="small" style="margin-top:48px;border-top:1px solid var(--bd);padding-top:16px">
-Grafy sú interaktívne — prejdi kurzorom pre presné hodnoty. Legendy sú statické.
-Všetky tabuľky a čísla v texte sú generované z dát. Dátum analýzy
-{C.AS_OF:%-d.\u00a0%-m.\u00a0%Y}.</p>
+<h3>Odporúčania</h3>
+{_recommendations(metrics)}
 """
     return html, []
 
 
+def _summary_list(metrics):
+    """Zistenia, ktoré report skutočne dokladá grafmi."""
+    summary = metrics["account_growth_summary"]
+    composition = metrics["account_growth_composition"]
+    diag = metrics["diag_summary"]
+    frequency = metrics["diag_frequency"]
+    scenario = metrics["diag_regular_scenario"]
+    sensitivity = metrics["diag_churn_sensitivity"]
+    growth = metrics["growth_by_band"]
+    concentration = metrics["concentration"].iloc[-1]
+    curves = metrics["churn_curves"]
+    yearly = metrics["yearly"]
+    single = metrics["single_order"]
+    histogram = metrics["frequency"]
+
+    dropped = composition.loc[metrics_account_growth.COMPOSITION_DROPPED]
+    both = composition.loc[metrics_account_growth.COMPOSITION_BOTH]
+    binary_share = (composition.loc[metrics_account_growth.COMPOSITION_NO_PREVIOUS,
+                                    "share_pct"] + dropped["share_pct"])
+    top_band = growth.iloc[-1]
+    smaller_bands = growth.iloc[:-1]
+    churn_now = curves.iloc[-1][f"churn_{C.CHURN_MAIN_THRESHOLD_MONTHS}m"]
+    mature_cohorts = single.loc[~single["is_immature"]]
+
+    return f"""
+<ol>
+<li><b>KPI je na maxime celého radu a cieľ je aj tak ďaleko.</b> Account growth je
+{PCT(summary["growing_pct"])} ({NUM(summary["growing"])} z {NUM(summary["accounts"])}
+posudzovaných účtov), čo je najviac za celé zobrazované obdobie — a cieľ
+{C.ACCOUNT_GROWTH_TARGET_PCT} % sa v ňom nedosiahol ani raz. Do cieľa chýba
+{NUM(summary["accounts_needed_for_target"])} ďalších rastúcich účtov.</li>
+
+<li><b>KPI meria hlavne to, či účet v okne nakúpil, nie či vyrástol.</b> Pri
+{PCT(binary_share)} posudzovaných účtov je výsledok rozhodnutý binárne: bez GMV pred rokom
+rastie účet automaticky, kto odišiel do nuly, automaticky klesá. Skutočnú zmenu objemu meria
+len {NUM(both["customers"])} účtov aktívnych v oboch oknách a tam rastie
+{PCT(both["growing_pct"])}. S {NUM(dropped["customers"])} odídenými účtami zmizlo
+{EUR(dropped["previous_gmv"])} minuloročného GMV.</li>
+
+<li><b>O raste účtu rozhoduje frekvencia, nie veľkosť objednávky.</b> Účet, ktorý objedná
+viackrát než pred rokom, rastie v {PCT(frequency.loc[MD.FREQUENCY_MORE, "growing_pct"])}
+prípadov; pri nižšom počte objednávok len v
+{PCT(frequency.loc[MD.FREQUENCY_FEWER, "growing_pct"])}.</li>
+
+<li><b>Priestor v KPI leží v aktivite, nie v tlaku na rast.</b> Z posudzovaných účtov
+{NUM(diag["outside_window"])} je živých, ale netrafilo okno — keby objednávali aspoň raz za
+{C.GMV_WINDOW_MONTHS} mesiace, KPI by bolo {PCT(scenario["growing_pct"].iloc[1])}. Ďalších
+{NUM(diag["churned"])} účtov je churnutých; keby boli aktívne, KPI by podľa predpokladu
+o ich raste bolo {PCT(sensitivity["growing_pct"].iloc[0])} až
+{PCT(sensitivity["growing_pct"].iloc[-1])}. Cieľ {C.ACCOUNT_GROWTH_TARGET_PCT} % je teda
+dosiahnuteľný len cez udržanie účtov v okne, nie cez rast tých, ktoré už nakupujú.</li>
+
+<li><b>Rast GMV je silne koncentrovaný.</b> Pásmo {growth.index[-1]} —
+{int(top_band["customers"])} účtov — pridalo {SIGNED_EUR(top_band["net_delta"])}, kým
+všetky ostatné pásma spolu {SIGNED_EUR(smaller_bands["net_delta"].sum())} pri
+{int(smaller_bands["customers"].sum())} účtoch. Top 1 zákazník je
+{PCT(concentration["top1_pct"])} GMV, top 10 je {PCT(concentration["top10_pct"])}, a na
+80 % GMV stačí {NUM(concentration["customers_for_80pct"])} zákazníkov.</li>
+
+<li><b>Nevážené KPI a tržby hovoria dve rôzne veci.</b> Rastúce účty držia
+{PCT(summary["gmv_growing_pct"])} tržieb aktuálneho okna, ale v neváženom KPI sú len
+{PCT(summary["growing_pct"])} účtov. Rozdiel je celý o tom, že nevážená metrika váži drobný
+účet rovnako ako strategický.</li>
+
+<li><b>Typická objednávka sa nemení, rastie chvost.</b> Medián hodnoty objednávky je
+{EUR(yearly.iloc[-1]["median_order"])} oproti {EUR(yearly.iloc[0]["median_order"])}
+v {yearly.iloc[0]["label"]}, zatiaľ čo priemer stúpol na
+{EUR(yearly.iloc[-1]["mean_order"])}. Pomer priemer/medián sa zdvihol na
+{NUM(yearly.iloc[-1]["mean_to_median"], 1)}×.</li>
+
+<li><b>Akvizícia klesá v kvalite a churn je vysoký.</b> Podiel zákazníkov s jedinou
+objednávkou za život stúpol z {PCT(mature_cohorts.iloc[0]["single_order_pct"])} (kohorta
+{mature_cohorts.iloc[0]["label"]}) na {PCT(mature_cohorts.iloc[-1]["single_order_pct"])}
+({mature_cohorts.iloc[-1]["label"]}) a z tých, čo za posledných
+{C.FREQUENCY_WINDOW_MONTHS} mesiacov vôbec nakúpili, má
+{PCT(histogram.loc["1"]["share_pct"])} jedinú objednávku.
+{C.CHURN_MAIN_THRESHOLD_MONTHS}-mesačný churn je {PCT(churn_now)}.</li>
+</ol>
+"""
+
+
+def _recommendations(metrics):
+    """Čo s tým robiť."""
+    diag = metrics["diag_summary"]
+    scenario = metrics["diag_regular_scenario"]
+    activity = metrics["diag_activity_split"]
+    growth = metrics["growth_by_band"]
+    smaller_bands = growth.iloc[:-1]
+    gain = scenario["growing_pct"].iloc[1] - scenario["growing_pct"].iloc[0]
+
+    return f"""
+<ol>
+<li><b>Udržať živé účty v okne.</b> {NUM(diag["outside_window"])} účtov nakúpilo za
+posledných {C.KPI_DIAG_CHURN_DAYS} dní, ale nie v aktuálnom okne, a nesie
+{EUR(activity.iloc[1]["previous_gmv"])} minuloročného GMV. Je to
+{NUM(gain, 1)} p. b. v KPI bez jediného nového zákazníka.</li>
+<li><b>Prevencia churnu pred win-backom.</b> {NUM(diag["churned"])} churnutých účtov je
+celý zvyšok cesty k cieľu — a účet, ktorý raz spadne na nulu, ťahá KPI dole aj celý
+nasledujúci rok.</li>
+<li><b>Pracovať s frekvenciou, nie s veľkosťou objednávky.</b> Keď má účet objednať
+aspoň raz za {C.GMV_WINDOW_MONTHS} mesiace, je to konkrétny cieľ pre account managera;
+„zvýšiť objem“ nie je.</li>
+<li><b>Znížiť závislosť na top účtoch.</b> Všetky pásma okrem {growth.index[-1]} sú spolu
+netto {SIGNED_EUR(smaller_bands["net_delta"].sum())} — rast dnes stojí na
+{int(growth.iloc[-1]["customers"])} účtoch.</li>
+<li><b>Zamerať sa na druhú objednávku.</b> Rastúci podiel zákazníkov s jedinou objednávkou
+je najlacnejšia páka — druhá objednávka rozhoduje o celej kohorte.</li>
+<li><b>Kvalifikovať akvizíciu.</b> Buď oddeliť drobných odberateľov do samoobslužného
+segmentu bez account managementu, alebo zvýšiť vstupnú hranicu.</li>
+</ol>
+"""
+
+
 SECTION_BUILDERS = [
     header,
-    methodology,
     trend_section,
     bridge_section,
     order_value_section,
     concentration_section,
-    markets_section,
-    churn_section,
     account_growth_section,
     loyalty_section,
-    reactivation_section,
     conclusions,
 ]
 

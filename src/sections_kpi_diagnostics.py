@@ -44,7 +44,7 @@ def header(metrics):
     html = f"""
 <h1>Account growth — čo drží KPI pod cieľom</h1>
 <p class="lead">Diagnostika interného KPI · okno {C.GMV_WINDOW_MONTHS} mesiace medziročne
-k {C.AS_OF:%-d. %-m. %Y} · menovateľ {NUM(summary["accounts"])} účtov ·
+k {C.AS_OF:%-d. %-m. %Y} · {NUM(summary["accounts"])} posudzovaných účtov ·
 zdroj <code>{C.INPUT_XLSX}</code> · {NUM(quality["orders"])} objednávok</p>
 {R.render_kpi_cards(cards)}
 {R.render_note(
@@ -88,7 +88,7 @@ coin flip ({PCT(same["growing_pct"])}). Účet, ktorý objedná menejkrát, je o
 ({PCT(fewer["growing_pct"])}). Účet, ktorý objedná viackrát, rastie takmer vždy
 ({PCT(more["growing_pct"])}).</p>
 <p>Pri {C.GMV_WINDOW_MONTHS}-mesačnom okne je „o jednu objednávku menej“ bežná vec —
-{PCT(summary["thin_pct"], 0)} menovateľa má v oboch oknách najviac
+{PCT(summary["thin_pct"], 0)} posudzovaných účtov má v oboch oknách najviac
 {C.KPI_DIAG_THIN_ORDERS} objednávky. <b>Frekvencia je zároveň najlepší predstihový
 indikátor tohto KPI</b>: dá sa sledovať týždenne, kým samotné KPI sa dá zmerať až
 s ročným odstupom.</p>
@@ -98,7 +98,7 @@ s ročným odstupom.</p>
 
 # ── 2. kedy účty naposledy nakúpili ───────────────────────────────────────────
 def activity_section(metrics):
-    """Rozdelenie menovateľa a scenár pravidelného objednávania."""
+    """Rozdelenie posudzovaných účtov a scenár pravidelného objednávania."""
     activity = metrics["diag_activity_split"]
     scenario = metrics["diag_regular_scenario"]
 
@@ -110,7 +110,7 @@ def activity_section(metrics):
     table = R.render_table(
         activity,
         [("customers", "Účty", NUM),
-         ("share_pct", "% menovateľa", PCT),
+         ("share_pct", "% posudzovaných účtov", PCT),
          ("growing_pct", "% rastúcich", PCT),
          ("previous_gmv", "GMV pred rokom", EUR)],
         index_label="Kedy naposledy nakúpili",
@@ -127,7 +127,7 @@ def activity_section(metrics):
 {_fig(figures, "kpi_activity_split")}
 {table}
 <p>V aktuálnom okne nakúpilo {NUM(in_window["customers"])} účtov
-({PCT(in_window["share_pct"])} menovateľa) a rastie z nich
+({PCT(in_window["share_pct"])} posudzovaných účtov) a rastie z nich
 {PCT(in_window["growing_pct"])}. Ostatné dve skupiny majú
 {PCT(0)} rastúcich z definície — bez objednávky v okne nemá čo rásť.</p>
 <p>Medzi nimi leží <b>{NUM(outside["customers"])} účtov</b>, ktoré nakúpili za

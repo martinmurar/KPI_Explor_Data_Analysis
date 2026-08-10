@@ -63,7 +63,7 @@ def _frequency_row(label, members):
 
 # ── 2. kedy účty naposledy nakúpili ───────────────────────────────────────────
 def activity_split(table, df):
-    """Celý menovateľ KPI rozdelený podľa toho, kedy účet naposledy nakúpil.
+    """Všetky posudzované účty rozdelené podľa toho, kedy naposledy nakúpili.
 
     Churnutý je účet, ktorý nenakúpil KPI_DIAG_CHURN_DAYS dní. Prostredná
     skupina je jadro problému — sú to živé účty, ktoré len netrafili okno, a KPI
@@ -86,7 +86,7 @@ def activity_split(table, df):
 
 
 def _activity_groups(table, df):
-    """Masky troch skupín menovateľa podľa poslednej objednávky."""
+    """Masky troch skupín posudzovaných účtov podľa poslednej objednávky."""
     in_window = table["current"] > 0
     alive = _alive_mask(table, df)
     return {
@@ -108,7 +108,7 @@ def outside_window_accounts(table, df):
 
 
 def churned_accounts(table, df):
-    """Churnuté účty v menovateli KPI."""
+    """Churnuté účty medzi posudzovanými."""
     return table.loc[(table["current"] == 0) & ~_alive_mask(table, df)]
 
 
@@ -133,7 +133,7 @@ def churn_prevented_sensitivity(table, df):
     nerastie, teda dnešný stav) po 1 (rastie vždy). Nepoužíva sa náhodná
     simulácia, počíta sa priamo očakávaná hodnota.
 
-    Menovateľ sa nemení — churnuté účty v ňom už sú, mení sa len to, či sa
+    Posudzovaná skupina sa nemení — churnuté účty v nej už sú, mení sa len to, či sa
     počítajú ako rastúce.
     """
     prevented = len(churned_accounts(table, df))
@@ -176,7 +176,7 @@ def combined_scenario_pct(table, df):
 def _scenario_table(table, labels, scenario_growing, converted):
     """Dvojriadková tabuľka: KPI dnes a KPI v scenári.
 
-    Menovateľ sa v scenári nemení — účty sa v ňom už nachádzajú, mení sa len
+    Posudzovaná skupina sa v scenári nemení — účty v nej už sú, mení sa len
     to, či sa počítajú ako rastúce.
     """
     rows = [
@@ -215,7 +215,7 @@ def diagnostics_summary(table, df):
 
 
 def _thin_share(table):
-    """Podiel menovateľa, ktorý má v oboch oknách najviac KPI_DIAG_THIN_ORDERS objednávok."""
+    """Podiel posudzovaných účtov s najviac KPI_DIAG_THIN_ORDERS objednávkami v oboch oknách."""
     limit = C.KPI_DIAG_THIN_ORDERS
     thin = table.loc[(table["previous_orders"] <= limit) & (table["current_orders"] <= limit)]
     return len(thin) / len(table) * 100

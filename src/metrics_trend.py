@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Trend GMV, sezonalita a hodnota objednávky."""
+"""Trend GMV, sezónnosť a hodnota objednávky."""
 
 import pandas as pd
 
@@ -36,6 +36,13 @@ def seasonality(df):
         shares.append(by_month / by_month.sum() * 100)
 
     return pd.concat(shares, axis=1).mean(axis=1)
+
+
+def seasonality_customers(df):
+    """Počet zákazníkov, z ktorých je spočítaný sezónny profil."""
+    first_year, last_year = C.SEASONALITY_YEARS
+    in_range = (df["year"] >= first_year) & (df["year"] <= last_year)
+    return int(df.loc[in_range, "cust"].nunique())
 
 
 def yearly_summary(df):

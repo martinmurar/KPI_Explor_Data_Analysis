@@ -16,18 +16,13 @@ OUTPUT_HTML_KPI_DIAGNOSTICS = "../data/b2b_kpi_diagnostics.html"
 # ID grafov, ktoré sa v reporte nevykresľujú (text okolo nich zostáva).
 # ID zodpovedá figure_id/id z charts.py — pri hľadaní ID grafu, ktorý chceš
 # vypnúť, stačí grepnúť charts.py za "_figure(".
-HIDDEN_CHARTS = {
-    "ag_by_group",
-    "ag_by_country",
-    "ag_by_cohort",
-    "ag_by_orders",
-}
+HIDDEN_CHARTS = set()
 
 # ── časové hranice ────────────────────────────────────────────────────────────
 # Rok, od ktorého report zobrazuje dáta — ročné tabuľky a grafy (trend,
 # koncentrácia, trhy, bridge, kohorty, reaktivácie), mesačný trend, churn
 # krivka aj kvartálna história account growth. Metriky s klzavým oknom alebo
-# historickým menovateľom (napr. 12-mesačný priemer, churn báza) počítajú aj
+# historickou bázou (napr. 12-mesačný priemer, churn báza) počítajú aj
 # s dátami spred tohto roka — tie len nie sú v reporte vidieť, sú potrebné,
 # aby prvý zobrazený bod mal platnú hodnotu. Zmena tejto jednej hodnoty
 # preráta všetky časové grafy a tabuľky v reporte naraz.
@@ -47,8 +42,10 @@ PARTIAL_YEAR_LAST_MONTH = 7
 # Rolling okno pre GMV analýzy podľa pásma: 3 mesiace YoY.
 GMV_WINDOW_MONTHS = 3
 
-# Roky, z ktorých sa počíta priemerná sezonalita (len kompletné roky).
-SEASONALITY_YEARS = (2022, 2025)
+# Roky, z ktorých sa počíta priemerná sezonalita. Len kompletné roky, a len
+# roky zo zobrazovaného obdobia — sezónny profil nie je hodnota, ktorá by na
+# svoj výpočet potrebovala staršie dáta.
+SEASONALITY_YEARS = (DISPLAY_START_YEAR, 2025)
 
 # Šírka klzavého priemeru v mesačnom trende.
 MOVING_AVERAGE_MONTHS = 12
@@ -64,9 +61,12 @@ CHURN_MAIN_THRESHOLD_MONTHS = 6
 # Ako dlho dozadu sa meria veľkosť zákazníka pri churne podľa pásma.
 CHURN_BAND_LOOKBACK_MONTHS = 12
 
-# Prvý mesiac churn krivky. Odvodené z DISPLAY_START_YEAR — churn báza sa aj
-# tak počíta zo všetkých historicky akvirovaných zákazníkov, len sa krivka
-# nekreslí skôr, ako report zobrazuje dáta.
+# Prvý mesiac churn krivky a zároveň hranica churn bázy — do bázy patrí len
+# účet, ktorý od tohto dátumu aspoň raz nakúpil. Bez tej hranice by v báze
+# navždy zostávali mŕtve účty z rokov 2018–2023 a churn by stúpal len tým, že
+# sa báza plní účtami, ktoré už nikdy neobjednajú (74,3 % namiesto 59,8 %).
+# Je to jedna hodnota pre obe veci zámerne: krivka aj báza majú začínať tam,
+# kde začína zobrazované obdobie.
 CHURN_CURVE_START = pd.Timestamp(year=DISPLAY_START_YEAR, month=1, day=1)
 
 # Medzera bez objednávky, po ktorej sa ďalšia objednávka počíta ako reaktivácia.
@@ -74,7 +74,7 @@ REACTIVATION_GAP_MONTHS = 12
 
 # ── account growth (interné KPI) ──────────────────────────────────────────────
 # Účet mladší ako toto sa do KPI nepočíta. Hodnota nie je voľná:
-# 12 + GMV_WINDOW_MONTHS zaručuje, že každý účet v menovateli mal k dispozícii
+# 12 + GMV_WINDOW_MONTHS zaručuje, že každý posudzovaný účet mal k dispozícii
 # plné minuloročné porovnávacie okno.
 ACCOUNT_GROWTH_MIN_AGE_MONTHS = 12 + GMV_WINDOW_MONTHS
 
@@ -104,12 +104,13 @@ KPI_DIAG_THIN_ORDERS = 2
 # Kto nakúpil neskôr, je živý — len neobjednal práve v porovnávanom okne.
 KPI_DIAG_CHURN_DAYS = 180
 
-# Popisky troch skupín, na ktoré sa delí celý menovateľ KPI. Prostredná skupina
+# Popisky troch skupín, na ktoré sa delia posudzované účty. Prostredná skupina
 # je jadro problému — sú to živé účty, ktoré len netrafili okno.
 KPI_DIAG_ACTIVITY_LABELS = [
     "Nakúpili v aktuálnom okne",
-    f"Nakúpili za posledných {KPI_DIAG_CHURN_DAYS} dní, ale mimo okna",
-    f"Churnuté — {KPI_DIAG_CHURN_DAYS}+ dní bez objednávky",
+    f"Nakúpili za posledných {KPI_DIAG_CHURN_DAYS} dní, ale mimo "
+    f"{GMV_WINDOW_MONTHS}-mesačného okna",
+    f"Churned — {KPI_DIAG_CHURN_DAYS}+ dní bez objednávky",
 ]
 
 # Popisky scenára pravidelného objednávania.
@@ -150,7 +151,7 @@ MARKET_ORDER = REPORTED_COUNTRIES + [OTHER_MARKET_LABEL]
 FREQUENCY_WINDOW_MONTHS = 12
 
 # Histogram frekvencie má jednotkové koše od FREQUENCY_FIRST_BUCKET po
-# FREQUENCY_TOP_BUCKET - 1. Menovateľom sú len zákazníci s aspoň jednou
+# FREQUENCY_TOP_BUCKET - 1. Zahrnutí sú len zákazníci s aspoň jednou
 # objednávkou v okne, takže koše idú od 1, nie od 0.
 FREQUENCY_FIRST_BUCKET = 1
 

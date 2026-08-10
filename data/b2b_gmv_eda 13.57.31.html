@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="sk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EDA — rast GMV v B2B</title>
+<style>
+:root{--ink:#141413;--ink2:#52514e;--mut:#898781;--bd:#e1e0d9;--bg:#faf9f5;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:400 16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+ -webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:48px 28px 80px}
+h1{font-size:30px;font-weight:500;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:21px;font-weight:500;margin:56px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--bd)}
+h3{font-size:16px;font-weight:500;margin:32px 0 10px}
+p{margin:0 0 14px}
+.lead{color:var(--ink2);font-size:15px;margin-bottom:28px}
+.small{font-size:13px;color:var(--mut)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:14px 0 22px}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--bd)}
+th{font-weight:500;color:var(--ink2);background:#f3f2ec}
+th:first-child,td:first-child{text-align:left}
+tr:hover td{background:#f7f6f1}
+.fig{background:var(--card);border:1px solid var(--bd);border-radius:12px;
+ padding:18px 20px 20px;margin:20px 0 28px}
+.fig h4{margin:0 0 2px;font-size:14.5px;font-weight:500}
+.fig .cap{font-size:12.5px;color:var(--mut);margin:0 0 14px}
+.cv{position:relative;width:100%}
+.lg{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 12px;font-size:12px;color:var(--ink2)}
+.lg span{display:flex;align-items:center;gap:5px}
+.lg i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0 8px}
+.kpi div{background:#f3f2ec;border-radius:8px;padding:14px 16px}
+.kpi .l{font-size:12.5px;color:var(--mut);margin:0 0 4px}
+.kpi .v{font-size:23px;font-weight:500;margin:0}
+.note{background:#f3f2ec;border-left:3px solid #eb6834;padding:14px 18px;margin:20px 0;
+ font-size:14.5px;border-radius:0 8px 8px 0}
+ol,ul{margin:0 0 14px;padding-left:22px}
+li{margin-bottom:7px}
+.neg{color:#a32d2d}.pos{color:#0f6e56}
+</style></head>
+<body><div class="wrap">
+
+<h1>EDA — rast GMV v B2B</h1>
+
+<ul class="lead">
+<li>Zdroj: <code>../data/b2b_orders_cleaned_w_company_name_2.xlsx</code></li>
+<li>Zobrazované obdobie: 1. 1. 2024 – 31. 7. 2026</li>
+<li>Objednávky: 30 000</li>
+<li>Zákazníci: 2 764</li>
+</ul>
+
+<div class="kpi"><div><p class="l">GMV 2026*</p><p class="v">13,10 mil. €</p></div><div><p class="l">Medziročný rast</p><p class="v">+49 %</p></div><div><p class="l">Medián objednávky</p><p class="v">349 €</p></div><div><p class="l">Churn 6 mes.</p><p class="v">74 %</p></div><div><p class="l">Account growth</p><p class="v">41,8 %</p></div></div>
+
+
+<h2>1. Trend GMV</h2>
+<div class="fig"><h4>Mesačné GMV a 12-mesačný klzavý priemer</h4><p class="cap">V mil. €. Klzavý priemer vyhladzuje sezónnosť — stúpa bez prerušenia, ale mesačné stĺpce kolíšu čoraz viac.</p><div class="lg"><span><i style="background:#eb6834"></i>12-mes. klzavý priemer</span><span><i style="background:#a9c8ea"></i>GMV</span></div><div class="cv" style="height:360px"><canvas id="monthly_trend"></canvas></div></div>
+<table><thead><tr><th>Rok</th><th>Objednávky</th><th>GMV</th><th>Zákazníci</th><th>Obj./zákazník</th><th>GMV/zákazník</th></tr></thead><tbody><tr><td>2024</td><td>10 175</td><td>11 314 733 €</td><td>1 267</td><td>8,0</td><td>8 930 €</td></tr><tr><td>2025</td><td>11 331</td><td>16 052 281 €</td><td>1 507</td><td>7,5</td><td>10 652 €</td></tr><tr><td>2026*</td><td>8 494</td><td>13 097 010 €</td><td>1 555</td><td>5,5</td><td>8 423 €</td></tr></tbody></table>
+<div class="fig"><h4>Sezónnosť</h4><p class="cap">Priemerný podiel mesiaca na ročnom GMV, 2022–2025 (len kompletné roky).</p><div class="lg"><span><i style="background:#2a78d6"></i>Podiel na ročnom GMV</span></div><div class="cv" style="height:300px"><canvas id="seasonality"></canvas></div></div>
+<p>Najsilnejší mesiac je 10. (10,2 % ročného GMV), najslabší
+4. (7,2 %). Rozdiel medzi špičkou a dnom je len
+3,0 % — sezónnosť je mierna.</p>
+
+
+<h2>2. Komponenty medziročnej zmeny GMV</h2>
+<div class="fig"><h4>Komponenty medziročnej zmeny GMV</h4><p class="cap">V mil. €, kalendárne roky. Stĺpec 2026* porovnáva Jan–Júl 2026 s Jan–Júl 2025 — porovnávať čiastočný rok s celým by nemalo zmysel.</p><div class="lg"><span><i style="background:#2a78d6"></i>Expanzia</span><span><i style="background:#1baf7a"></i>Reaktivovaní</span><span><i style="background:#eda100"></i>Noví</span><span><i style="background:#eb6834"></i>Kontrakcia</span><span><i style="background:#e34948"></i>Churn</span><span><i style="background:#141413"></i>Netto zmena</span></div><div class="cv" style="height:360px"><canvas id="yearly_bridge"></canvas></div></div>
+<table><thead><tr><th>Rok</th><th>Netto zmena</th><th>Expanzia</th><th>Reaktivovaní</th><th>Noví</th><th>Kontrakcia</th><th>Churn</th></tr></thead><tbody><tr><td>2024</td><td>+1 917 980 €</td><td>+3 371 472 €</td><td>+40 596 €</td><td>+1 205 668 €</td><td><span class="neg">-1 977 830 €</span></td><td><span class="neg">-721 926 €</span></td></tr><tr><td>2025</td><td>+4 737 548 €</td><td>+5 445 392 €</td><td>+40 187 €</td><td>+1 900 314 €</td><td><span class="neg">-1 732 413 €</span></td><td><span class="neg">-915 933 €</span></td></tr><tr><td>2026*</td><td>+4 279 859 €</td><td>+3 550 369 €</td><td>+651 769 €</td><td>+1 600 025 €</td><td><span class="neg">-694 520 €</span></td><td><span class="neg">-827 784 €</span></td></tr></tbody></table>
+<div class="note"><b>Pozor na interpretáciu položky Reaktivovaní pri ročných oknách.</b> Pri celých rokoch znamená „nenakúpil celý predchádzajúci rok“. Stĺpec 2026* však porovnáva len Jan–Júl, takže sa doň dostanú aj zákazníci, ktorí nakúpili v druhej polovici predchádzajúceho roku. Jeho hodnota preto nie je porovnateľná s predchádzajúcimi rokmi a nemá sa z nej čítať počet reaktivácií.</div>
+
+
+<h2>3. Priemerná vs mediánová hodnota objednávky</h2>
+<div class="fig"><h4>Priemerná vs mediánová hodnota objednávky</h4><p class="cap">V €. Medián je „prostredná“ objednávka — polovica objednávok je menšia, polovica väčšia. Priemer rastie, medián je plochý, takže celý rast sedí vo veľkých objednávkach.</p><div class="lg"><span><i style="background:#2a78d6"></i>Priemer</span><span><i style="background:#eb6834"></i>Medián</span></div><div class="cv" style="height:300px"><canvas id="order_value"></canvas></div></div>
+<table><thead><tr><th>Rok</th><th>Priemer</th><th>Medián</th><th>p95</th><th>Priemer / medián</th></tr></thead><tbody><tr><td>2024</td><td>1 112 €</td><td>373 €</td><td>3 341 €</td><td>2,98</td></tr><tr><td>2025</td><td>1 417 €</td><td>374 €</td><td>4 970 €</td><td>3,79</td></tr><tr><td>2026*</td><td>1 542 €</td><td>349 €</td><td>5 390 €</td><td>4,41</td></tr></tbody></table>
+<p>Od 2024 do 2026* vzrástol priemer o +39 %,
+zatiaľ čo medián o -6 %. Pomer priemer/medián sa zdvihol
+z 3,0× na 4,4×.
+Typická objednávka sa nezmenila; zmenil sa chvost.</p>
+
+
+<h2>4. Koncentrácia portfólia</h2>
+<div class="fig"><h4>Podiel top N zákazníkov na GMV</h4><p class="cap">V %. Rastúca koncentrácia znamená, že celkový rast závisí od stále menšieho počtu účtov.</p><div class="lg"><span><i style="background:#e34948"></i>Top 1</span><span><i style="background:#2a78d6"></i>Top 5</span><span><i style="background:#1baf7a"></i>Top 10</span><span><i style="background:#4a3aa7"></i>Top 20</span><span><i style="background:#898781"></i>Top 50</span></div><div class="cv" style="height:300px"><canvas id="concentration_shares"></canvas></div></div>
+<table><thead><tr><th>Rok</th><th>Zákazníci</th><th>Top 1</th><th>Top 5</th><th>Top 10</th><th>Top 20</th><th>Zák. na 80 % GMV</th><th>HHI</th><th>Gini</th></tr></thead><tbody><tr><td>2024</td><td>1 267</td><td>15,2 %</td><td>41,7 %</td><td>51,8 %</td><td>63,6 %</td><td>75</td><td>478</td><td>0,88</td></tr><tr><td>2025</td><td>1 507</td><td>23,1 %</td><td>48,5 %</td><td>58,5 %</td><td>68,8 %</td><td>48</td><td>805</td><td>0,92</td></tr><tr><td>2026*</td><td>1 555</td><td>20,0 %</td><td>51,9 %</td><td>61,0 %</td><td>70,5 %</td><td>43</td><td>773</td><td>0,92</td></tr></tbody></table>
+<p>Podiel top 5 zákazníkov sa zmenil z 41,7 % (2024) na
+51,9 % (2026*). 80 % GMV dnes tvorí iba
+43 zákazníkov oproti
+75 v roku 2024.</p>
+
+
+<h2>5. Account growth a štruktúra rastu</h2>
+
+<p>KPI porovnáva GMV účtu za posledné 3 mesiace s GMV za to isté okno
+o rok skôr. Účet rastie, ak je aktuálne GMV vyššie. Do menovateľa patrí účet, ktorý je
+starší ako 15 mesiacov <b>a</b> bol aktívny aspoň v jednom
+z dvoch okien.</p>
+<div class="note"><b>Aktuálna hodnota: 41,8 %</b> (281 z 673 účtov). Klesá 58,2 %. Do cieľa 60 % chýba 123 ďalších rastúcich účtov. Zároveň ale <b>78,7 % tržieb už v rastúcich účtoch leží</b> — nevážené KPI a tržby nehovoria to isté.</div>
+
+<div class="fig"><h4>Account growth v čase</h4><p class="cap">V %, klzavé 3 mesiace medziročne, body sú konce kvartálov. Zvyšok stĺpca do 100 % menovateľa sú klesajúce účty. Čierna línia je GMV-vážený variant: podiel tržieb, ktoré ležia v rastúcich účtoch. Prerušovaná čiara je cieľ 60 %.</p><div class="lg"><span><i style="background:#898781"></i>Cieľ 60 %</span><span><i style="background:#141413"></i>% GMV v rastúcich účtoch</span><span><i style="background:#2a78d6"></i>% rastúcich účtov</span></div><div class="cv" style="height:360px"><canvas id="account_growth_over_time"></canvas></div></div>
+
+<p>KPI nie je v prepade. Od dna 30,6 % (10/2024) sa vrátilo na
+41,8 % a posledné štyri kvartály rastie. <b>Maximum celého radu je
+41,8 % (7/2026), teda cieľ 60 % sa v tomto
+rozsahu dát nikdy nedosiahol</b> — nie je to návrat do normálu, ale nová hodnota, a to
+by malo vstúpiť do rozhovoru o tom, či je cieľ realistický.</p>
+<p>GMV-vážená línia je celý čas výrazne vyššia než stĺpce. Rozdiel medzi nimi je mierou
+toho, ako silno nevážené KPI váži drobné účty rovnako ako strategické.</p>
+
+
+<h3>Z čoho sa skladá menovateľ</h3>
+<div class="fig"><h4>Z čoho sa skladá menovateľ KPI</h4><p class="cap">Počet účtov. Prvé dve skupiny nie sú rozhodnuté rastom, ale tým, či účet v okne vôbec nakúpil — bez GMV pred rokom rastie účet automaticky, odídené do nuly klesajú automaticky. Len tretia skupina meria skutočnú zmenu objemu.</p><div class="lg"><span><i style="background:#2a78d6"></i>Rastúce</span><span><i style="background:#e34948"></i>Klesajúce</span></div><div class="cv" style="height:240px"><canvas id="account_growth_composition"></canvas></div></div>
+<table><thead><tr><th>Skupina</th><th>Účty</th><th>% menovateľa</th><th>% rastúcich</th><th>GMV pred rokom</th><th>GMV teraz</th></tr></thead><tbody><tr><td>Bez GMV v minuloročnom okne (0 → +)</td><td>102</td><td>15,2 %</td><td>100,0 %</td><td>0 €</td><td>78 974 €</td></tr><tr><td>Odišli do nuly (+ → 0)</td><td>203</td><td>30,2 %</td><td>0,0 %</td><td>285 627 €</td><td>0 €</td></tr><tr><td>Aktívne v oboch oknách</td><td>368</td><td>54,7 %</td><td>48,6 %</td><td>3 555 900 €</td><td>4 654 976 €</td></tr></tbody></table>
+
+<p>Menovateľ nie je homogénny — sedia v ňom tri rôzne situácie.
+<b>Pri 45,3 % účtov je výsledok rozhodnutý už tým, či účet v okne vôbec
+nakúpil.</b> 102 účtov bez GMV v minuloročnom okne (pred rokom
+nenakúpili, teraz áno) je rastúcich automaticky, lebo z nuly rastie čokoľvek. Nie sú
+to nutne reaktivované účty — medián ich medzery je okolo štyroch mesiacov, väčšina
+z nich len jedno okno vynechala.
+203 odídených účtov (pred rokom nakúpili, teraz už nie) je
+z rovnakého dôvodu automaticky klesajúcich. Skutočnú zmenu objemu meria len zvyšných
+368 účtov aktívnych v oboch oknách — a tam rastie
+48,6 %, teda takmer presne pol na pol.</p>
+<p>KPI sa preto hýbe hlavne cez pády do nuly, nie cez rast existujúcich účtov:
+s odídenými účtami zmizlo 285 627 € z minuloročného okna.
+<b>KPI sa nezvýši tým, že účty prinútime rásť — zvýši sa tým, že ich nedopustíme spadnúť
+do nuly.</b> Rub tej istej mince je, že 123
+chýbajúcich rastúcich účtov sa dá „splniť“ rozhýbaním drobných dormantných účtov
+s takmer nulovým dopadom na tržby.</p>
+
+
+<h3>Čím je rozhodnuté, či účet rastie</h3>
+<div class="fig"><h4>Rast účtu podľa zmeny počtu objednávok</h4><p class="cap">V %, len 368 účtov aktívnych v oboch oknách. Zelená je nad cieľom 60 %, červená pod celkovým KPI.</p><div class="lg"><span><i style="background:#2a78d6"></i>% rastúcich účtov</span></div><div class="cv" style="height:210px"><canvas id="kpi_frequency"></canvas></div></div>
+
+<p>Vzťah je takmer deterministický: účet, ktorý objedná viackrát než pred rokom,
+rastie v 87,5 % prípadov, pri rovnakom počte je to coin flip
+(50,9 %) a pri nižšom počte je účet odpísaný
+(8,5 %). <b>Rast účtu v tomto KPI je o frekvencii, nie
+o veľkosti objednávky</b> — a frekvencia sa dá sledovať týždenne, kým samotné KPI
+až s ročným odstupom.</p>
+
+
+<h3>Kedy účty naposledy nakúpili</h3>
+<div class="fig"><h4>Kedy naposledy nakúpili účty v menovateli KPI</h4><p class="cap">Počet účtov. Za churnutý sa považuje účet, ktorý nenakúpil 180 dní. Modrá skupina churnutá nie je — len neobjednala práve v 3-mesačnom okne. KPI ju aj tak počíta ako klesajúcu.</p><div class="lg"><span><i style="background:#2a78d6"></i>Počet účtov</span></div><div class="cv" style="height:230px"><canvas id="kpi_activity_split"></canvas></div></div>
+
+<p>V aktuálnom okne nakúpilo 470 účtov
+(69,8 % menovateľa) a rastie z nich
+59,8 % — <b>takmer na cieli</b>. Ostatné dve skupiny majú
+0,0 % rastúcich z definície. Medzi nimi leží 70 účtov,
+ktoré nakúpili za posledných 180 dní, ale mimo okna: nie sú
+churnuté a predstavujú 110 498 € minuloročného GMV.
+Churnutých je 133.</p>
+
+<div class="fig"><h4>KPI, keby živé účty objednávali aspoň raz za 3 mesiace</h4><p class="cap">V %. Menovateľ je v oboch stĺpcoch rovnaký. Druhý stĺpec počíta 70 živých účtov, ktoré v aktuálnom okne nenakúpili, ako rastúce. Je to horná hranica scenára, nie prognóza.</p><div class="lg"><span><i style="background:#2a78d6"></i>% rastúcich účtov</span></div><div class="cv" style="height:170px"><canvas id="kpi_regular_ordering"></canvas></div></div>
+
+<p>Ak by tých 70 účtov objednávalo aspoň raz za
+3 mesiace, KPI by bolo 52,2 % namiesto
+41,8 %, teda o 10,4 p. b. vyššie bez jediného
+nového zákazníka. Je to <b>horná hranica, nie prognóza</b> — každý z tých účtov má
+nenulové minuloročné GMV, takže rastúcim sa stane len ten, ktorý ho prekročí.</p>
+
+
+<h3>Čo ak by sme zabránili churnu</h3>
+<div class="fig"><h4>KPI pri zabránení churnu — citlivosť na predpoklad o raste</h4><p class="cap">V %. Všetkých 133 churnutých účtov sa berie ako aktívnych v okne, mení sa len predpoklad, aký podiel z nich rastie. Menovateľ je vo všetkých stĺpcoch rovnaký. Prerušovaná čiara je cieľ 60 %.</p><div class="lg"><span><i style="background:#898781"></i>Cieľ 60 %</span><span><i style="background:#2a78d6"></i>% rastúcich účtov</span></div><div class="cv" style="height:280px"><canvas id="kpi_churn_sensitivity"></canvas></div></div>
+
+<p>Ak by všetkých 133 churnutých účtov bolo aktívnych v okne, KPI by
+podľa predpokladu o ich raste bolo 41,8 % až 61,5 %. Realistický je
+stredný scenár — zachránený účet sa dostane medzi účty aktívne v oboch oknách, kde
+rastie 48,6 %, teda hod
+mincou — a ten dáva 51,6 %.</p>
+<p>S churnutými účtami odišlo 175 129 € minuloročného
+GMV. Na rozdiel od pravidelnosti objednávania je to <b>skutočná strata tržieb, nie
+chyba merania</b>. Obe skupiny sú disjunktné, takže sa efekty sčítajú — spolu dávajú
+62,0 %.</p>
+
+
+<h3>Netto GMV podľa veľkostného pásma</h3>
+<div class="fig"><h4>Netto medziročná zmena GMV podľa pásma</h4><p class="cap">V tis. €. Porovnáva sa 3-mesačné okno 1. 5. 2026 – 31. 7. 2026 s rovnakým oknom o rok skôr (1. 5. 2025 – 31. 7. 2025). Pásmo je určené podľa GMV v staršom okne, nie v aktuálnom — inak by účet, ktorý medzitým prestal nakupovať, spadol do najnižšieho pásma a graf by tvrdil, že tam vznikla strata. V grafe sú len účty, ktoré v staršom okne nakúpili a sú staršie ako 15 mesiacov — rovnaká populácia ako v account growth KPI. Hranica patrí vždy nižšiemu pásmu.</p><div class="lg"><span><i style="background:#2a78d6"></i>Netto zmena</span></div><div class="cv" style="height:300px"><canvas id="net_gmv_by_band"></canvas></div></div>
+
+<p>Pásmo >50k € pridalo +918 031 € pri
+13 účtoch. Všetky ostatné pásma spolu
+-104 582 € pri 558 účtoch.</p>
+<div class="note"><b>Súčet pásiem nie je celý rast portfólia.</b> Pásma pokrývajú +813 449 € pri 571 účtoch, ale skutočná netto zmena GMV v okne je +1 692 100 €. Rozdiel robí 892 účtov mimo grafu — najmä 692 účtov, ktoré v staršom okne nenakúpili vôbec, a teda ich niet podľa čoho zaradiť do pásma; tie pridali +975 914 €. Pásmo >50k € je preto <b>54,3 % rastu, nie celý rast</b> — ale je to 13 účtov oproti 1 450 ostatným.</div>
+
+
+<h4 style="font-size:14px;font-weight:500;margin:24px 0 8px">Účty v pásme
+&gt;50k €</h4>
+<table><thead><tr><th>Účet</th><th>GMV pred rokom</th><th>GMV teraz</th><th>Netto zmena</th></tr></thead><tbody><tr><td>Alza.cz a.s.</td><td>819 293 €</td><td>1 255 890 €</td><td>+436 597 €</td></tr><tr><td>Alza.cz a.s.</td><td>473 176 €</td><td>809 165 €</td><td>+335 990 €</td></tr><tr><td>Notino, s.r.o.</td><td>198 642 €</td><td>461 136 €</td><td>+262 494 €</td></tr><tr><td>SPORTISIMO s.r.o.</td><td>79 952 €</td><td>141 963 €</td><td>+62 011 €</td></tr><tr><td>Pilulka Lékárny a.s.</td><td>107 496 €</td><td>124 159 €</td><td>+16 663 €</td></tr><tr><td>PEARS HEALTH CYBER, s.r.o.</td><td>55 892 €</td><td>69 412 €</td><td>+13 519 €</td></tr><tr><td>Mgr.Jozef Mindala - FitForm.sk</td><td>68 256 €</td><td>61 676 €</td><td><span class="neg">-6 581 €</span></td></tr><tr><td>UNIPHARMA - 1. slovenská lekárnická akciová spoloč</td><td>67 622 €</td><td>57 659 €</td><td><span class="neg">-9 962 €</span></td></tr><tr><td>ROSSMANN spol. s r.o.</td><td>107 692 €</td><td>89 393 €</td><td><span class="neg">-18 299 €</span></td></tr><tr><td>Kaufland Slovenská republika v.o.s.</td><td>352 157 €</td><td>320 199 €</td><td><span class="neg">-31 957 €</span></td></tr><tr><td>PHOENIX lékárenský velkoobchod, s.r.o.</td><td>107 281 €</td><td>70 127 €</td><td><span class="neg">-37 154 €</span></td></tr><tr><td>Velká pecka s.r.o.</td><td>90 700 €</td><td>44 879 €</td><td><span class="neg">-45 821 €</span></td></tr><tr><td>Decathlon SK s. r. o.</td><td>59 467 €</td><td>0 €</td><td><span class="neg">-59 467 €</span></td></tr></tbody></table>
+<p class="small">Zoradené podľa netto zmeny. Účet bez vyplneného
+<code>company_bill</code> je uvedený e-mailom. Tá istá firma sa môže objaviť
+viackrát, ak nakupuje z viacerých e-mailov.</p>
+
+
+
+<h2>6. Lojalita a frekvencia</h2>
+<div class="fig"><h4>Podiel zákazníkov s jedinou objednávkou za život</h4><p class="cap">V %, podľa roku prvej objednávky. Kohorta 2026* je sivá — ešte nemala čas objednať druhýkrát, jej hodnota nie je porovnateľná.</p><div class="lg"><span><i style="background:#e34948"></i>% s jedinou objednávkou</span></div><div class="cv" style="height:300px"><canvas id="single_order"></canvas></div></div>
+<table><thead><tr><th>Kohorta</th><th>Zákazníci</th><th>% s 1 objednávkou</th><th>Medián objednávok</th><th>Medián LTV</th></tr></thead><tbody><tr><td>2024</td><td>540</td><td>33,9 %</td><td>3</td><td>1 052 €</td></tr><tr><td>2025</td><td>748</td><td>38,0 %</td><td>2</td><td>755 €</td></tr><tr><td>2026*</td><td>669</td><td>56,5 %</td><td>1</td><td>388 €</td></tr></tbody></table>
+<p>Podiel zákazníkov s jedinou objednávkou za život stúpol z 33,9 %
+(kohorta 2024) na 38,0 % (2025). Medián
+objednávok za život klesol z 3 na 2
+a medián LTV z 1 052 € na 755 €. Akvizícia rastie
+v počte a klesá v kvalite.</p>
+<div class="fig"><h4>Frekvencia objednávania</h4><p class="cap">Na osi x počet objednávok za posledných 12 mesiacov, na osi y počet zákazníkov. Menovateľom sú zákazníci s aspoň jednou objednávkou v okne — dormantní v grafe nie sú. Posledný kôš zlučuje 30 a viac objednávok (maximum je 343). V hover je aj reverzný kumulatív, teda počet zákazníkov s danou frekvenciou a vyššou.</p><div class="lg"><span><i style="background:#2a78d6"></i>Zákazníci</span></div><div class="cv" style="height:360px"><canvas id="frequency_histogram"></canvas></div></div>
+<p>Menovateľom sú zákazníci, ktorí za posledných 12 mesiacov
+aspoň raz nakúpili — 1 870 zákazníkov. <b>Najväčšia skupina má jedinú
+objednávku</b>: 707 (37,8 %).
+Dve objednávky má 305 zákazníkov
+(16,3 %).</p>
+<p>Rozdelenie je monotónne klesajúce — čím vyššia frekvencia, tým menej zákazníkov,
+bez akéhokoľvek typického nákupného rytmu, okolo ktorého by sa báza zhlukovala.
+Reverzný kumulatív to ukazuje presne: aspoň desať objednávok má už len
+15,6 % bázy a v poslednom koši
+(30+ objednávok) je 72 zákazníkov, teda
+3,9 %. Práve tí sú ale celý biznis — väčšina nakupujúcich má
+s nami len jednorazový kontakt.</p>
+
+
+<h2>7. Zhrnutie</h2>
+<ol>
+<li><b>Rast je silne koncentrovaný.</b> Pásmo >50k € —
+13 účtov — pridalo +918 031 €, čo je
+54,3 % celej netto zmeny GMV v okne; všetky ostatné pásma
+spolu -104 582 €. Zvyšok rastu prináša
+692 účtov, ktoré pred rokom nenakúpili. Top 1
+zákazník je 20,0 % GMV, top 10 je
+61,0 % — pri odchode jedného účtu padne ročné GMV
+o pätinu.</li>
+
+<li><b>Typický zákazník nerastie.</b> Mediánová hodnota objednávky je plochá a mediánová
+medziročná zmena GMV je negatívna vo všetkých veľkostných pásmach. Nízky podiel rastúcich
+zákazníkov nie je chyba merania — je to štruktúra portfólia.</li>
+
+<li><b>Churn rastie a je nezvratný.</b> 6-mesačný churn stúpol
+na 74,3 %. Reaktivácia je pritom vzácna a jednorazová, takže
+odchod je v praxi definitívny.</li>
+
+<li><b>Akvizícia klesá v kvalite.</b> Podiel zákazníkov s jedinou objednávkou za život
+stúpol na 38,0 % a z tých, čo za posledných
+12 mesiacov vôbec nakúpili, má 37,8 % jedinú
+objednávku. Do B2B kanálu tečú drobní odberatelia.</li>
+
+<li><b>Rast je geograficky úzky.</b> Dva najväčšie trhy tvoria 77,4 % GMV.
+Kategória Ostatné má 42,0 % zákazníkov, ale len
+9,1 % GMV — a tým ťahá každú metriku „na zákazníka" dole.</li>
+</ol>
+
+<h3>Odporúčania k metrikám</h3>
+<ol>
+<li>Doplniť ku každej metrike „na zákazníka" jej <b>GMV-váženú verziu</b>. Nevážená verzia
+meria hlavne dlhý chvost drobných odberateľov.</li>
+<li>Merať rast a churn <b>oddelene pre strategické účty a transakčných kupujúcich</b>
+(hranica napríklad 10 000 € ročne alebo aspoň 4 objednávky ročne).</li>
+<li>Zafixovať menovateľ v definícii churnu a rastu — v tomto reporte je to explicitne
+uvedené pri každom grafe, v internom KPI to chýba.</li>
+</ol>
+
+<h3>Odporúčania k biznisu</h3>
+<ol>
+<li><b>Znížiť závislosť na top účtoch</b> rozšírením mid-market pásma, ktoré je dnes
+netto negatívne.</li>
+<li><b>Zamerať sa na prvých 90 dní.</b> Rastúci podiel zákazníkov s jedinou objednávkou
+je najlacnejšia páka — druhá objednávka rozhoduje o celej kohorte.</li>
+<li><b>Kvalifikovať akvizíciu.</b> Buď oddeliť drobných odberateľov do samoobslužného
+segmentu bez account managementu, alebo zvýšiť vstupnú hranicu.</li>
+<li><b>Nestavať na win-back kampaniach.</b> Dáta hovoria, že odchod je definitívny;
+prevencia je jediná fungujúca stratégia.</li>
+</ol>
+
+<h3>Ďalšie kroky v analýze</h3>
+<ol>
+<li>Zjednotiť identitu zákazníka (viac e-mailov = jedna firma). Bez toho sú noví, churn
+aj reaktivácie nadhodnotené.</li>
+<li>Doplniť produktovú a maržovú dimenziu — rast priemernej objednávky môže byť mix efekt,
+nie skutočný rast hodnoty.</li>
+</ol>
+
+<p class="small" style="margin-top:48px;border-top:1px solid var(--bd);padding-top:16px">
+Grafy sú interaktívne — prejdi kurzorom pre presné hodnoty. Legendy sú statické.
+Všetky tabuľky a čísla v texte sú generované z dát. Dátum analýzy
+31. 7. 2026.</p>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>const SPECS = [{"id": "monthly_trend", "title": "Mesačné GMV a 12-mesačný klzavý priemer", "caption": "V mil. €. Klzavý priemer vyhladzuje sezónnosť — stúpa bez prerušenia, ale mesačné stĺpce kolíšu čoraz viac.", "type": "bar", "labels": ["2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07"], "datasets": [{"label": "12-mes. klzavý priemer", "data": [0.8111, 0.8414, 0.8524, 0.8826, 0.9016, 0.9092, 0.8971, 0.9026, 0.9213, 0.9283, 0.9338, 0.9429, 0.9568, 0.9653, 0.9994, 1.0065, 1.0378, 1.0615, 1.119, 1.136, 1.1953, 1.2363, 1.2826, 1.3377, 1.4208, 1.4635, 1.5234, 1.5533, 1.5839, 1.6421, 1.6943], "color": "#eb6834", "type": "line", "dashed": false, "point_colors": null, "value_format": null}, {"label": "GMV", "data": [1.0226, 1.0394, 0.9854, 0.9902, 1.0831, 0.9304, 0.6525, 0.864, 0.9884, 1.1128, 0.9584, 0.6875, 1.1893, 1.1412, 1.395, 1.0758, 1.4584, 1.2148, 1.3425, 1.0673, 1.7006, 1.6043, 1.5149, 1.348, 2.1861, 1.6541, 2.1139, 1.4349, 1.8254, 1.9131, 1.9693], "color": "#a9c8ea", "type": "bar", "dashed": false, "point_colors": null, "value_format": null}], "height": 360, "stacked": false, "index_axis": "x", "value_format": "mil_eur", "y_max": null, "y_begin_at_zero": true, "hover_extras": null}, {"id": "seasonality", "title": "Sezónnosť", "caption": "Priemerný podiel mesiaca na ročnom GMV, 2022–2025 (len kompletné roky).", "type": "bar", "labels": ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"], "datasets": [{"label": "Podiel na ročnom GMV", "data": [7.6758, 7.5486, 8.6843, 7.222, 9.4018, 8.6153, 7.3136, 7.8915, 9.0246, 10.2178, 9.0633, 7.3414], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#a9c8ea", "#a9c8ea", "#a9c8ea", "#a9c8ea", "#2a78d6", "#a9c8ea", "#a9c8ea", "#a9c8ea", "#2a78d6", "#2a78d6", "#2a78d6", "#a9c8ea"], "value_format": null}], "height": 300, "stacked": false, "index_axis": "x", "value_format": "pct", "y_max": null, "y_begin_at_zero": true, "hover_extras": null}, {"id": "yearly_bridge", "title": "Komponenty medziročnej zmeny GMV", "caption": "V mil. €, kalendárne roky. Stĺpec 2026* porovnáva Jan–Júl 2026 s Jan–Júl 2025 — porovnávať čiastočný rok s celým by nemalo zmysel.", "type": "bar", "labels": ["2024", "2025", "2026*"], "datasets": [{"label": "Expanzia", "data": [3.3715, 5.4454, 3.5504], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": null, "value_format": null}, {"label": "Reaktivovaní", "data": [0.0406, 0.0402, 0.6518], "color": "#1baf7a", "type": "bar", "dashed": false, "point_colors": null, "value_format": null}, {"label": "Noví", "data": [1.2057, 1.9003, 1.6], "color": "#eda100", "type": "bar", "dashed": false, "point_colors": null, "value_format": null}, {"label": "Kontrakcia", "data": [-1.9778, -1.7324, -0.6945], "color": "#eb6834", "type": "bar", "dashed": false, "point_colors": null, "value_format": null}, {"label": "Churn", "data": [-0.7219, -0.9159, -0.8278], "color": "#e34948", "type": "bar", "dashed": false, "point_colors": null, "value_format": null}, {"label": "Netto zmena", "data": [1.918, 4.7375, 4.2799], "color": "#141413", "type": "line", "dashed": false, "point_colors": null, "value_format": null}], "height": 360, "stacked": true, "index_axis": "x", "value_format": "mil_eur", "y_max": null, "y_begin_at_zero": false, "hover_extras": null}, {"id": "order_value", "title": "Priemerná vs mediánová hodnota objednávky", "caption": "V €. Medián je „prostredná“ objednávka — polovica objednávok je menšia, polovica väčšia. Priemer rastie, medián je plochý, takže celý rast sedí vo veľkých objednávkach.", "type": "line", "labels": ["2024", "2025", "2026*"], "datasets": [{"label": "Priemer", "data": [1112.0131, 1416.6694, 1541.9132], "color": "#2a78d6", "type": "line", "dashed": false, "point_colors": null, "value_format": null}, {"label": "Medián", "data": [373.3844, 373.57, 349.4861], "color": "#eb6834", "type": "line", "dashed": false, "point_colors": null, "value_format": null}], "height": 300, "stacked": false, "index_axis": "x", "value_format": "eur", "y_max": null, "y_begin_at_zero": true, "hover_extras": null}, {"id": "concentration_shares", "title": "Podiel top N zákazníkov na GMV", "caption": "V %. Rastúca koncentrácia znamená, že celkový rast závisí od stále menšieho počtu účtov.", "type": "line", "labels": ["2024", "2025", "2026*"], "datasets": [{"label": "Top 1", "data": [15.2268, 23.1097, 19.9564], "color": "#e34948", "type": "line", "dashed": false, "point_colors": null, "value_format": null}, {"label": "Top 5", "data": [41.7475, 48.5425, 51.9187], "color": "#2a78d6", "type": "line", "dashed": false, "point_colors": null, "value_format": null}, {"label": "Top 10", "data": [51.8382, 58.4605, 60.9863], "color": "#1baf7a", "type": "line", "dashed": false, "point_colors": null, "value_format": null}, {"label": "Top 20", "data": [63.5761, 68.8307, 70.5223], "color": "#4a3aa7", "type": "line", "dashed": false, "point_colors": null, "value_format": null}, {"label": "Top 50", "data": [75.6465, 80.6259, 81.6811], "color": "#898781", "type": "line", "dashed": false, "point_colors": null, "value_format": null}], "height": 300, "stacked": false, "index_axis": "x", "value_format": "pct", "y_max": 100, "y_begin_at_zero": true, "hover_extras": null}, {"id": "account_growth_over_time", "title": "Account growth v čase", "caption": "V %, klzavé 3 mesiace medziročne, body sú konce kvartálov. Zvyšok stĺpca do 100 % menovateľa sú klesajúce účty. Čierna línia je GMV-vážený variant: podiel tržieb, ktoré ležia v rastúcich účtoch. Prerušovaná čiara je cieľ 60 %.", "type": "bar", "labels": ["2024-01", "2024-04", "2024-07", "2024-10", "2025-01", "2025-04", "2025-07", "2025-10", "2026-01", "2026-04", "2026-07"], "datasets": [{"label": "Cieľ 60 %", "data": [60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0], "color": "#898781", "type": "line", "dashed": true, "point_colors": null, "value_format": null}, {"label": "% GMV v rastúcich účtoch", "data": [67.4891, 76.465, 75.8686, 74.7304, 73.3759, 77.3231, 90.9857, 89.8387, 91.7782, 85.9575, 78.7406], "color": "#141413", "type": "line", "dashed": false, "point_colors": null, "value_format": null}, {"label": "% rastúcich účtov", "data": [38.055, 35.6604, 33.0357, 30.648, 31.6413, 34.2812, 32.7532, 36.0502, 37.9019, 40.2941, 41.7533], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": null, "value_format": null}], "height": 360, "stacked": false, "index_axis": "x", "value_format": "pct", "y_max": 100, "y_begin_at_zero": true, "hover_extras": [["Menovateľ: 473 účtov"], ["Menovateľ: 530 účtov"], ["Menovateľ: 560 účtov"], ["Menovateľ: 571 účtov"], ["Menovateľ: 591 účtov"], ["Menovateľ: 633 účtov"], ["Menovateľ: 632 účtov"], ["Menovateľ: 638 účtov"], ["Menovateľ: 591 účtov"], ["Menovateľ: 680 účtov"], ["Menovateľ: 673 účtov"]]}, {"id": "account_growth_composition", "title": "Z čoho sa skladá menovateľ KPI", "caption": "Počet účtov. Prvé dve skupiny nie sú rozhodnuté rastom, ale tým, či účet v okne vôbec nakúpil — bez GMV pred rokom rastie účet automaticky, odídené do nuly klesajú automaticky. Len tretia skupina meria skutočnú zmenu objemu.", "type": "bar", "labels": ["Bez GMV v minuloročnom okne (0 → +)", "Odišli do nuly (+ → 0)", "Aktívne v oboch oknách"], "datasets": [{"label": "Rastúce", "data": [102.0, 0.0, 179.0], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": null, "value_format": null}, {"label": "Klesajúce", "data": [0.0, 203.0, 189.0], "color": "#e34948", "type": "bar", "dashed": false, "point_colors": null, "value_format": null}], "height": 240, "stacked": true, "index_axis": "y", "value_format": "count", "y_max": null, "y_begin_at_zero": true, "hover_extras": null}, {"id": "kpi_frequency", "title": "Rast účtu podľa zmeny počtu objednávok", "caption": "V %, len 368 účtov aktívnych v oboch oknách. Zelená je nad cieľom 60 %, červená pod celkovým KPI.", "type": "bar", "labels": ["Viac objednávok", "Rovnaký počet", "Menej objednávok"], "datasets": [{"label": "% rastúcich účtov", "data": [87.5, 50.9091, 8.4615], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#1a9268", "#2a78d6", "#e34948"], "value_format": null}], "height": 210, "stacked": false, "index_axis": "y", "value_format": "pct", "y_max": 100, "y_begin_at_zero": true, "hover_extras": [["Účtov: 128", "Netto zmena GMV: +1 278 125 €"], ["Účtov: 110", "Netto zmena GMV: +23 272 €"], ["Účtov: 130", "Netto zmena GMV: -202 321 €"]]}, {"id": "kpi_activity_split", "title": "Kedy naposledy nakúpili účty v menovateli KPI", "caption": "Počet účtov. Za churnutý sa považuje účet, ktorý nenakúpil 180 dní. Modrá skupina churnutá nie je — len neobjednala práve v 3-mesačnom okne. KPI ju aj tak počíta ako klesajúcu.", "type": "bar", "labels": ["Nakúpili v aktuálnom okne", "Nakúpili za posledných 180 dní, ale mimo okna", "Churnuté — 180+ dní bez objednávky"], "datasets": [{"label": "Počet účtov", "data": [470.0, 70.0, 133.0], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#1a9268", "#2a78d6", "#e34948"], "value_format": null}], "height": 230, "stacked": false, "index_axis": "y", "value_format": "count", "y_max": null, "y_begin_at_zero": true, "hover_extras": [["Podiel menovateľa: 69,8 %", "GMV pred rokom: 3 555 900 €"], ["Podiel menovateľa: 10,4 %", "GMV pred rokom: 110 498 €"], ["Podiel menovateľa: 19,8 %", "GMV pred rokom: 175 129 €"]]}, {"id": "kpi_regular_ordering", "title": "KPI, keby živé účty objednávali aspoň raz za 3 mesiace", "caption": "V %. Menovateľ je v oboch stĺpcoch rovnaký. Druhý stĺpec počíta 70 živých účtov, ktoré v aktuálnom okne nenakúpili, ako rastúce. Je to horná hranica scenára, nie prognóza.", "type": "bar", "labels": ["KPI ako sa vykazuje", "KPI, ak by živé účty objednávali aspoň raz za 3 mesiace"], "datasets": [{"label": "% rastúcich účtov", "data": [41.7533, 52.1545], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#2a78d6", "#1a9268"], "value_format": null}], "height": 170, "stacked": false, "index_axis": "y", "value_format": "pct", "y_max": 100, "y_begin_at_zero": true, "hover_extras": [["Menovateľ: 673 účtov"], ["Menovateľ: 673 účtov"]]}, {"id": "kpi_churn_sensitivity", "title": "KPI pri zabránení churnu — citlivosť na predpoklad o raste", "caption": "V %. Všetkých 133 churnutých účtov sa berie ako aktívnych v okne, mení sa len predpoklad, aký podiel z nich rastie. Menovateľ je vo všetkých stĺpcoch rovnaký. Prerušovaná čiara je cieľ 60 %.", "type": "bar", "labels": ["0 % — dnešný stav", "50 % zachránených rastie", "100 % zachránených rastie"], "datasets": [{"label": "Cieľ 60 %", "data": [60.0, 60.0, 60.0], "color": "#898781", "type": "line", "dashed": true, "point_colors": null, "value_format": null}, {"label": "% rastúcich účtov", "data": [41.7533, 51.6345, 61.5156], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#e34948", "#2a78d6", "#1a9268"], "value_format": null}], "height": 280, "stacked": false, "index_axis": "x", "value_format": "pct", "y_max": 70, "y_begin_at_zero": true, "hover_extras": [["Menovateľ: 673 účtov", "Zachránených účtov: 133"], ["Menovateľ: 673 účtov", "Zachránených účtov: 133"], ["Menovateľ: 673 účtov", "Zachránených účtov: 133"]]}, {"id": "net_gmv_by_band", "title": "Netto medziročná zmena GMV podľa pásma", "caption": "V tis. €. Porovnáva sa 3-mesačné okno 1. 5. 2026 – 31. 7. 2026 s rovnakým oknom o rok skôr (1. 5. 2025 – 31. 7. 2025). Pásmo je určené podľa GMV v staršom okne, nie v aktuálnom — inak by účet, ktorý medzitým prestal nakupovať, spadol do najnižšieho pásma a graf by tvrdil, že tam vznikla strata. V grafe sú len účty, ktoré v staršom okne nakúpili a sú staršie ako 15 mesiacov — rovnaká populácia ako v account growth KPI. Hranica patrí vždy nižšiemu pásmu.", "type": "bar", "labels": ["<0,5k €", "0,5–2k €", "2–10k €", "10–50k €", ">50k €"], "datasets": [{"label": "Netto zmena", "data": [-22.4083, -61.5113, -23.114, 2.4517, 918.0307], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": ["#e34948", "#e34948", "#e34948", "#2a78d6", "#2a78d6"], "value_format": null}], "height": 300, "stacked": false, "index_axis": "y", "value_format": "k_eur", "y_max": null, "y_begin_at_zero": false, "hover_extras": null}, {"id": "single_order", "title": "Podiel zákazníkov s jedinou objednávkou za život", "caption": "V %, podľa roku prvej objednávky. Kohorta 2026* je sivá — ešte nemala čas objednať druhýkrát, jej hodnota nie je porovnateľná.", "type": "bar", "labels": ["2024", "2025", "2026*"], "datasets": [{"label": "% s jedinou objednávkou", "data": [33.8889, 37.9679, 56.5022], "color": "#e34948", "type": "bar", "dashed": false, "point_colors": ["#e34948", "#e34948", "#898781"], "value_format": null}], "height": 300, "stacked": false, "index_axis": "x", "value_format": "pct", "y_max": null, "y_begin_at_zero": true, "hover_extras": null}, {"id": "frequency_histogram", "title": "Frekvencia objednávania", "caption": "Na osi x počet objednávok za posledných 12 mesiacov, na osi y počet zákazníkov. Menovateľom sú zákazníci s aspoň jednou objednávkou v okne — dormantní v grafe nie sú. Posledný kôš zlučuje 30 a viac objednávok (maximum je 343). V hover je aj reverzný kumulatív, teda počet zákazníkov s danou frekvenciou a vyššou.", "type": "bar", "labels": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30+"], "datasets": [{"label": "Zákazníci", "data": [707.0, 305.0, 170.0, 104.0, 88.0, 74.0, 59.0, 40.0, 31.0, 39.0, 24.0, 26.0, 16.0, 21.0, 14.0, 14.0, 11.0, 7.0, 8.0, 6.0, 7.0, 3.0, 4.0, 1.0, 7.0, 6.0, 2.0, 2.0, 2.0, 72.0], "color": "#2a78d6", "type": "bar", "dashed": false, "point_colors": null, "value_format": null}], "height": 360, "stacked": false, "index_axis": "x", "value_format": "count", "y_max": null, "y_begin_at_zero": true, "hover_extras": [["Frekvencia 1 a vyššia: 1 870 zákazníkov (100,0 % bázy)"], ["Frekvencia 2 a vyššia: 1 163 zákazníkov (62,2 % bázy)"], ["Frekvencia 3 a vyššia: 858 zákazníkov (45,9 % bázy)"], ["Frekvencia 4 a vyššia: 688 zákazníkov (36,8 % bázy)"], ["Frekvencia 5 a vyššia: 584 zákazníkov (31,2 % bázy)"], ["Frekvencia 6 a vyššia: 496 zákazníkov (26,5 % bázy)"], ["Frekvencia 7 a vyššia: 422 zákazníkov (22,6 % bázy)"], ["Frekvencia 8 a vyššia: 363 zákazníkov (19,4 % bázy)"], ["Frekvencia 9 a vyššia: 323 zákazníkov (17,3 % bázy)"], ["Frekvencia 10 a vyššia: 292 zákazníkov (15,6 % bázy)"], ["Frekvencia 11 a vyššia: 253 zákazníkov (13,5 % bázy)"], ["Frekvencia 12 a vyššia: 229 zákazníkov (12,2 % bázy)"], ["Frekvencia 13 a vyššia: 203 zákazníkov (10,9 % bázy)"], ["Frekvencia 14 a vyššia: 187 zákazníkov (10,0 % bázy)"], ["Frekvencia 15 a vyššia: 166 zákazníkov (8,9 % bázy)"], ["Frekvencia 16 a vyššia: 152 zákazníkov (8,1 % bázy)"], ["Frekvencia 17 a vyššia: 138 zákazníkov (7,4 % bázy)"], ["Frekvencia 18 a vyššia: 127 zákazníkov (6,8 % bázy)"], ["Frekvencia 19 a vyššia: 120 zákazníkov (6,4 % bázy)"], ["Frekvencia 20 a vyššia: 112 zákazníkov (6,0 % bázy)"], ["Frekvencia 21 a vyššia: 106 zákazníkov (5,7 % bázy)"], ["Frekvencia 22 a vyššia: 99 zákazníkov (5,3 % bázy)"], ["Frekvencia 23 a vyššia: 96 zákazníkov (5,1 % bázy)"], ["Frekvencia 24 a vyššia: 92 zákazníkov (4,9 % bázy)"], ["Frekvencia 25 a vyššia: 91 zákazníkov (4,9 % bázy)"], ["Frekvencia 26 a vyššia: 84 zákazníkov (4,5 % bázy)"], ["Frekvencia 27 a vyššia: 78 zákazníkov (4,2 % bázy)"], ["Frekvencia 28 a vyššia: 76 zákazníkov (4,1 % bázy)"], ["Frekvencia 29 a vyššia: 74 zákazníkov (4,0 % bázy)"], ["Frekvencia 30 a vyššia: 72 zákazníkov (3,9 % bázy)"]]}];
+
+const GRID = {color:'#e1e0d9', drawTicks:false};
+const NO_GRID = {display:false};
+
+Chart.defaults.font.family = '-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif';
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#898781';
+
+const FORMATTERS = {
+  mil_eur: {tick: v => v.toFixed(1), tip: v => v.toFixed(2) + ' mil. €'},
+  k_eur:   {tick: v => v + 'k',      tip: v => Math.round(v).toLocaleString('sk-SK') + ' tis. €'},
+  eur:     {tick: v => v.toLocaleString('sk-SK'), tip: v => Math.round(v).toLocaleString('sk-SK') + ' €'},
+  pct:     {tick: v => v + ' %',     tip: v => v.toFixed(1) + ' %'},
+  count:   {tick: v => v.toLocaleString('sk-SK'), tip: v => Math.round(v).toLocaleString('sk-SK')}
+};
+
+function buildDataset(series, spec) {
+  const isLine = series.type === 'line';
+  const dataset = {
+    type: series.type,
+    label: series.label,
+    data: series.data,
+    valueFormat: series.value_format || spec.value_format
+  };
+  if (isLine) {
+    dataset.borderColor = series.color;
+    dataset.borderWidth = 2.5;
+    dataset.pointRadius = 3;
+    dataset.pointBackgroundColor = series.color;
+    dataset.tension = 0.25;
+    dataset.fill = false;
+    dataset.order = 0;
+    if (series.dashed) { dataset.borderDash = [6, 4]; dataset.borderWidth = 2; }
+    // V stohovanom grafe Chart.js stohuje aj línie. Vlastná stack skupina pre
+    // každú líniu ich drží nezávislé — bez toho sa druhá línia vykreslí ako
+    // súčet s prvou a pri y_max = 100 vypadne z grafu.
+    if (spec.stacked) { dataset.stack = 'line-' + series.label; }
+  } else {
+    dataset.backgroundColor = series.point_colors || series.color;
+    dataset.borderRadius = 3;
+    dataset.order = 1;
+    if (spec.stacked) { dataset.stack = 'total'; }
+  }
+  return dataset;
+}
+
+function buildValueAxis(spec) {
+  const formatter = FORMATTERS[spec.value_format];
+  return {
+    stacked: spec.stacked,
+    beginAtZero: spec.y_begin_at_zero,
+    max: spec.y_max,
+    grid: GRID,
+    border: {display: false},
+    ticks: {callback: formatter.tick}
+  };
+}
+
+function buildCategoryAxis(spec) {
+  return {
+    stacked: spec.stacked,
+    grid: NO_GRID,
+    border: {color: '#c3c2b7'},
+    ticks: {autoSkip: spec.labels.length > 24, maxRotation: 60, maxTicksLimit: 26}
+  };
+}
+
+function buildChart(spec) {
+  const horizontal = spec.index_axis === 'y';
+  const valueAxis = buildValueAxis(spec);
+  const categoryAxis = buildCategoryAxis(spec);
+
+  new Chart(document.getElementById(spec.id), {
+    data: {
+      labels: spec.labels,
+      datasets: spec.datasets.map(series => buildDataset(series, spec))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: spec.index_axis,
+      plugins: {
+        legend: {display: false},
+        tooltip: {callbacks: {
+          label: item => {
+            const value = horizontal ? item.parsed.x : item.parsed.y;
+            const format = item.dataset.valueFormat;
+            return item.dataset.label + ': ' + FORMATTERS[format].tip(value);
+          },
+          afterBody: items => {
+            if (!spec.hover_extras) { return []; }
+            return spec.hover_extras[items[0].dataIndex] || [];
+          }
+        }}
+      },
+      scales: horizontal
+        ? {x: valueAxis, y: categoryAxis}
+        : {x: categoryAxis, y: valueAxis}
+    }
+  });
+}
+
+SPECS.forEach(buildChart);
+</script>
+</body></html>
