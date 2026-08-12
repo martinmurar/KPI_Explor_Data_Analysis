@@ -407,6 +407,31 @@ def kpi_frequency_effect(frequency, reference_pct):
     )
 
 
+def kpi_by_order_count(breakdown, reference_pct):
+    """KPI osobitne pre každý kôš podľa počtu objednávok za rok."""
+    values = list(breakdown["growing_pct"])
+    return _figure(
+        "kpi_by_order_count",
+        f"Account growth podľa počtu objednávok za {C.FREQUENCY_WINDOW_MONTHS} mesiacov",
+        f"V %. Kôš určuje počet objednávok za posledných {C.FREQUENCY_WINDOW_MONTHS} "
+        f"mesiacov. {_population_note(int(breakdown['customers'].sum()), 'posudzovanými účtami')} "
+        f"Zelená je nad cieľom {C.ACCOUNT_GROWTH_TARGET_PCT} %, červená pod celkovým KPI.",
+        "bar",
+        breakdown.index,
+        [_series("% rastúcich účtov", values, C.KPI_DIAG_COLOR_NEUTRAL,
+                 point_colors=_kpi_status_colors(values, reference_pct))],
+        height=max(200, 34 * len(breakdown) + 60),
+        index_axis="y",
+        value_format="pct",
+        y_max=100,
+        hover_extras=_kpi_hover(breakdown, lambda row: [
+            f"Účtov: {formatting.format_number(row['customers'])}",
+            f"Rastúcich: {formatting.format_number(row['growing'])}",
+            f"Netto zmena GMV: {formatting.format_signed_eur(row['net_delta'])}",
+        ]),
+    )
+
+
 _ACTIVITY_COLORS = [
     C.KPI_DIAG_COLOR_GOOD,
     C.KPI_DIAG_COLOR_NEUTRAL,

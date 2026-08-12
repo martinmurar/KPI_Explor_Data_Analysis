@@ -230,6 +230,7 @@ def account_growth_section(metrics):
         charts.account_growth_over_time(history),
         charts.account_growth_composition(composition),
         charts.kpi_frequency_effect(metrics["diag_frequency"], diag["growing_pct"]),
+        charts.kpi_by_order_count(metrics["diag_by_order_count"], diag["growing_pct"]),
         charts.kpi_activity_split(metrics["diag_activity_split"]),
         charts.kpi_regular_ordering(metrics["diag_regular_scenario"]),
         charts.kpi_churn_sensitivity(metrics["diag_churn_sensitivity"]),
@@ -250,6 +251,8 @@ def account_growth_section(metrics):
 <h3>Čím je rozhodnuté, či účet rastie</h3>
 {_fig(figures, "kpi_frequency")}
 {_frequency_text(metrics)}
+{_fig(figures, "kpi_by_order_count")}
+{_order_count_text(metrics)}
 
 <h3>Kedy účty naposledy nakúpili</h3>
 {_fig(figures, "kpi_activity_split")}
@@ -317,6 +320,31 @@ rastie v {PCT(more["growing_pct"])} prípadov, pri rovnakom počte je to coin fl
 ({PCT(same["growing_pct"])}) a pri nižšom počte je účet odpísaný
 ({PCT(fewer["growing_pct"])}). <b>Rast účtu v tomto KPI je o frekvencii, nie
 o veľkosti objednávky.</b></p>
+"""
+
+
+def _order_count_text(metrics):
+    """Odstavec ku KPI podľa počtu objednávok za rok."""
+    breakdown = metrics["diag_by_order_count"]
+    summary = metrics["account_growth_summary"]
+
+    dormant = breakdown.loc[C.KPI_ORDER_COUNT_BUCKETS[0]]
+    top = breakdown.iloc[-1]
+    thin = breakdown.iloc[1:3]
+    dormant_share = dormant["customers"] / breakdown["customers"].sum() * 100
+
+    return f"""
+<p>KPI rastie s frekvenciou naprieč celým rozsahom: od {PCT(thin["growing_pct"].min())}
+pri účtoch s jednou či dvoma objednávkami po {PCT(top["growing_pct"])} pri účtoch
+s {breakdown.index[-1]} objednávkami. <b>Cieľ {C.ACCOUNT_GROWTH_TARGET_PCT} % dosahuje
+jediný kôš — ten najfrekventovanejší.</b></p>
+<p>Kôš 0 je {PCT(dormant["growing_pct"])} z definície: kto za
+{C.FREQUENCY_WINDOW_MONTHS} mesiacov nenakúpil, nemá GMV ani v kratšom okne KPI
+a je automaticky klesajúci. Práve to je jeho výpoveď — <b>{NUM(dormant["customers"])}
+z {NUM(breakdown["customers"].sum())} posudzovaných účtov
+({PCT(dormant_share)}) je celý rok mŕtvych</b> a KPI ich napriek tomu drží
+v menovateli. Bez nich by celkových {PCT(summary["growing_pct"])} bolo
+{PCT(summary["growing"] / (breakdown["customers"].sum() - dormant["customers"]) * 100)}.</p>
 """
 
 
@@ -667,15 +695,21 @@ SECTION_BUILDERS = [
 def build_all(metrics):
     """Poskladá HTML všetkých sekcií a zoznam grafov, ktoré sa naozaj vykreslili.
 
+    Každá sekcia ide cez render_collapsible, takže sa dá zbaliť za jej nadpis.
+    Hlavička sa nezbaľuje — nemá <h2>, vráti sa nedotknutá a hneď za ňu patria
+    ovládacie tlačidlá.
+
     Grafy skryté cez C.HIDDEN_CHARTS sa sem nedostanú — inak by Chart.js na
     strane prehliadača skúšal nakresliť graf do neexistujúceho <canvas> a
     spadol by aj so zvyšnými grafmi za ním.
     """
     html_parts = []
     figures = []
-    for builder in SECTION_BUILDERS:
+    for position, builder in enumerate(SECTION_BUILDERS):
         section_html, section_figures = builder(metrics)
-        html_parts.append(section_html)
+        html_parts.append(R.render_collapsible(section_html))
+        if position == 0:
+            html_parts.append(R.FOLD_TOOLBAR_HTML)
         for figure in section_figures:
             if figure["id"] not in C.HIDDEN_CHARTS:
                 figures.append(figure)

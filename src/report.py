@@ -8,6 +8,7 @@ z rovnakých metrík, ktoré kreslia grafy, takže nemôžu zostať zastarané.
 
 import html
 import json
+import re
 
 import pandas as pd
 
@@ -50,6 +51,22 @@ tr:hover td{background:#f7f6f1}
 ol,ul{margin:0 0 14px;padding-left:22px}
 li{margin-bottom:7px}
 .neg{color:#a32d2d}.pos{color:#0f6e56}
+.sec>summary{font-size:21px;font-weight:500;margin:56px 0 14px;padding-bottom:10px;
+ border-bottom:1px solid var(--bd);cursor:pointer;list-style:none;
+ display:flex;align-items:center;gap:10px;user-select:none}
+.sec>summary::-webkit-details-marker{display:none}
+.sec>summary:hover{color:var(--ink2)}
+.sec>summary::before{content:"";width:0;height:0;flex:none;
+ border-left:6px solid var(--mut);border-top:5px solid transparent;
+ border-bottom:5px solid transparent;transition:transform .15s}
+.sec[open]>summary::before{transform:rotate(90deg)}
+.sec:not([open])>summary{margin-bottom:0}
+.sec:not([open])+.sec>summary{margin-top:22px}
+.fold{display:flex;gap:8px;margin:26px 0 0}
+.fold button{font:inherit;font-size:13px;color:var(--ink2);background:var(--card);
+ border:1px solid var(--bd);border-radius:7px;padding:5px 12px;cursor:pointer}
+.fold button:hover{background:#f3f2ec}
+@media print{.fold{display:none}}
 """
 
 CHART_BUILDER_JS = """
@@ -157,6 +174,40 @@ function buildChart(spec) {
 SPECS.forEach(buildChart);
 """
 
+# Zbaľovanie sekcií. Beží vo vlastnom <script> pred Chart.js a nezávisí od neho —
+# keby bolo v tom istom bloku, zlyhané načítanie knižnice z CDN (offline, proxy)
+# by zhodilo aj zbaľovanie a report by ostal natrvalo rozbalený.
+#
+# Grafy sa kreslia raz, pri načítaní, keď sú všetky sekcie otvorené — Chart.js
+# potrebuje nenulovú šírku kontajnera. Zbalenie ich preto nezničí, len skryje;
+# po rozbalení si responsive layout poradí sám.
+FOLD_TOOLBAR_HTML = """<div class="fold">
+<button type="button" data-fold="open">Rozbaliť všetko</button>
+<button type="button" data-fold="close">Zbaliť všetko</button>
+</div>"""
+
+FOLD_JS = """
+const SECTIONS = document.querySelectorAll('details.sec');
+
+document.querySelectorAll('.fold button').forEach(button => {
+  button.addEventListener('click', () => {
+    const shouldOpen = button.dataset.fold === 'open';
+    SECTIONS.forEach(section => { section.open = shouldOpen; });
+  });
+});
+
+// Zbalená sekcia sa nevytlačí. Pred tlačou sa všetky otvoria a po nej vráti
+// späť, aby si používateľ nemusel pamätať, čo mal rozbalené.
+let foldedBeforePrint = [];
+window.addEventListener('beforeprint', () => {
+  foldedBeforePrint = [...SECTIONS].filter(section => !section.open);
+  foldedBeforePrint.forEach(section => { section.open = true; });
+});
+window.addEventListener('afterprint', () => {
+  foldedBeforePrint.forEach(section => { section.open = false; });
+});
+"""
+
 
 # ── formátovanie čísiel ───────────────────────────────────────────────────────
 # Preposielané zo spoločného modulu, aby ich sections.py mohol brať odtiaľto.
@@ -246,6 +297,22 @@ def render_note(text):
     return f'<div class="note">{text}</div>'
 
 
+def render_collapsible(section_html):
+    """Zabalí sekciu do <details>, aby sa dala zbaliť za jej nadpis.
+
+    Nadpis sekcie je prvý <h2> — ten sa stane <summary> a zvyšok telom.
+    Sekcia bez <h2> (hlavička reportu) sa vráti nedotknutá.
+    """
+    match = re.search(r"<h2>(.*?)</h2>", section_html, re.S)
+    if match is None:
+        return section_html
+
+    title = match.group(1)
+    body = section_html[match.end():]
+    return (f'<details class="sec" open><summary>{title}</summary>\n'
+            f"{body}</details>")
+
+
 def render_document(title, body_html, specs):
     """Zloží celý HTML dokument."""
     specs_json = json.dumps(specs, ensure_ascii=False)
@@ -257,6 +324,7 @@ def render_document(title, body_html, specs):
 <body><div class="wrap">
 {body_html}
 </div>
+<script>{FOLD_JS}</script>
 <script src="{CHARTJS_CDN}"></script>
 <script>const SPECS = {specs_json};
 {CHART_BUILDER_JS}</script>

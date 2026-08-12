@@ -16,6 +16,7 @@ import pandas as pd
 
 from src import constants as C
 import data
+import metrics_bridge
 
 
 # Popisky skupín podľa zmeny počtu objednávok. Poradie je od najlepšej.
@@ -48,6 +49,45 @@ def frequency_effect(table):
 def _active_in_both(table):
     """Účty s nenulovým GMV v oboch oknách."""
     return table.loc[(table["previous"] > 0) & (table["current"] > 0)]
+
+
+def kpi_by_order_count(table, df):
+    """KPI počítané osobitne pre každý kôš podľa počtu objednávok za rok.
+
+    Kôš určuje počet objednávok za posledných FREQUENCY_WINDOW_MONTHS mesiacov,
+    teda za aktuálne obdobie. Kôš 0 preto vyjde nutne 0 % — kto za rok nenakúpil,
+    nemá GMV ani v kratšom okne KPI a je automaticky klesajúci. Nie je to chyba
+    rezu, ale jeho hlavný nález: ukazuje, koľko posudzovaných účtov je mŕtvych.
+    """
+    buckets = _orders_last_year(table, df).map(_order_count_bucket)
+
+    rows = []
+    for label in C.KPI_ORDER_COUNT_BUCKETS:
+        members = table.loc[buckets == label]
+        if len(members) == 0:
+            continue
+        rows.append(_frequency_row(label, members))
+    return pd.DataFrame(rows).set_index("segment")
+
+
+def _orders_last_year(table, df):
+    """Počet objednávok každého posudzovaného účtu za posledný rok."""
+    start, end = metrics_bridge.gmv_window(C.AS_OF, C.FREQUENCY_WINDOW_MONTHS)
+    window = data.orders_in_window(df, start, end)
+    counts = window.groupby("cust").size()
+    return counts.reindex(table.index).fillna(0).astype(int)
+
+
+def _order_count_bucket(count):
+    """Popisok koša pre daný počet objednávok.
+
+    KPI_ORDER_COUNT_EDGES sú horné hranice prvých košov; čo sa do žiadnej
+    nezmestí, patrí do posledného, otvoreného koša.
+    """
+    for edge, label in zip(C.KPI_ORDER_COUNT_EDGES, C.KPI_ORDER_COUNT_BUCKETS):
+        if count <= edge:
+            return label
+    return C.KPI_ORDER_COUNT_BUCKETS[-1]
 
 
 def _frequency_row(label, members):

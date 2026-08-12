@@ -129,6 +129,12 @@ FREQUENCY_FIRST_BUCKET = 1
 # Posledný kôš zlučuje túto frekvenciu a všetky vyššie a nesie označenie "30+".
 FREQUENCY_TOP_BUCKET = 30
 
+# Koše pre rez KPI podľa počtu objednávok za FREQUENCY_WINDOW_MONTHS mesiacov.
+# EDGES sú horné hranice, posledný kôš je otvorený a hranicu nemá. Koše musia
+# byť disjunktné — účet s 12 objednávkami patrí do „6–12“, nie aj do „13–30“.
+KPI_ORDER_COUNT_EDGES = [0, 1, 2, 5, 12, 30]
+KPI_ORDER_COUNT_BUCKETS = ["0", "1", "2", "3–5", "6–12", "13–30", "31+"]
+
 # ── farby grafov ──────────────────────────────────────────────────────────────
 COLOR_BLUE = "#2a78d6"
 COLOR_BLUE_LIGHT = "#a9c8ea"
