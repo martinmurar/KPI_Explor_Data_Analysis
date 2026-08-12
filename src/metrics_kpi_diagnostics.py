@@ -158,21 +158,6 @@ def _probability_label(probability):
     if probability == 0:
         return f"{percent} % — dnešný stav"
     return f"{percent} % zachránených rastie"
-
-
-def combined_scenario_pct(table, df):
-    """KPI, keby platili oba scenáre naraz.
-
-    Skupiny sú disjunktné — účet je buď živý mimo okna, alebo churnutý — takže
-    sa efekty dajú sčítať bez dvojitého počítania.
-    """
-    outside = len(outside_window_accounts(table, df))
-    prevented = len(churned_accounts(table, df))
-    growing = (table["growing"].sum() + outside
-               + prevented * C.KPI_DIAG_CHURN_PREVENTED_GROWTH_RATE)
-    return growing / len(table) * 100
-
-
 def _scenario_table(table, labels, scenario_growing, converted):
     """Dvojriadková tabuľka: KPI dnes a KPI v scenári.
 

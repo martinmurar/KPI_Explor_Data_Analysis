@@ -91,52 +91,6 @@ def churn_curves(df):
         result[f"churn_{threshold}m"] = curve["churn_pct"]
         result[f"base_{threshold}m"] = curve["base"]
     return result
-
-
-# ── churn podľa veľkostného pásma ─────────────────────────────────────────────
-def churn_by_band(df):
-    """Churn k dátumu AS_OF podľa veľkostného pásma zákazníka.
-
-    Veľkosť sa meria za obdobie PRED oknom, v ktorom mohol zákazník odísť —
-    inak by churned zákazníci mali automaticky nulové GMV a pásmo by nemalo zmysel.
-    """
-    cutoff = C.AS_OF - pd.DateOffset(months=C.CHURN_MAIN_THRESHOLD_MONTHS)
-    size_start = cutoff - pd.DateOffset(months=C.CHURN_BAND_LOOKBACK_MONTHS)
-
-    size_gmv = data.gmv_per_customer(df, size_start, cutoff)
-    size_gmv = size_gmv.loc[size_gmv > 0]
-
-    last_orders = data.last_order_per_customer(df, as_of=C.AS_OF)
-    table = pd.DataFrame({"size_gmv": size_gmv})
-    table["last_order"] = last_orders.reindex(table.index)
-    table["is_churned"] = table["last_order"] < cutoff
-    table["band"] = data.assign_bands(table["size_gmv"], C.BAND_EDGES, C.BAND_LABELS)
-
-    return _summarise_churn_bands(table)
-
-
-def _summarise_churn_bands(table):
-    """Zhrnie churn po pásmach."""
-    rows = []
-    for band in C.BAND_LABELS:
-        members = table.loc[table["band"] == band]
-        if len(members) == 0:
-            continue
-        churned = members.loc[members["is_churned"]]
-        rows.append({
-            "band": band,
-            "customers": len(members),
-            "churned": len(churned),
-            "churn_pct": len(churned) / len(members) * 100,
-            "gmv_at_risk": churned["size_gmv"].sum(),
-            "gmv_total": members["size_gmv"].sum(),
-        })
-
-    result = pd.DataFrame(rows).set_index("band")
-    result["gmv_churn_pct"] = result["gmv_at_risk"] / result["gmv_total"] * 100
-    return result
-
-
 # ── rast a netto GMV podľa pásma ──────────────────────────────────────────────
 def _customers_by_band(df):
     """Zákazníci v porovnávacom období so zaradením do GMV pásma.
@@ -214,37 +168,6 @@ def top_band_detail(df):
         "delta": customers["delta"].values,
     })
     return table.sort_values("delta", ascending=False).set_index("account")
-
-
-def band_coverage(df):
-    """Zmierenie súčtu pásiem so skutočnou netto zmenou GMV v okne.
-
-    Graf pásiem nepokrýva celú zmenu GMV — nezaradení sú účty, ktoré v staršom
-    okne nenakúpili (noví a vrátení, nemajú podľa čoho dostať pásmo) a účty
-    mladšie ako vekový prah. Bez tohto rozdielu sa dá zo súčtu pásiem omylom
-    čítať celý rast portfólia.
-    """
-    start, end = metrics_bridge.gmv_window(C.AS_OF, C.GMV_WINDOW_MONTHS)
-    comparison = metrics_bridge.customer_comparison(df, start, end)
-    banded = _customers_by_band(df)
-    top_band = banded.loc[banded["band"] == C.BAND_LABELS[-1]]
-
-    total_delta = comparison["delta"].sum()
-    banded_delta = banded["delta"].sum()
-    return {
-        "total_delta": total_delta,
-        "banded_delta": banded_delta,
-        "banded_customers": len(banded),
-        "outside_delta": total_delta - banded_delta,
-        "outside_customers": len(comparison) - len(banded),
-        "no_previous_customers": int((comparison["previous"] == 0).sum()),
-        "no_previous_delta": comparison.loc[comparison["previous"] == 0, "delta"].sum(),
-        "top_band_delta": top_band["delta"].sum(),
-        "top_band_customers": len(top_band),
-        "top_band_share_pct": top_band["delta"].sum() / total_delta * 100,
-    }
-
-
 def _summarise_growth_bands(table):
     """Zhrnie rast po pásmach."""
     rows = []
@@ -297,102 +220,6 @@ def single_order_share(df):
             "is_immature": year == C.PARTIAL_YEAR,
         })
     return pd.DataFrame(rows).set_index("cohort_year")
-
-
-# ── reaktivácie ───────────────────────────────────────────────────────────────
-def reactivation_events(df):
-    """Objednávky, ktoré nasledujú po medzere dlhšej ako REACTIVATION_GAP_MONTHS."""
-    ordered = df.sort_values(["cust", "created_at"]).copy()
-    ordered["previous_order"] = ordered.groupby("cust")["created_at"].shift(1)
-
-    gap_cutoff = ordered["created_at"] - pd.DateOffset(months=C.REACTIVATION_GAP_MONTHS)
-    is_reactivation = ordered["previous_order"].notna() & (ordered["previous_order"] < gap_cutoff)
-
-    return ordered.loc[is_reactivation, ["cust", "created_at", "gmv", "previous_order"]]
-
-
-def reactivation_counts(df):
-    """Počet reaktivácií za život každého zákazníka (vrátane nuly)."""
-    events = reactivation_events(df)
-    counts = events.groupby("cust").size()
-    all_customers = pd.Index(df["cust"].unique(), name="cust")
-    return counts.reindex(all_customers, fill_value=0)
-
-
-def reactivation_histogram(df):
-    """Rozdelenie zákazníkov podľa počtu reaktivácií."""
-    counts = reactivation_counts(df)
-    # Zaujímajú nás len zákazníci, ktorí mali aspoň dve objednávky —
-    # zákazník s jedinou objednávkou nemá ako byť reaktivovaný.
-    orders_per_customer = df.groupby("cust").size()
-    eligible = counts.loc[orders_per_customer >= 2]
-
-    rows = []
-    for index, label in enumerate(C.REACTIVATION_LABELS):
-        is_last = index == len(C.REACTIVATION_LABELS) - 1
-        if is_last:
-            members = eligible.loc[eligible >= index]
-        else:
-            members = eligible.loc[eligible == index]
-        rows.append({
-            "reactivations": label,
-            "customers": len(members),
-            "share_pct": len(members) / len(eligible) * 100,
-        })
-    return pd.DataFrame(rows).set_index("reactivations")
-
-
-def repeat_reactivation_by_year(df):
-    """Koľko reaktivácií za rok a aký podiel z nich sú opakovaní reaktivanti.
-
-    Odpovedá na otázku, či sa v reaktiváciách netočia stále tí istí zákazníci.
-    """
-    events = reactivation_events(df).sort_values("created_at").copy()
-    events["event_number"] = events.groupby("cust").cumcount() + 1
-    events["year"] = events["created_at"].dt.year
-
-    rows = []
-    for year in data.trend_years(df):
-        year_events = events.loc[events["year"] == year]
-        if len(year_events) == 0:
-            continue
-        repeat = year_events.loc[year_events["event_number"] >= 2]
-        rows.append({
-            "year": year,
-            "label": data.year_label(year),
-            "events": len(year_events),
-            "customers": year_events["cust"].nunique(),
-            "repeat_events": len(repeat),
-            "repeat_pct": len(repeat) / len(year_events) * 100,
-            "gmv": year_events["gmv"].sum(),
-        })
-    return pd.DataFrame(rows).set_index("year")
-
-
-def reactivation_value(df):
-    """Porovná hodnotu opakovane reaktivovaných zákazníkov so stabilnými."""
-    counts = reactivation_counts(df)
-    per_customer = df.groupby("cust").agg(orders=("gmv", "size"), gmv=("gmv", "sum"))
-    per_customer["reactivations"] = counts
-
-    repeat = per_customer.loc[per_customer["reactivations"] >= 2]
-    once = per_customer.loc[per_customer["reactivations"] == 1]
-    stable = per_customer.loc[(per_customer["reactivations"] == 0) & (per_customer["orders"] >= 2)]
-
-    rows = []
-    for label, group in [("stabilní (0 reaktivácií)", stable),
-                         ("1 reaktivácia", once),
-                         ("2+ reaktivácie", repeat)]:
-        rows.append({
-            "group": label,
-            "customers": len(group),
-            "median_orders": group["orders"].median(),
-            "median_ltv": group["gmv"].median(),
-            "total_gmv": group["gmv"].sum(),
-        })
-    return pd.DataFrame(rows).set_index("group")
-
-
 # ── frekvencia objednávania ───────────────────────────────────────────────────
 def orders_per_customer_last_year(df):
     """Počet objednávok každého zákazníka za okno frekvencie."""
@@ -454,8 +281,3 @@ def _frequency_row(label, threshold, counts, gmv, is_top=False):
         "share_at_or_above_pct": at_or_above.sum() / len(counts) * 100,
         "gmv_share_at_or_above_pct": gmv.loc[at_or_above].sum() / gmv.sum() * 100,
     }
-
-
-def max_frequency(df):
-    """Najvyššia frekvencia objednávania v okne."""
-    return int(orders_per_customer_last_year(df).max())

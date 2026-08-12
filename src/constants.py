@@ -8,10 +8,6 @@ import pandas as pd
 INPUT_XLSX = "../data/b2b_orders_cleaned_w_company_name_2.xlsx"
 OUTPUT_HTML = "../data/b2b_gmv_eda.html"
 
-# Druhý, samostatný report — diagnostika KPI account growth. Má vlastný vstupný
-# bod (main_kpi_diagnostics.py) a hlavného reportu sa nedotýka.
-OUTPUT_HTML_KPI_DIAGNOSTICS = "../data/b2b_kpi_diagnostics.html"
-
 # ── viditeľnosť grafov ────────────────────────────────────────────────────────
 # ID grafov, ktoré sa v reporte nevykresľujú (text okolo nich zostáva).
 # ID zodpovedá figure_id/id z charts.py — pri hľadaní ID grafu, ktorý chceš
@@ -58,9 +54,6 @@ CHURN_THRESHOLDS_MONTHS = (3, 6, 12)
 # Prah použitý v analýzach podľa pásma a v prehľadových číslach.
 CHURN_MAIN_THRESHOLD_MONTHS = 6
 
-# Ako dlho dozadu sa meria veľkosť zákazníka pri churne podľa pásma.
-CHURN_BAND_LOOKBACK_MONTHS = 12
-
 # Prvý mesiac churn krivky a zároveň hranica churn bázy — do bázy patrí len
 # účet, ktorý od tohto dátumu aspoň raz nakúpil. Bez tej hranice by v báze
 # navždy zostávali mŕtve účty z rokov 2018–2023 a churn by stúpal len tým, že
@@ -68,9 +61,6 @@ CHURN_BAND_LOOKBACK_MONTHS = 12
 # Je to jedna hodnota pre obe veci zámerne: krivka aj báza majú začínať tam,
 # kde začína zobrazované obdobie.
 CHURN_CURVE_START = pd.Timestamp(year=DISPLAY_START_YEAR, month=1, day=1)
-
-# Medzera bez objednávky, po ktorej sa ďalšia objednávka počíta ako reaktivácia.
-REACTIVATION_GAP_MONTHS = 12
 
 # ── account growth (interné KPI) ──────────────────────────────────────────────
 # Účet mladší ako toto sa do KPI nepočíta. Hodnota nie je voľná:
@@ -85,15 +75,6 @@ ACCOUNT_GROWTH_TARGET_PCT = 60
 # každý bod je nezávislý prierez, takže skrátenie radu nemení hodnoty
 # ostávajúcich bodov, len históriu pred nimi nekreslí.
 ACCOUNT_GROWTH_HISTORY_START = pd.Timestamp(year=DISPLAY_START_YEAR, month=1, day=1)
-
-# Segment menší ako toto sa v rezoch nezobrazuje — pri jednotkách účtov je
-# podiel rastúcich už len šum.
-ACCOUNT_GROWTH_MIN_SEGMENT_SIZE = 15
-
-# Koše počtu objednávok v minuloročnom okne. EDGES sú horné hranice košov,
-# posledný kôš je otvorený a hranicu nemá.
-ACCOUNT_GROWTH_ORDER_EDGES = [0, 1, 2, 5]
-ACCOUNT_GROWTH_ORDER_BUCKETS = ["0", "1", "2", "3–5", "6+"]
 
 # ── diagnostika KPI account growth (druhý report) ─────────────────────────────
 # Účet s najviac týmto počtom objednávok v oboch oknách je porovnávaný na
@@ -124,19 +105,10 @@ KPI_DIAG_REGULAR_LABELS = [
 # 0 = zachránený účet nikdy nerastie (= dnešný stav), 1 = rastie vždy.
 KPI_DIAG_CHURN_PROBABILITIES = (0.0, 0.5, 1.0)
 
-# Stredný predpoklad použitý v kombinovanom scenári. Účet, ktorý by v okne
-# nakúpil, sa dostane medzi účty aktívne v oboch oknách — a tam je rast
-# v podstate hod mincou, preto 0,5.
-KPI_DIAG_CHURN_PREVENTED_GROWTH_RATE = 0.5
-
 # ── veľkostné pásma zákazníkov ────────────────────────────────────────────────
 # Podľa GMV v porovnávacom období.
 BAND_EDGES = [0, 500, 2000, 10000, 50000, float("inf")]
 BAND_LABELS = ["<0,5k €", "0,5–2k €", "2–10k €", "10–50k €", ">50k €"]
-
-# Pásma pre koncentráciu portfólia (ročné GMV zákazníka).
-PORTFOLIO_EDGES = [0, 1000, 5000, 20000, 100000, float("inf")]
-PORTFOLIO_LABELS = ["<1k €", "1–5k €", "5–20k €", "20–100k €", ">100k €"]
 
 # ── ostatné parametre ─────────────────────────────────────────────────────────
 # Koľko top zákazníkov sa sleduje v koncentrácii.
@@ -145,7 +117,6 @@ TOP_N_LEVELS = (1, 5, 10, 20, 50)
 # Krajiny vykazované samostatne. Všetko ostatné sa zlúči do jednej kategórie.
 REPORTED_COUNTRIES = ["SK", "CZ", "HU", "PL"]
 OTHER_MARKET_LABEL = "Ostatné"
-MARKET_ORDER = REPORTED_COUNTRIES + [OTHER_MARKET_LABEL]
 
 # Okno, za ktoré sa meria frekvencia objednávania.
 FREQUENCY_WINDOW_MONTHS = 12
@@ -158,31 +129,17 @@ FREQUENCY_FIRST_BUCKET = 1
 # Posledný kôš zlučuje túto frekvenciu a všetky vyššie a nesie označenie "30+".
 FREQUENCY_TOP_BUCKET = 30
 
-# Koše histogramu počtu reaktivácií za život zákazníka.
-REACTIVATION_LABELS = ["0", "1", "2", "3", "4+"]
-
 # ── farby grafov ──────────────────────────────────────────────────────────────
 COLOR_BLUE = "#2a78d6"
 COLOR_BLUE_LIGHT = "#a9c8ea"
 COLOR_ORANGE = "#eb6834"
 COLOR_TEAL = "#1baf7a"
+COLOR_TEAL_DARK = "#1a9268"
 COLOR_YELLOW = "#eda100"
-COLOR_MAGENTA = "#e87ba4"
-COLOR_GREEN = "#008300"
 COLOR_VIOLET = "#4a3aa7"
 COLOR_RED = "#e34948"
 COLOR_GREY = "#898781"
 COLOR_INK = "#141413"
-
-COUNTRY_PALETTE = [
-    COLOR_BLUE, COLOR_ORANGE, COLOR_TEAL, COLOR_YELLOW,
-    COLOR_MAGENTA, COLOR_GREEN, COLOR_VIOLET, COLOR_RED, COLOR_GREY,
-]
-
-COHORT_PALETTE = [
-    COLOR_BLUE, COLOR_ORANGE, COLOR_TEAL, COLOR_YELLOW,
-    COLOR_MAGENTA, COLOR_GREEN, COLOR_VIOLET, COLOR_RED,
-]
 
 # Farby komponentov medziročnej zmeny GMV.
 BRIDGE_COLORS = {
@@ -209,16 +166,8 @@ ACCOUNT_GROWTH_COLOR_GROWING = COLOR_BLUE
 ACCOUNT_GROWTH_COLOR_DECLINING = COLOR_RED
 ACCOUNT_GROWTH_COLOR_GMV = COLOR_INK
 ACCOUNT_GROWTH_COLOR_TARGET = COLOR_GREY
-ACCOUNT_GROWTH_COLOR_ABOVE_TARGET = COLOR_TEAL
-
-# Tmavšia zelená pre diagnostický report. COLOR_TEAL nemá voči pozadiu kontrast
-# 3:1 a od COLOR_RED sa pri deuteranopii odlíši len s ΔE 6,9 — tento odtieň
-# prejde oboma kontrolami. V hlavnom reporte zámerne nemeníme nič.
-COLOR_TEAL_DARK = "#1a9268"
-
 # Farby v grafoch diagnostiky KPI.
 KPI_DIAG_COLOR_GOOD = COLOR_TEAL_DARK
 KPI_DIAG_COLOR_NEUTRAL = COLOR_BLUE
 KPI_DIAG_COLOR_BAD = COLOR_RED
-KPI_DIAG_COLOR_MUTED = COLOR_GREY
 KPI_DIAG_COLOR_TARGET = COLOR_GREY

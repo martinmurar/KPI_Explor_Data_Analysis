@@ -86,15 +86,6 @@ def data_quality(df):
         "duplicate_ids": int(df["entity_id"].duplicated().sum()),
         "zero_gmv_orders": int((df["gmv"] == 0).sum()),
     }
-
-
-def gmv_by_status(df):
-    """GMV a počet objednávok podľa statusu."""
-    table = df.groupby("status")["gmv"].agg(["count", "sum"])
-    table["share_pct"] = table["sum"] / table["sum"].sum() * 100
-    return table.sort_values("sum", ascending=False)
-
-
 def company_names(df):
     """Najčastejšie použitý company_bill pre každého zákazníka.
 

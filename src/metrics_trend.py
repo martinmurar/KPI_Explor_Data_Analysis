@@ -97,18 +97,3 @@ def _comparable_gmv(df, year, reference_year):
         months = year_orders["created_at"].dt.month
         year_orders = year_orders.loc[months <= C.PARTIAL_YEAR_LAST_MONTH]
     return year_orders["gmv"].sum()
-
-
-def order_value_distribution(df):
-    """Priemer, medián a p95 hodnoty objednávky po rokoch."""
-    summary = yearly_summary(df)
-    return summary[["label", "mean_order", "median_order", "p95_order", "mean_to_median"]]
-
-
-def interpurchase_gap(df):
-    """Medián a priemer dní medzi po sebe idúcimi objednávkami, po rokoch."""
-    ordered = df.sort_values(["cust", "created_at"])
-    ordered = ordered.copy()
-    ordered["gap_days"] = ordered.groupby("cust")["created_at"].diff().dt.days
-    with_gap = ordered.dropna(subset=["gap_days"])
-    return with_gap.groupby("year")["gap_days"].agg(median="median", mean="mean", count="size")

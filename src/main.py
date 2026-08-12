@@ -59,7 +59,6 @@ def _displayed_orders(df):
 def _base_metrics(df):
     """Metriky ostatných sekcií reportu."""
     return {
-        "quality": data.data_quality(df),
         "quality_displayed": data.data_quality(_displayed_orders(df)),
 
         "monthly": metrics_trend.monthly_gmv(df),
@@ -71,13 +70,11 @@ def _base_metrics(df):
         "bridge": metrics_bridge.yearly_bridge(df),
 
         "concentration": metrics_concentration.concentration_by_year(df),
-        "market_summary": metrics_concentration.market_summary(df),
 
         "churn_curves": metrics_churn.churn_curves(df),
         "growth_by_band": metrics_churn.growth_by_band(df),
         "band_window": metrics_churn.band_window(),
         "top_band_detail": metrics_churn.top_band_detail(df),
-        "band_coverage": metrics_churn.band_coverage(df),
         "single_order": metrics_churn.single_order_share(df),
         "frequency": metrics_churn.frequency_histogram(df),
         "frequency_window": metrics_churn.frequency_window(),
