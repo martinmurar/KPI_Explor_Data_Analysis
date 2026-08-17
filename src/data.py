@@ -2,9 +2,12 @@
 """Načítanie a príprava dát o objednávkach.
 
 Rozhodnutia:
-- Statusy sa nefiltrujú. V dátach nie je žiadny `canceled`; nedokončené stavy sú
-  0,3 % GMV, ale v poslednom mesiaci ~10 % (čerstvé objednávky). Filtrovanie na
-  `complete` by posledný mesiac systematicky podhodnotilo.
+- Zrušené objednávky sa vyhadzujú, ostatné statusy nie. Export od verzie
+  `_3` obsahuje aj `canceled` — je to tretina vykazovaného GMV, takže bez
+  odfiltrovania by report tvrdil tržby, ktoré nikdy nevznikli. Rozpracované
+  stavy (sent, processing, pending) zostávajú: sú 0,1 % GMV, ale v poslednom
+  mesiaci sú to čerstvé objednávky a filtrovanie na `complete` by posledný
+  mesiac systematicky podhodnotilo.
 - Zákazník = customer_email (lowercase, strip). Ak firma nakupuje z viacerých
   e-mailov, je v dátach ako viac zákazníkov -> nadhodnocuje new/churn/reactivated.
 """
@@ -20,11 +23,22 @@ def load_orders(path):
     df["created_at"] = pd.to_datetime(df["created_at"])
     df["gmv"] = pd.to_numeric(df["gmv"])
     df["cust"] = df["customer_email"].str.strip().str.lower()
+    df = _drop_canceled(df)
     df = _drop_orders_after_as_of(df)
     df = _add_period_columns(df)
     df = _add_customer_columns(df)
     df["market"] = _market_group(df["country"])
     return df
+
+
+def _drop_canceled(df):
+    """Odstráni zrušené objednávky.
+
+    Staršie exporty ich neobsahovali vôbec, preto sa status nefiltroval. Vo
+    verzii `_3` ich pribudlo 10 416 za 30,5 mil. €; ponechané by nafúkli GMV
+    aj menovateľ KPI o tretinu.
+    """
+    return df.loc[df["status"] != C.CANCELED_STATUS].copy()
 
 
 def _drop_orders_after_as_of(df):
@@ -141,6 +155,27 @@ def last_order_per_customer(df, as_of=None):
 def first_order_per_customer(df):
     """Dátum prvej objednávky každého zákazníka."""
     return df.groupby("cust")["created_at"].min()
+
+
+def without_small_veterans(df):
+    """Objednávky bez zákazníkov, ktorí za celý život minuli málo a už dávno.
+
+    Odfiltrujú sa spodné extrémy: zákazník s celoživotným GMV pod
+    SMALL_VETERAN_LIFETIME_GMV, ktorého prvá objednávka je staršia ako
+    SMALL_VETERAN_AGE_MONTHS. Mladší zákazník zostáva bez ohľadu na útratu —
+    ešte nemal čas rozbehnúť sa a jeho vyradenie by potrestalo čerstvú akvizíciu.
+
+    Vracia objednávky, nie zákazníkov, aby sa výsledok dal poslať do rovnakých
+    metrík ako pôvodný dataset.
+    """
+    lifetime_gmv = df.groupby("cust")["gmv"].sum()
+    first_order = first_order_per_customer(df)
+    cutoff = C.AS_OF - pd.DateOffset(months=C.SMALL_VETERAN_AGE_MONTHS)
+
+    is_small = lifetime_gmv < C.SMALL_VETERAN_LIFETIME_GMV
+    is_veteran = first_order < cutoff
+    dropped = lifetime_gmv.index[is_small & is_veteran]
+    return df.loc[~df["cust"].isin(dropped)]
 
 
 def assign_bands(gmv_series, edges, labels):

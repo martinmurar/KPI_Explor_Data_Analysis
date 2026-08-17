@@ -5,8 +5,16 @@ import pandas as pd
 
 # ── vstup a výstup ────────────────────────────────────────────────────────────
 # INPUT_XLSX = "../data/b2b_orders_cleaned.xlsx"
-INPUT_XLSX = "../data/b2b_orders_cleaned_w_company_name_2.xlsx"
+INPUT_XLSX = "../data/b2b_orders_cleaned_w_company_name_3.xlsx"
 OUTPUT_HTML = "../data/b2b_gmv_eda.html"
+
+# Druhý, samostatný report — drill-in do KPI account growth. Má vlastný vstupný
+# bod (main_drill_in.py) a hlavného reportu sa nedotýka.
+OUTPUT_HTML_DRILL_IN = "../data/b2b_account_growth_drill_in.html"
+
+# Status zrušenej objednávky. Zrušené objednávky sa z datasetu vyhadzujú —
+# nie sú tržbou a v exporte `_3` tvoria tretinu GMV.
+CANCELED_STATUS = "canceled"
 
 # ── viditeľnosť grafov ────────────────────────────────────────────────────────
 # ID grafov, ktoré sa v reporte nevykresľujú (text okolo nich zostáva).
@@ -129,11 +137,38 @@ FREQUENCY_FIRST_BUCKET = 1
 # Posledný kôš zlučuje túto frekvenciu a všetky vyššie a nesie označenie "30+".
 FREQUENCY_TOP_BUCKET = 30
 
+# Drill-in: spodný extrém je zákazník, ktorý za celý život minul menej než
+# SMALL_VETERAN_LIFETIME_GMV a zároveň je starší než SMALL_VETERAN_AGE_MONTHS.
+# Obe podmienky naraz — mladý zákazník s nízkou útratou ešte nemal čas rozbehnúť
+# sa a jeho vyradenie by potrestalo čerstvú akvizíciu.
+#
+# Vek je zosúladený s ACCOUNT_GROWTH_MIN_AGE_MONTHS zámerne: filter tak vyradí
+# presne tie účty, ktoré KPI vôbec posudzuje, a ani o jeden viac. Nižšia hranica
+# by z datasetu brala zákazníkov, ktorých menovateľ aj tak nevidí — na KPI by to
+# nemalo vplyv, ale ostatné rezy nad tým datasetom by tichu prišli o akvizíciu.
+SMALL_VETERAN_LIFETIME_GMV = 1000
+SMALL_VETERAN_AGE_MONTHS = ACCOUNT_GROWTH_MIN_AGE_MONTHS
+
+# Zákazník s jedinou objednávkou sa posudzuje, až keď mal na návrat aspoň toľko
+# času. Bez toho by sa medzi „stratených“ počítala aj čerstvá akvizícia, ktorá
+# druhú objednávku ešte len môže urobiť.
+SINGLE_ORDER_MIN_AGE_MONTHS = 12
+
+# Koše hodnoty objednávky pre porovnanie jednorazových a opakujúcich zákazníkov.
+# EDGES sú horné hranice, posledný kôš je otvorený.
+ORDER_VALUE_EDGES = [100, 300, 1000, 5000]
+ORDER_VALUE_BUCKETS = ["< 100 €", "100–300 €", "300–1 000 €", "1–5 tis. €", "> 5 tis. €"]
+
 # Koše pre rez KPI podľa počtu objednávok za FREQUENCY_WINDOW_MONTHS mesiacov.
-# EDGES sú horné hranice, posledný kôš je otvorený a hranicu nemá. Koše musia
-# byť disjunktné — účet s 12 objednávkami patrí do „6–12“, nie aj do „13–30“.
-KPI_ORDER_COUNT_EDGES = [0, 1, 2, 5, 12, 30]
-KPI_ORDER_COUNT_BUCKETS = ["0", "1", "2", "3–5", "6–12", "13–30", "31+"]
+# EDGES sú horné hranice prvých košov, posledný kôš je otvorený a hranicu nemá,
+# takže BUCKETS má o jeden prvok viac. Koše musia byť disjunktné — účet s 15
+# objednávkami patrí do „6–15“, nie aj do „16–25“.
+#
+# Komentár pod grafom číta koše po skupinách: prvý je mŕtve účty, druhý a tretí
+# tenký chvost, prostredné tvoria plató a posledný je otvorený. Pri zmene počtu
+# košov to platí ďalej, pri zmene ich poradia už nie.
+KPI_ORDER_COUNT_EDGES = [0, 1, 2, 5, 15, 25, 30]
+KPI_ORDER_COUNT_BUCKETS = ["0", "1", "2", "3–5", "6–15", "16–25", "26–30", "31+"]
 
 # ── farby grafov ──────────────────────────────────────────────────────────────
 COLOR_BLUE = "#2a78d6"

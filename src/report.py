@@ -62,6 +62,17 @@ li{margin-bottom:7px}
 .sec[open]>summary::before{transform:rotate(90deg)}
 .sec:not([open])>summary{margin-bottom:0}
 .sec:not([open])+.sec>summary{margin-top:22px}
+.roll>summary{font-size:14px;font-weight:500;color:var(--ink2);cursor:pointer;
+ list-style:none;display:flex;align-items:center;gap:8px;user-select:none;margin:24px 0 0}
+.roll>summary::-webkit-details-marker{display:none}
+.roll>summary:hover{color:var(--ink)}
+.roll>summary::before{content:"";width:0;height:0;flex:none;
+ border-left:5px solid var(--mut);border-top:4px solid transparent;
+ border-bottom:4px solid transparent;transition:transform .15s}
+.roll[open]>summary::before{transform:rotate(90deg)}
+.sel{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:12.5px;color:var(--ink2)}
+.sel select{font:inherit;font-size:12.5px;color:var(--ink);background:var(--card);
+ border:1px solid var(--bd);border-radius:7px;padding:5px 10px;max-width:100%}
 .fold{display:flex;gap:8px;margin:26px 0 0}
 .fold button{font:inherit;font-size:13px;color:var(--ink2);background:var(--card);
  border:1px solid var(--bd);border-radius:7px;padding:5px 12px;cursor:pointer}
@@ -107,10 +118,20 @@ function buildDataset(series, spec) {
     // súčet s prvou a pri y_max = 100 vypadne z grafu.
     if (spec.stacked) { dataset.stack = 'line-' + series.label; }
   } else {
+    dataset.hoverExtras = series.hover_extras || null;
     dataset.backgroundColor = series.point_colors || series.color;
     dataset.borderRadius = 3;
     dataset.order = 1;
     if (spec.stacked) { dataset.stack = 'total'; }
+    // grouped:false vykreslí sériu cez predchádzajúcu namiesto vedľa nej.
+    // Užší stĺpec necháva spodnú sériu po stranách vidieť, order:0 ju kreslí
+    // navrch — bez toho by ju spodná séria prekryla.
+    if (series.overlay) {
+      dataset.grouped = false;
+      dataset.barPercentage = 0.5;
+      dataset.categoryPercentage = 0.9;
+      dataset.order = 0;
+    }
   }
   return dataset;
 }
@@ -141,7 +162,7 @@ function buildChart(spec) {
   const valueAxis = buildValueAxis(spec);
   const categoryAxis = buildCategoryAxis(spec);
 
-  new Chart(document.getElementById(spec.id), {
+  const chart = new Chart(document.getElementById(spec.id), {
     data: {
       labels: spec.labels,
       datasets: spec.datasets.map(series => buildDataset(series, spec))
@@ -150,15 +171,53 @@ function buildChart(spec) {
       responsive: true,
       maintainAspectRatio: false,
       indexAxis: spec.index_axis,
+      // hover_mode 'index' ukáže v jednom tooltipe všetky série daného koša.
+      // Pri prekryte je to jediný spôsob, ako sa dostať k číslam série, ktorú
+      // tá druhá celou šírkou zakrýva.
+      //
+      // axis musí sedieť s indexAxis. Bez toho Chart.js hľadá najbližší prvok
+      // po osi x aj vo vodorovnom grafe, takže pri kurzore nad krátkym stĺpcom
+      // trafí ten kôš, ktorého dĺžka je náhodou najbližšie — typicky najdlhší.
+      interaction: spec.hover_mode
+        ? {mode: spec.hover_mode, intersect: false, axis: horizontal ? 'y' : 'x'}
+        : {mode: 'nearest', intersect: true},
       plugins: {
         legend: {display: false},
-        tooltip: {callbacks: {
+        tooltip: {
+          // Neproporcionálne písmo drží stĺpce zarovnanej tabuľky pod sebou.
+          bodyFont: spec.hover_font === 'mono'
+            ? {family: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'}
+            : {},
+          // Poradie sérií v tooltipe má sedieť s poradím v legende, nie
+          // s poradím kreslenia — prekrytá séria sa kreslí navrch a bez tohto
+          // by v tooltipe skočila na prvé miesto.
+          itemSort: (a, b) => a.datasetIndex - b.datasetIndex,
+          callbacks: {
           label: item => {
+            // hover_labels_only: hodnota je v zarovnanej tabuľke nižšie, tu
+            // zostáva len názov série s farebným štvorčekom ako legenda.
+            if (spec.hover_labels_only) { return item.dataset.label; }
             const value = horizontal ? item.parsed.x : item.parsed.y;
             const format = item.dataset.valueFormat;
             return item.dataset.label + ': ' + FORMATTERS[format].tip(value);
           },
           afterBody: items => {
+            // Riadky na úrovni série majú prednosť: pri dvoch sériách nad
+            // rôznymi datasetmi sú spoločné riadky grafu nepoužiteľné, lebo
+            // by ku každej sérii vypísali čísla toho istého datasetu.
+            const perSeries = items.filter(item => item.dataset.hoverExtras);
+            if (perSeries.length) {
+              // Názov série sa pred riadky píše len keď je sérií viac. Pri
+              // jednej by len zopakoval to, čo je o riadok vyššie pri hodnote.
+              const named = perSeries.length > 1;
+              const lines = [];
+              perSeries.forEach(item => {
+                if (named) { lines.push(item.dataset.label + ':'); }
+                (item.dataset.hoverExtras[item.dataIndex] || []).forEach(
+                  line => lines.push(named ? '  ' + line : line));
+              });
+              return lines;
+            }
             if (!spec.hover_extras) { return []; }
             return spec.hover_extras[items[0].dataIndex] || [];
           }
@@ -169,6 +228,30 @@ function buildChart(spec) {
         : {x: categoryAxis, y: valueAxis}
     }
   });
+
+  if (spec.selector) { wireSelector(spec, chart); }
+}
+
+// Prepínač série. Prekresľujú sa len dáta a názov série — popisky osi zostávajú,
+// preto musia mať všetky série rovnakú dĺžku (o to sa stará Python).
+function wireSelector(spec, chart) {
+  const select = document.getElementById('sel-' + spec.id);
+  if (!select) { return; }
+
+  const apply = () => {
+    const chosen = select.value;
+    chart.data.datasets[0].data = spec.selector.series[chosen];
+    chart.data.datasets[0].label = select.options[select.selectedIndex].text;
+    // Riadky hoveru patria k účtu, nie ku grafu — musia sa prepnúť spolu
+    // s dátami, inak by pri druhom účte ostali počty objednávok toho prvého.
+    if (spec.selector.hover) {
+      chart.data.datasets[0].hoverExtras = spec.selector.hover[chosen];
+    }
+    chart.update();
+  };
+
+  select.addEventListener('change', apply);
+  apply();
 }
 
 SPECS.forEach(buildChart);
@@ -280,8 +363,27 @@ def render_figure(spec):
 
     return (f'<div class="fig"><h4>{escape(spec["title"])}</h4>'
             f'<p class="cap">{escape(spec["caption"])}</p>{legend}'
+            f'{_render_selector(spec)}'
             f'<div class="cv" style="height:{spec["height"]}px">'
             f'<canvas id="{spec["id"]}"></canvas></div></div>')
+
+
+def _render_selector(spec):
+    """Rozbaľovací zoznam nad grafom, ak graf prepína medzi sériami.
+
+    Vykresľuje sa len HTML; naviazanie na graf robí JS v CHART_BUILDER_JS.
+    """
+    selector = spec.get("selector")
+    if not selector:
+        return ""
+
+    options = []
+    for option in selector["options"]:
+        options.append(f'<option value="{escape(option["value"])}">'
+                       f'{escape(option["label"])}</option>')
+    return (f'<div class="sel"><label for="sel-{spec["id"]}">'
+            f'{escape(selector["label"])}</label>'
+            f'<select id="sel-{spec["id"]}">' + "".join(options) + "</select></div>")
 
 
 def render_kpi_cards(cards):
@@ -291,6 +393,16 @@ def render_kpi_cards(cards):
         blocks.append(f'<div><p class="l">{escape(label)}</p>'
                       f'<p class="v">{escape(value)}</p></div>')
     return '<div class="kpi">' + "".join(blocks) + "</div>"
+
+
+def render_rollup(title, content):
+    """Zabalí obsah do zroloateľného bloku s vlastným nadpisom.
+
+    Na dlhé tabuľky, ktoré patria do reportu ako podklad, ale nemajú ho zaberať
+    celý. Na rozdiel od render_collapsible sa nepoužíva na celé sekcie.
+    """
+    return (f'<details class="roll"><summary>{escape(title)}</summary>\n'
+            f"{content}</details>")
 
 
 def render_note(text):

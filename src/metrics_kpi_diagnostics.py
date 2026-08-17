@@ -244,3 +244,226 @@ def _thin_share(table):
     limit = C.KPI_DIAG_THIN_ORDERS
     thin = table.loc[(table["previous_orders"] <= limit) & (table["current_orders"] <= limit)]
     return len(thin) / len(table) * 100
+
+
+# ── účty vyradené filtrom spodných extrémov ───────────────────────────────────
+# Popisky rozpadu vyradených účtov podľa aktivity za posledný rok.
+DROPPED_DORMANT = "Bez objednávky za rok"
+DROPPED_ACTIVE = "Aspoň jedna objednávka za rok"
+DROPPED_ACTIVITY_ORDER = [DROPPED_DORMANT, DROPPED_ACTIVE]
+
+
+def dropped_accounts(table, filtered_table, df):
+    """Detail účtov, ktoré filter spodných extrémov vyradí z menovateľa KPI.
+
+    Nie je to celý odfiltrovaný dataset — drvivá väčšina odfiltrovaných
+    zákazníkov v menovateli nikdy nebola. Zaujímavé sú práve tie účty, ktoré
+    v ňom boli a filtrom z neho vypadli, lebo len tie hýbu hodnotou KPI.
+
+    „Za celý život“ znamená od začiatku dát, nie od C.DISPLAY_START_YEAR.
+    """
+    dropped = table.index.difference(filtered_table.index)
+    start, end = metrics_bridge.gmv_window(C.AS_OF, C.FREQUENCY_WINDOW_MONTHS)
+    window = data.orders_in_window(df, start, end)
+    names = data.company_names(df)
+
+    detail = table.loc[dropped, ["country", "growing"]].copy()
+    detail["name"] = [names.get(cust, cust) for cust in detail.index]
+    detail["lifetime_gmv"] = df.groupby("cust")["gmv"].sum().reindex(dropped)
+    detail["lifetime_orders"] = df.groupby("cust").size().reindex(dropped)
+    detail["gmv_12m"] = window.groupby("cust")["gmv"].sum().reindex(dropped).fillna(0.0)
+    detail["orders_12m"] = window.groupby("cust").size().reindex(dropped).fillna(0).astype(int)
+    detail["last_order"] = data.last_order_per_customer(df, as_of=C.AS_OF).reindex(dropped)
+    return detail.sort_values("lifetime_gmv", ascending=False)
+
+
+def dropped_activity_split(detail):
+    """Vyradené účty rozdelené podľa aktivity za rok a podľa príznaku rastu.
+
+    Rozdelenie ukazuje, prečo filter KPI nezdvihol: v jednej skupine sú samé
+    klesajúce účty, v druhej prevažne rastúce, a filter vzal obe naraz.
+    """
+    dormant = detail.loc[detail["orders_12m"] == 0]
+    active = detail.loc[detail["orders_12m"] > 0]
+
+    rows = []
+    for label, members in [(DROPPED_DORMANT, dormant), (DROPPED_ACTIVE, active)]:
+        rows.append({
+            "segment": label,
+            "customers": len(members),
+            "growing": int(members["growing"].sum()),
+            "declining": int((~members["growing"]).sum()),
+            "lifetime_gmv": members["lifetime_gmv"].sum(),
+            "gmv_12m": members["gmv_12m"].sum(),
+        })
+    return pd.DataFrame(rows).set_index("segment")
+
+
+def largest_account(table, df):
+    """Najväčší posudzovaný účet podľa GMV za posledný rok.
+
+    Slúži ako mierka pre vyradenú skupinu — bez porovnania s niečím známym je
+    súčet za štyridsiatku drobných účtov len ďalšie číslo.
+    """
+    start, end = metrics_bridge.gmv_window(C.AS_OF, C.FREQUENCY_WINDOW_MONTHS)
+    window = data.orders_in_window(df, start, end)
+    gmv = window.groupby("cust")["gmv"].sum().reindex(table.index).fillna(0.0)
+    cust = gmv.idxmax()
+    names = data.company_names(df)
+    return {"name": names.get(cust, cust), "gmv_12m": gmv.max()}
+
+
+def dropped_by_country(detail):
+    """Vyradené účty podľa krajiny, od najpočetnejšej."""
+    counts = detail.groupby("country").size().sort_values(ascending=False)
+    return counts.rename("customers").to_frame()
+
+
+# ── zákazníci s jedinou objednávkou za život ──────────────────────────────────
+def single_order_accounts(df):
+    """Objednávky zákazníkov, ktorí za celý život objednali práve raz.
+
+    Berú sa len tí, ktorých jediná objednávka je staršia ako
+    SINGLE_ORDER_MIN_AGE_MONTHS — mladší zákazník ešte mal čas vrátiť sa
+    a medzi stratených nepatrí.
+
+    Keďže má každý z nich práve jednu objednávku, riadok objednávky je zároveň
+    riadkom zákazníka a dá sa s ním ďalej pracovať priamo.
+    """
+    cutoff = C.AS_OF - pd.DateOffset(months=C.SINGLE_ORDER_MIN_AGE_MONTHS)
+    orders_per_customer = df.groupby("cust").size()
+    first_order = data.first_order_per_customer(df)
+
+    is_single = orders_per_customer == 1
+    is_mature = first_order < cutoff
+    accounts = orders_per_customer.index[is_single & is_mature]
+    return df.loc[df["cust"].isin(accounts)].copy()
+
+
+def repeat_first_orders(df):
+    """Prvé objednávky zákazníkov, ktorí sa neskôr vrátili.
+
+    Porovnávacia skupina k single_order_accounts: rovnaká udalosť (prvý nákup),
+    rovnaké obmedzenie veku, iný osud zákazníka.
+    """
+    cutoff = C.AS_OF - pd.DateOffset(months=C.SINGLE_ORDER_MIN_AGE_MONTHS)
+    orders_per_customer = df.groupby("cust").size()
+    repeat = orders_per_customer.index[orders_per_customer > 1]
+
+    first = df.loc[df["cust"].isin(repeat)].sort_values("created_at")
+    first = first.drop_duplicates("cust")
+    return first.loc[first["created_at"] < cutoff]
+
+
+def order_value_mix(single, repeat_first):
+    """Rozdelenie hodnoty prvej objednávky v oboch skupinách, v percentách.
+
+    Percentá, nie počty — skupiny sú rôzne veľké a v absolútnych číslach by sa
+    tvary rozdelení nedali porovnať.
+    """
+    rows = []
+    for label in C.ORDER_VALUE_BUCKETS:
+        rows.append({
+            "segment": label,
+            "single_pct": _value_bucket_share(single, label),
+            "repeat_pct": _value_bucket_share(repeat_first, label),
+            "customers": int(_value_bucket_mask(single, label).sum()),
+            "gmv": single.loc[_value_bucket_mask(single, label), "gmv"].sum(),
+        })
+    return pd.DataFrame(rows).set_index("segment")
+
+
+def _value_bucket_mask(orders, label):
+    """Maska objednávok patriacich do koša hodnoty."""
+    position = C.ORDER_VALUE_BUCKETS.index(label)
+    low = C.ORDER_VALUE_EDGES[position - 1] if position > 0 else 0.0
+    if position < len(C.ORDER_VALUE_EDGES):
+        return (orders["gmv"] >= low) & (orders["gmv"] < C.ORDER_VALUE_EDGES[position])
+    return orders["gmv"] >= low
+
+
+def _value_bucket_share(orders, label):
+    """Podiel objednávok v koši hodnoty."""
+    return _value_bucket_mask(orders, label).mean() * 100
+
+
+def single_order_by_year(single):
+    """Zákazníci s jedinou objednávkou podľa roku tej objednávky."""
+    grouped = single.groupby("year").agg(customers=("cust", "size"), gmv=("gmv", "sum"))
+    return grouped.sort_index()
+
+
+# ── účty, ktoré odišli do nuly ────────────────────────────────────────────────
+def dropped_to_zero_accounts(table, df):
+    """Účty s nenulovým GMV v minuloročnom okne a nulovým v aktuálnom.
+
+    V rozklade menovateľa je to skupina COMPOSITION_DROPPED. Sú to zabehnutí
+    odberatelia, nie drobní jednorázoví zákazníci — preto stojí za to pozrieť
+    sa na ne menovite.
+    """
+    accounts = table.loc[(table["previous"] > 0) & (table["current"] == 0)].copy()
+    names = data.company_names(df)
+
+    accounts["name"] = [names.get(cust, cust) for cust in accounts.index]
+    accounts["lifetime_gmv"] = df.groupby("cust")["gmv"].sum().reindex(accounts.index)
+    accounts["lifetime_orders"] = df.groupby("cust").size().reindex(accounts.index)
+    accounts["last_order"] = data.last_order_per_customer(df, as_of=C.AS_OF).reindex(accounts.index)
+    accounts["months_silent"] = ((C.AS_OF - accounts["last_order"]).dt.days / 30.44).round(1)
+    accounts["mean_order"] = df.groupby("cust")["gmv"].mean().reindex(accounts.index)
+    accounts["median_order"] = df.groupby("cust")["gmv"].median().reindex(accounts.index)
+    accounts["orders_per_month"] = _orders_per_month(accounts, df)
+    return accounts.sort_values("previous", ascending=False)
+
+
+def _orders_per_month(accounts, df):
+    """Priemerná frekvencia objednávok za celý život účtu.
+
+    Vzťah sa meria od prvej po poslednú objednávku, nie po C.AS_OF — ticho po
+    odchode nie je súčasťou toho, ako často účet nakupoval, kým nakupoval.
+    Vzťah kratší než mesiac sa počíta ako mesiac, aby jednodňový účet nevyšiel
+    ako extrémne frekventovaný.
+    """
+    first_order = data.first_order_per_customer(df).reindex(accounts.index)
+    tenure_months = (accounts["last_order"] - first_order).dt.days / 30.44
+    return accounts["lifetime_orders"] / tenure_months.clip(lower=1.0)
+
+
+def last_order_cluster(accounts):
+    """Počet odídených účtov podľa mesiaca ich poslednej objednávky.
+
+    Zhluk v čase je najlacnejší test na spoločnú príčinu — ak účty prestali
+    nakupovať naraz, ide skôr o udalosť na našej strane než o 220 nezávislých
+    obchodných rozhodnutí.
+    """
+    grouped = accounts.groupby(accounts["last_order"].dt.to_period("M")).agg(
+        customers=("previous", "size"),
+        previous_gmv=("previous", "sum"),
+    )
+    months = pd.period_range(start=grouped.index.min(), end=grouped.index.max(), freq="M")
+    return grouped.reindex(months, fill_value=0)
+
+
+def monthly_gmv_by_account(df, accounts):
+    """Mesačné GMV každého zadaného účtu, na spoločnej časovej osi."""
+    return _monthly_by_account(df, accounts, "sum")
+
+
+def monthly_orders_by_account(df, accounts):
+    """Mesačný počet objednávok každého zadaného účtu, na spoločnej časovej osi."""
+    return _monthly_by_account(df, accounts, "size").astype(int)
+
+
+def _monthly_by_account(df, accounts, aggfunc):
+    """Mesačný rez podľa účtu, na spoločnej časovej osi.
+
+    Spoločná os je nutná — graf s prepínačom účtov prekresľuje len dáta, nie
+    popisky, takže všetky série musia mať rovnakú dĺžku. Mesiace bez objednávky
+    sú nuly, nie chýbajúce hodnoty, inak by v grafe vznikli diery.
+    """
+    start = pd.Timestamp(year=C.DISPLAY_START_YEAR, month=1, day=1)
+    window = df.loc[(df["created_at"] >= start) & (df["cust"].isin(accounts))]
+
+    months = pd.period_range(start=start, end=C.AS_OF, freq="M")
+    monthly = window.pivot_table(index="month", columns="cust", values="gmv",
+                                 aggfunc=aggfunc, fill_value=0)
+    return monthly.reindex(index=months, columns=accounts, fill_value=0).fillna(0)

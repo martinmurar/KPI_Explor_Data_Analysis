@@ -40,7 +40,6 @@ def _account_growth_metrics(df):
         "account_growth_history": metrics_account_growth.history(df),
         "diag_summary": metrics_kpi_diagnostics.diagnostics_summary(table, df),
         "diag_frequency": metrics_kpi_diagnostics.frequency_effect(table),
-        "diag_by_order_count": metrics_kpi_diagnostics.kpi_by_order_count(table, df),
         "diag_activity_split": metrics_kpi_diagnostics.activity_split(table, df),
         "diag_regular_scenario": metrics_kpi_diagnostics.regular_ordering_scenario(table, df),
         "diag_churn_sensitivity": metrics_kpi_diagnostics.churn_prevented_sensitivity(table, df),

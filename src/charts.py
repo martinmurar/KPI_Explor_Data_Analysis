@@ -25,11 +25,20 @@ import formatting
 
 
 def _series(label, values, color, chart_type="bar", dashed=False,
-            point_colors=None, value_format=None):
+            point_colors=None, value_format=None, overlay=False,
+            hover_extras=None):
     """Jedna séria grafu.
 
     value_format prepíše formát čísiel grafu — použije sa, keď má séria inú
     jednotku ako zvyšok grafu (napríklad percentá vedľa absolútnych počtov).
+
+    overlay=True vykreslí sériu cez predchádzajúcu, nie vedľa nej, a užšie —
+    tak, aby spodná séria zostala po stranách vidieť. Slúži na porovnanie tej
+    istej metriky nad dvoma datasetmi.
+
+    hover_extras sú riadky do tooltipu patriace tejto sérii. Pri dvoch sériách
+    nad rôznymi datasetmi nestačia riadky na úrovni grafu — tie sú spoločné pre
+    obe série a ukázali by čísla len jedného datasetu.
     """
     return {
         "label": label,
@@ -39,6 +48,8 @@ def _series(label, values, color, chart_type="bar", dashed=False,
         "dashed": dashed,
         "point_colors": point_colors,
         "value_format": value_format,
+        "overlay": overlay,
+        "hover_extras": hover_extras,
     }
 
 
@@ -68,6 +79,10 @@ def _figure(figure_id, title, caption, chart_type, labels, datasets, **options):
         "y_max": options.get("y_max"),
         "y_begin_at_zero": options.get("y_begin_at_zero", True),
         "hover_extras": options.get("hover_extras"),
+        "hover_mode": options.get("hover_mode"),
+        "hover_font": options.get("hover_font"),
+        "hover_labels_only": options.get("hover_labels_only", False),
+        "selector": options.get("selector"),
     }
     return figure
 
@@ -407,29 +422,104 @@ def kpi_frequency_effect(frequency, reference_pct):
     )
 
 
-def kpi_by_order_count(breakdown, reference_pct):
-    """KPI osobitne pre každý kôš podľa počtu objednávok za rok."""
+def kpi_by_order_count(breakdown, reference_pct, filtered=None):
+    """KPI osobitne pre každý kôš podľa počtu objednávok za rok.
+
+    Ak je zadaný filtered, vykreslí sa ako užšia svetlá séria cez plnú — ten
+    istý rez nad datasetom bez spodných extrémov. Prekryv namiesto stĺpcov
+    vedľa seba drží obe hodnoty na tej istej pozícii, takže rozdiel medzi nimi
+    je vidieť ako presah spodnej série, nie ako vzdialenosť dvoch stĺpcov.
+    """
     values = list(breakdown["growing_pct"])
+    series = [_series("Celý dataset", values, C.KPI_DIAG_COLOR_NEUTRAL,
+                      point_colors=_kpi_status_colors(values, reference_pct))]
+    if filtered is None:
+        hover = _order_count_hover(breakdown)
+    else:
+        series.append(_series("Bez spodných extrémov", list(filtered["growing_pct"]),
+                              C.COLOR_BLUE_LIGHT, overlay=True))
+        hover = _order_count_comparison_hover(breakdown, filtered)
+
     return _figure(
         "kpi_by_order_count",
         f"Account growth podľa počtu objednávok za {C.FREQUENCY_WINDOW_MONTHS} mesiacov",
         f"V %. Kôš určuje počet objednávok za posledných {C.FREQUENCY_WINDOW_MONTHS} "
         f"mesiacov. {_population_note(int(breakdown['customers'].sum()), 'posudzovanými účtami')} "
-        f"Zelená je nad cieľom {C.ACCOUNT_GROWTH_TARGET_PCT} %, červená pod celkovým KPI.",
+        f"Farba spodnej série: zelená nad cieľom {C.ACCOUNT_GROWTH_TARGET_PCT} %, "
+        f"červená pod celkovým KPI. Svetlá séria navrchu je ten istý rez nad datasetom "
+        f"bez zákazníkov s celoživotným GMV pod "
+        f"{formatting.format_eur(C.SMALL_VETERAN_LIFETIME_GMV)}, ktorí sú zároveň starší "
+        f"ako {C.SMALL_VETERAN_AGE_MONTHS} mesiacov.",
         "bar",
         breakdown.index,
-        [_series("% rastúcich účtov", values, C.KPI_DIAG_COLOR_NEUTRAL,
-                 point_colors=_kpi_status_colors(values, reference_pct))],
-        height=max(200, 34 * len(breakdown) + 60),
+        series,
+        height=max(200, 40 * len(breakdown) + 60),
         index_axis="y",
         value_format="pct",
         y_max=100,
-        hover_extras=_kpi_hover(breakdown, lambda row: [
-            f"Účtov: {formatting.format_number(row['customers'])}",
-            f"Rastúcich: {formatting.format_number(row['growing'])}",
-            f"Netto zmena GMV: {formatting.format_signed_eur(row['net_delta'])}",
-        ]),
+        hover_mode="index",
+        hover_extras=hover,
+        hover_font="mono",
+        hover_labels_only=filtered is not None,
     )
+
+
+# Popisky riadkov porovnávacej tabuľky v hoveri a stĺpce, z ktorých sa plnia.
+ORDER_COUNT_HOVER_ROWS = [
+    ("% rastúcich", "growing_pct", formatting.format_pct),
+    ("Účtov", "customers", formatting.format_number),
+    ("Rastúcich", "growing", formatting.format_number),
+    ("Netto GMV", "net_delta", formatting.format_signed_eur),
+]
+
+# Hlavičky stĺpcov porovnávacej tabuľky. Kratšie než názvy sérií v legende —
+# tooltip musí zostať úzky, identitu sérií nesie farebný štvorček nad tabuľkou.
+ORDER_COUNT_HOVER_HEADERS = ("celý", "filtrovaný")
+
+
+def _order_count_comparison_hover(breakdown, filtered):
+    """Zarovnaná porovnávacia tabuľka do hoveru: jeden riadok na metriku.
+
+    Šírky stĺpcov sa počítajú cez všetky koše naraz, nie pre každý zvlášť —
+    tabuľka tak pri prechode myšou po grafe neposkakuje. Zarovnanie medzerami
+    funguje len v neproporcionálnom písme, preto hover_font="mono".
+    """
+    label_width = max(len(label) for label, _, _ in ORDER_COUNT_HOVER_ROWS)
+    label_width = max(label_width, len(""))
+    left_width = _hover_column_width(breakdown, ORDER_COUNT_HOVER_HEADERS[0])
+    right_width = _hover_column_width(filtered, ORDER_COUNT_HOVER_HEADERS[1])
+
+    header = ("".ljust(label_width) + "  "
+              + ORDER_COUNT_HOVER_HEADERS[0].rjust(left_width) + "  "
+              + ORDER_COUNT_HOVER_HEADERS[1].rjust(right_width))
+
+    lines = []
+    for bucket in breakdown.index:
+        rows = [header]
+        for label, column, formatter in ORDER_COUNT_HOVER_ROWS:
+            rows.append(label.ljust(label_width) + "  "
+                        + formatter(breakdown.loc[bucket, column]).rjust(left_width) + "  "
+                        + formatter(filtered.loc[bucket, column]).rjust(right_width))
+        lines.append(rows)
+    return lines
+
+
+def _hover_column_width(breakdown, header):
+    """Najširšia hodnota stĺpca naprieč všetkými košmi, vrátane hlavičky."""
+    width = len(header)
+    for _, column, formatter in ORDER_COUNT_HOVER_ROWS:
+        for bucket in breakdown.index:
+            width = max(width, len(formatter(breakdown.loc[bucket, column])))
+    return width
+
+
+def _order_count_hover(breakdown):
+    """Riadky do hoveru pre jednu sériu rezu podľa počtu objednávok."""
+    return _kpi_hover(breakdown, lambda row: [
+        f"Účtov: {formatting.format_number(row['customers'])}",
+        f"Rastúcich: {formatting.format_number(row['growing'])}",
+        f"Netto zmena GMV: {formatting.format_signed_eur(row['net_delta'])}",
+    ])
 
 
 _ACTIVITY_COLORS = [
@@ -522,5 +612,135 @@ def kpi_churn_sensitivity(sensitivity):
         hover_extras=_kpi_hover(sensitivity, lambda row: [
             f"Posudzovaných účtov: {formatting.format_number(row['customers'])}",
             f"Zachránených účtov: {formatting.format_number(row['prevented'])}",
+        ]),
+    )
+
+
+def dropped_activity_split(split):
+    """Vyradené účty podľa aktivity za rok, rozdelené na rastúce a klesajúce."""
+    return _figure(
+        "dropped_activity",
+        "Účty vyradené filtrom podľa aktivity za posledný rok",
+        f"Počet účtov. Ľavá skupina je z definície celá klesajúca — bez objednávky "
+        f"za {C.FREQUENCY_WINDOW_MONTHS} mesiacov nemá účet GMV ani v okne KPI. "
+        f"{_population_note(int(split['customers'].sum()), 'účtami vyradenými z menovateľa')}",
+        "bar",
+        split.index,
+        [
+            _series("Rastúce", split["growing"], C.KPI_DIAG_COLOR_GOOD),
+            _series("Klesajúce", split["declining"], C.KPI_DIAG_COLOR_BAD),
+        ],
+        height=260,
+        stacked=True,
+        value_format="count",
+        hover_extras=_kpi_hover(split, lambda row: [
+            f"Účtov spolu: {formatting.format_number(row['customers'])}",
+            f"Lifetime GMV: {formatting.format_eur(row['lifetime_gmv'])}",
+            f"GMV za rok: {formatting.format_eur(row['gmv_12m'])}",
+        ]),
+    )
+
+
+def order_value_mix(mix):
+    """Rozdelenie hodnoty prvej objednávky: jednorazoví vs opakujúci zákazníci."""
+    return _figure(
+        "order_value_mix",
+        "Hodnota prvej objednávky — jednorazoví vs opakujúci zákazníci",
+        "V % zákazníkov v danej skupine. Percentá, nie počty — skupiny sú rôzne veľké. "
+        "Ak by sa dalo z prvej objednávky poznať, kto sa vráti, tvary by sa líšili.",
+        "bar",
+        mix.index,
+        [
+            _series("Jednorazoví", mix["single_pct"], C.KPI_DIAG_COLOR_BAD),
+            _series("Opakujúci (prvá objednávka)", mix["repeat_pct"], C.KPI_DIAG_COLOR_NEUTRAL),
+        ],
+        height=300,
+        value_format="pct",
+    )
+
+
+def single_order_by_year(by_year, window_months):
+    """Počet jednorazových zákazníkov podľa roku ich jedinej objednávky."""
+    return _figure(
+        "single_order_year",
+        "Jednorazoví zákazníci podľa roku ich jedinej objednávky",
+        f"Počet zákazníkov. Posledných {window_months} mesiacov je vynechaných — "
+        f"kto nakúpil nedávno, ešte mal čas vrátiť sa a medzi stratených nepatrí. "
+        f"Posledný rok je preto nekompletný.",
+        "bar",
+        [str(year) for year in by_year.index],
+        [_series("Zákazníkov", by_year["customers"], C.COLOR_BLUE)],
+        height=300,
+        value_format="count",
+        hover_extras=_kpi_hover(by_year, lambda row: [
+            f"GMV: {formatting.format_eur(row['gmv'])}",
+        ]),
+    )
+
+
+def account_gmv_timeline(monthly, orders, accounts, figure_id, group_note):
+    """Mesačné GMV jedného účtu, s prepínačom medzi účtami.
+
+    Všetky série sú v špecifikácii naraz; prehliadač len prepína, ktorá sa
+    kreslí. Pri dvoch stovkách účtov je to lacnejšie než dvesto samostatných
+    grafov a používateľ nemusí nič načítavať.
+
+    figure_id a group_note sú tu preto, že ten istý graf sa kreslí pre viac
+    skupín účtov; dva grafy s rovnakým ID by sa pobili o ten istý <canvas>.
+    """
+    options = []
+    series = {}
+    hover = {}
+    for cust in monthly.columns:
+        series[cust] = [_clean(value) for value in monthly[cust]]
+        hover[cust] = _account_hover(orders[cust])
+        options.append({"value": cust, "label": _account_option_label(accounts, cust)})
+
+    first = monthly.columns[0]
+    return _figure(
+        figure_id,
+        "GMV účtu v čase",
+        f"V €, po mesiacoch od {C.DISPLAY_START_YEAR}. Mesiac bez objednávky je nula, "
+        f"nie chýbajúca hodnota. Účet vyber v zozname nad grafom — {group_note}, "
+        f"zoradené podľa GMV v minuloročnom okne. V hover je aj počet objednávok.",
+        "bar",
+        [str(month) for month in monthly.index],
+        [_series("GMV", monthly[first], C.COLOR_BLUE)],
+        height=320,
+        value_format="eur",
+        selector={"label": "Účet:", "options": options,
+                  "series": series, "hover": hover},
+    )
+
+
+def _account_hover(monthly_orders):
+    """Riadky do hoveru pre jeden účet: počet objednávok v danom mesiaci."""
+    lines = []
+    for count in monthly_orders:
+        lines.append([f"Objednávok: {formatting.format_number(count)}"])
+    return lines
+
+
+def _account_option_label(accounts, cust):
+    """Popisok účtu v prepínači: názov firmy a jeho minuloročné GMV."""
+    row = accounts.loc[cust]
+    return f"{row['name']} — {formatting.format_eur(row['previous'])}"
+
+
+def last_order_cluster(cluster, figure_id, group_note):
+    """Kedy účty danej skupiny naposledy nakúpili."""
+    return _figure(
+        figure_id,
+        "Mesiac poslednej objednávky",
+        f"Počet účtov — {group_note}. Zhluk v jednom období by znamenal spoločnú "
+        f"príčinu, teda udalosť na našej strane, nie stovky nezávislých rozhodnutí. "
+        f"V hover je GMV, ktoré tie účty mali v minuloročnom okne.",
+        "bar",
+        [str(month) for month in cluster.index],
+        [_series("Účtov", cluster["customers"], C.COLOR_RED)],
+        height=300,
+        value_format="count",
+        hover_extras=_kpi_hover(cluster, lambda row: [
+            f"GMV pred rokom: {formatting.format_eur(row['previous_gmv'])}",
         ]),
     )

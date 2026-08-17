@@ -1,0 +1,494 @@
+# -*- coding: utf-8 -*-
+"""Sekcie reportu Account growth drill-in.
+
+Samostatný report, ktorý rozoberá hodnotu KPI na skupiny účtov. Hlavný report
+(sections.py) odpovedá na otázku, prečo je KPI nízke; tento ukazuje, kde presne
+sedí a čo s ním spraví odfiltrovanie spodných extrémov.
+"""
+
+from src import constants as C
+import charts
+import metrics_kpi_diagnostics as MD
+import report as R
+
+EUR = R.format_eur
+PCT = R.format_pct
+NUM = R.format_number
+
+
+def _fig(figures, figure_id):
+    """Vykreslí graf podľa jeho ID, alebo nič, ak je v C.HIDDEN_CHARTS."""
+    if figure_id in C.HIDDEN_CHARTS:
+        return ""
+    for figure in figures:
+        if figure["id"] == figure_id:
+            return R.render_figure(figure)
+    raise KeyError(f"graf s id '{figure_id}' nie je medzi figures")
+
+
+def header(metrics):
+    """Nadpis a prehľadové karty oboch datasetov."""
+    full = metrics["account_growth_summary"]
+    filtered = metrics["filtered_summary"]
+
+    cards = [
+        ("KPI, celý dataset", PCT(full["growing_pct"], 1)),
+        ("KPI, bez spodných extrémov", PCT(filtered["growing_pct"], 1)),
+        ("Posudzovaných účtov", NUM(full["accounts"])),
+        ("Cieľ", f"{C.ACCOUNT_GROWTH_TARGET_PCT} %"),
+    ]
+
+    html = f"""
+<h1>Account growth — drill-in</h1>
+<ul class="lead">
+<li>Zdroj: <code>{C.INPUT_XLSX}</code></li>
+<li>Stav k: {C.AS_OF:%-d.\u00a0%-m.\u00a0%Y}</li>
+</ul>
+{R.render_kpi_cards(cards)}
+"""
+    return html, []
+
+
+def order_count_section(metrics):
+    """KPI podľa počtu objednávok, nad plným aj odfiltrovaným datasetom."""
+    diag = metrics["diag_summary"]
+
+    figures = [
+        charts.kpi_by_order_count(metrics["diag_by_order_count"], diag["growing_pct"],
+                                  filtered=metrics["filtered_by_order_count"]),
+    ]
+
+    return f"""
+<h2>1. KPI podľa počtu objednávok za {C.FREQUENCY_WINDOW_MONTHS} mesiacov</h2>
+{_dataset_definitions(metrics)}
+{_fig(figures, "kpi_by_order_count")}
+{_filtered_text(metrics)}
+""", figures
+
+
+def _dataset_definitions(metrics):
+    """Definícia oboch množín účtov, ktoré graf porovnáva.
+
+    Popisuje menovateľ KPI, nie surový dataset — počty zákazníkov v exporte sú
+    pre tento graf bez významu, KPI z nich vidí len zlomok.
+    """
+    full = metrics["account_growth_summary"]
+    filtered = metrics["filtered_summary"]
+
+    return f"""
+<p><b>Celý dataset</b> — účty, ktoré KPI posudzuje: staršie ako
+{C.ACCOUNT_GROWTH_MIN_AGE_MONTHS} mesiacov a s nenulovým GMV aspoň v jednom z dvoch
+{C.GMV_WINDOW_MONTHS}-mesačných okien. Je ich {NUM(full["accounts"])}.</p>
+<p><b>Bez spodných extrémov</b> — tie isté účty, ale bez zákazníkov, ktorí za celý
+život minuli menej než {EUR(C.SMALL_VETERAN_LIFETIME_GMV)}. Zostane
+{NUM(filtered["accounts"])} účtov, teda o {NUM(full["accounts"] - filtered["accounts"])}
+menej.</p>
+<p class="small">Filter má aj podmienku veku {C.SMALL_VETERAN_AGE_MONTHS} mesiacov, tá
+sa tu ale neprejaví — menovateľ mladšie účty neobsahuje.</p>
+"""
+
+
+def _filtered_text(metrics):
+    """Jediný záver, ktorý z porovnania oboch sérií plynie."""
+    full_breakdown = metrics["diag_by_order_count"]
+    filtered_breakdown = metrics["filtered_by_order_count"]
+    full = metrics["account_growth_summary"]
+    filtered = metrics["filtered_summary"]
+
+    changed = _changed_buckets(full_breakdown, filtered_breakdown)
+    first_untouched = _first_untouched_bucket(full_breakdown, changed)
+
+    return f"""
+<p><b>Dataset bez spodných extrémov má horšie KPI v košoch {_bucket_list(changed)}</b> —
+od koša {first_untouched} vyššie sú obe série totožné. Celkovo
+{PCT(full["growing_pct"])} oproti {PCT(filtered["growing_pct"])}.</p>
+"""
+
+
+def _changed_buckets(full_breakdown, filtered_breakdown):
+    """Koše, v ktorých sa podiel rastúcich po filtri zmenil.
+
+    Porovnáva sa na jedno desatinné miesto, teda na presnosť, s akou je hodnota
+    v reporte vidieť — inak by sa medzi „zmenené“ dostali koše líšiace sa
+    v stotinách, ktoré v grafe nikto nerozozná.
+    """
+    changed = []
+    for bucket in full_breakdown.index:
+        before = round(full_breakdown.loc[bucket, "growing_pct"], 1)
+        after = round(filtered_breakdown.loc[bucket, "growing_pct"], 1)
+        if before != after:
+            changed.append(bucket)
+    return changed
+
+
+def _first_untouched_bucket(full_breakdown, changed):
+    """Prvý kôš, od ktorého sa už obe série prekrývajú."""
+    for bucket in full_breakdown.index:
+        if bucket not in changed:
+            continue
+        position = list(full_breakdown.index).index(bucket)
+        if position + 1 < len(full_breakdown.index):
+            candidate = full_breakdown.index[position + 1]
+            if candidate not in changed:
+                return candidate
+    return full_breakdown.index[-1]
+
+
+def _bucket_list(buckets):
+    """Zoznam popiskov košov do vety."""
+    if len(buckets) == 1:
+        return buckets[0]
+    return ", ".join(buckets[:-1]) + f" a {buckets[-1]}"
+
+
+def dropped_accounts_section(metrics):
+    """Kto sú účty, ktoré filter vyradí z menovateľa."""
+    detail = metrics["dropped_accounts"]
+    split = metrics["dropped_activity"]
+
+    figures = [charts.dropped_activity_split(split)]
+
+    return f"""
+<h2>2. Kto sú vyradené účty</h2>
+{_dropped_intro(metrics)}
+{_fig(figures, "dropped_activity")}
+{_dropped_split_text(split)}
+{_dropped_profile(metrics)}
+{_dropped_table(detail)}
+""", figures
+
+
+def _dropped_intro(metrics):
+    """Veľkosť a váha skupiny vyradenej z menovateľa."""
+    detail = metrics["dropped_accounts"]
+    full = metrics["full_quality"]
+    filtered = metrics["filtered_quality"]
+
+    dropped_customers = full["customers"] - filtered["customers"]
+
+    return f"""
+<p>Filter vyradí z databázy {NUM(dropped_customers)} zákazníkov, ale drvivá väčšina
+z nich v menovateli KPI nikdy nebola. Zaujímavých je
+<b>{NUM(len(detail))} účtov, ktoré v ňom boli a vypadli z neho</b> — len tie hýbu
+hodnotou KPI. Za celý život, teda od začiatku dát, majú spolu
+{EUR(detail["lifetime_gmv"].sum())}; za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov
+{EUR(detail["gmv_12m"].sum())}. Žiadny z nich nemá viac ako
+{NUM(detail["lifetime_orders"].max())} objednávok za život, medián je
+{NUM(detail["lifetime_orders"].median())}.</p>
+"""
+
+
+def _dropped_split_text(split):
+    """Prečo skupina KPI nezdvihne."""
+    dormant = split.loc[MD.DROPPED_DORMANT]
+    active = split.loc[MD.DROPPED_ACTIVE]
+
+    return f"""
+<p>Skupina sa rozpadá na dve polovice s opačným účinkom.
+{NUM(dormant["customers"])} účtov nenakúpilo za rok vôbec nič — tie sú v menovateli
+mŕtvou váhou a ich odstránenie KPI dvíha. Druhých {NUM(active["customers"])} účtov
+za rok nakúpilo a {NUM(active["growing"])} z nich je rastúcich, čo je
+{PCT(active["growing"] / active["customers"] * 100)}, teda výrazne viac než celkové
+KPI. <b>Filter vezme obe skupiny naraz a ich účinky sa takmer vyrušia.</b> Preto sa
+KPI po odfiltrovaní nepohne nahor.</p>
+<p class="small">Rastúci účet v druhej skupine typicky urobil jednu objednávku za
+pár stoviek eur proti nule spred roka. Formálne rast, ekonomicky šum.</p>
+"""
+
+
+def _dropped_profile(metrics):
+    """Kto tie účty sú a akú majú váhu."""
+    detail = metrics["dropped_accounts"]
+    largest = metrics["largest_account"]
+    countries = metrics["dropped_by_country"]
+
+    dormant = detail.loc[detail["orders_12m"] == 0]
+    monthly = detail["gmv_12m"].sum() / C.FREQUENCY_WINDOW_MONTHS
+
+    return f"""
+<h3>Čo sú zač</h3>
+<p>Fitness centrá, telocvične a malé e-shopy s doplnkami — v zozname nižšie sú názvy
+ako gym, sport či webáruház. <b>Ani jedna firma, ktorá by vyzerala ako
+veľkoodberateľ.</b> Za posledný rok minuli spolu {EUR(detail["gmv_12m"].sum())}, teda
+{EUR(monthly)} mesačne. Najväčší posudzovaný účet ({R.escape(largest["name"])}) urobil
+za ten istý rok {EUR(largest["gmv_12m"])} — celá vyradená skupina je oproti nemu
+zaokrúhľovacia chyba.</p>
+<p>Nie je to skupina, ktorá raz vypadla. <b>Nikto z nich nemá viac než
+{NUM(detail["lifetime_orders"].max())} objednávok za celý život</b>, typicky
+{NUM(detail["lifetime_orders"].median())}, a to za obdobie niekoľkých rokov. Sú to
+zákazníci, ktorí si nás dvakrát-trikrát vyskúšali a nezostali.</p>
+<p>{NUM(len(dormant))} z nich nenakúpilo za posledný rok nič a posledná objednávka im
+padá medzi {dormant["last_order"].min():%-m/%Y} a {dormant["last_order"].max():%-m/%Y}.
+Tí sa už nevrátia a v menovateli sedeli len ako mŕtva váha.
+Geograficky: {_country_list(countries)}.</p>
+"""
+
+
+def _country_list(countries):
+    """Krajiny vyradených účtov ako veta, od najpočetnejšej."""
+    parts = []
+    for country, row in countries.iterrows():
+        parts.append(f"{NUM(row['customers'])}× {R.escape(country)}")
+    return ", ".join(parts)
+
+
+def _dropped_table(detail):
+    """Zoznam vyradených účtov."""
+    table = detail.copy()
+    table.index = table["name"]
+    return R.render_table(
+        table,
+        [("country", "Krajina", str),
+         ("lifetime_gmv", "Lifetime GMV", EUR),
+         ("gmv_12m", "GMV za rok", EUR),
+         ("lifetime_orders", "Obj. celkom", NUM),
+         ("orders_12m", "Obj. za rok", NUM),
+         ("last_order", "Posledná objednávka", lambda value: f"{value:%-d. %-m. %Y}"),
+         ("growing", "Rastie", lambda value: "áno" if value else "nie")],
+        index_label="Účet",
+    )
+
+
+def single_order_section(metrics):
+    """Zákazníci, ktorí za celý život objednali práve raz."""
+    single = metrics["single_orders"]
+    repeat_first = metrics["single_repeat_first"]
+
+    figures = [
+        charts.order_value_mix(metrics["single_value_mix"]),
+        charts.single_order_by_year(metrics["single_by_year"],
+                                    C.SINGLE_ORDER_MIN_AGE_MONTHS),
+    ]
+
+    return f"""
+<h2>3. Zákazníci s jedinou objednávkou</h2>
+{_single_intro(metrics)}
+{_fig(figures, "order_value_mix")}
+{_single_value_text(single, repeat_first)}
+{_fig(figures, "single_order_year")}
+{_single_year_text(metrics)}
+{_single_big_orders_table(single)}
+""", figures
+
+
+def _single_intro(metrics):
+    """Veľkosť skupiny a prečo sa mladí zákazníci nepočítajú."""
+    single = metrics["single_orders"]
+    quality = metrics["full_quality"]
+
+    return f"""
+<p>Zákazníci, ktorí za celý život — teda od začiatku dát — objednali práve raz.
+Počítajú sa len tí, ktorých objednávka je staršia ako
+{C.SINGLE_ORDER_MIN_AGE_MONTHS} mesiacov: kto nakúpil nedávno, ešte mal čas vrátiť sa
+a medzi stratených nepatrí. <b>Je ich {NUM(len(single))}, teda
+{PCT(len(single) / quality["customers"] * 100)} databázy, ale len
+{EUR(single["gmv"].sum())} GMV</b>, čo je
+{PCT(single["gmv"].sum() / quality["gmv"] * 100)} tržieb.</p>
+"""
+
+
+def _single_value_text(single, repeat_first):
+    """Prečo sa jednorazový zákazník nedá spoznať z prvej objednávky."""
+    return f"""
+<p><b>Z prvej objednávky sa nedá povedať, kto sa vráti.</b> Medián jedinej objednávky
+je {EUR(single["gmv"].median())}, medián prvej objednávky zákazníka, ktorý sa neskôr
+vrátil, {EUR(repeat_first["gmv"].median())}. Rozdiel je
+{EUR(abs(single["gmv"].median() - repeat_first["gmv"].median()))} a tvary oboch
+rozdelení sa prekrývajú vo všetkých košoch. Jednorazový zákazník nie je iný typ
+zákazníka — pri prvom nákupe vyzerá rovnako ako každý iný.</p>
+<p class="small">Jediný rozdiel, ktorý v dátach je: chýbajúci fakturačný názov.
+Vyplnený ho nemá {PCT(single["company_bill"].isna().mean() * 100)} jednorazových
+oproti {PCT(repeat_first["company_bill"].isna().mean() * 100)} opakujúcich. Slabý
+signál, na cielenie nestačí.</p>
+"""
+
+
+def _single_year_text(metrics):
+    """Ako je skupina rozložená v čase."""
+    by_year = metrics["single_by_year"]
+    peak = by_year["customers"].idxmax()
+
+    return f"""
+<p>Skupina sa neplní jednorazovo, pribúda každý rok — najviac v roku {peak}
+({NUM(by_year.loc[peak, "customers"])} zákazníkov). Nie je to teda dôsledok jednej
+zlej kampane, ale trvalý stav: <b>akvizícia funguje, druhý nákup nie.</b>
+Posledný rok v grafe je nekompletný, lebo posledných
+{C.SINGLE_ORDER_MIN_AGE_MONTHS} mesiacov sa zámerne nepočíta.</p>
+"""
+
+
+def _single_big_orders_table(single):
+    """Najväčšie jednorazové objednávky."""
+    big = single.loc[single["gmv"] >= C.ORDER_VALUE_EDGES[-1]].sort_values(
+        "gmv", ascending=False).copy()
+    big["label"] = big["company_bill"].fillna(big["customer_email"])
+    big = big.set_index("label")
+
+    return f"""
+<h3>Najväčšie stratené objednávky</h3>
+<p>{NUM(len(big))} zákazníkov urobilo jedinú objednávku nad
+{EUR(C.ORDER_VALUE_EDGES[-1])} a už sa nevrátili. Spolu je to
+{EUR(big["gmv"].sum())}, teda {PCT(big["gmv"].sum() / single["gmv"].sum() * 100)}
+GMV celej skupiny pri {PCT(len(big) / len(single) * 100)} zákazníkov.</p>
+{R.render_table(
+    big,
+    [("increment_id", "Objednávka", str),
+     ("customer_email", "E-mail", str),
+     ("gmv", "Hodnota", EUR),
+     ("country", "Krajina", str),
+     ("created_at", "Dátum", lambda value: f"{value:%-d. %-m. %Y}")],
+    index_label="Účet",
+)}
+"""
+
+
+def zero_accounts_section(metrics):
+    """Účty, ktoré v aktuálnom okne nenakúpili."""
+    return _account_group_section(
+        metrics,
+        prefix="zero",
+        heading="4. Účty, ktoré odišli do nuly",
+        group_note="účty, ktoré odišli do nuly",
+        intro=_zero_intro(metrics),
+    )
+
+
+def churned_accounts_section(metrics):
+    """Účty, ktoré nenakúpili už KPI_DIAG_CHURN_DAYS dní."""
+    return _account_group_section(
+        metrics,
+        prefix="churned",
+        heading="5. Churnuté účty",
+        group_note="churnuté účty",
+        intro=_churned_intro(metrics),
+    )
+
+
+def _account_group_section(metrics, prefix, heading, group_note, intro):
+    """Sekcia o jednej skupine účtov: graf v čase, zhluk odchodov a zoznam.
+
+    Obe skupiny majú rovnakú štruktúru, líšia sa len výberom účtov a úvodom,
+    preto ich stavia jedna funkcia.
+    """
+    accounts = metrics[f"{prefix}_accounts"]
+    cluster = metrics[f"{prefix}_cluster"]
+    timeline_id = f"{prefix}_gmv_timeline"
+    cluster_id = f"{prefix}_last_order_cluster"
+
+    figures = [
+        charts.account_gmv_timeline(metrics[f"{prefix}_monthly"],
+                                    metrics[f"{prefix}_monthly_orders"],
+                                    accounts, timeline_id, group_note),
+        charts.last_order_cluster(cluster, cluster_id, group_note),
+    ]
+
+    return f"""
+<h2>{heading}</h2>
+{intro}
+{_fig(figures, timeline_id)}
+
+<h3>Kedy naposledy nakúpili</h3>
+{_fig(figures, cluster_id)}
+{_cluster_text(cluster)}
+{R.render_rollup(f"Zoznam všetkých {NUM(len(accounts))} účtov", _accounts_table(accounts))}
+""", figures
+
+
+def _zero_intro(metrics):
+    """Kto sú účty, ktoré prestali nakupovať."""
+    accounts = metrics["zero_accounts"]
+    summary = metrics["account_growth_summary"]
+    top_ten = accounts.nlargest(10, "previous")["previous"].sum()
+    fresh = accounts.loc[accounts["months_silent"] <= 6]
+
+    return f"""
+<p>Účty s nenulovým GMV v minuloročnom okne a nulovým v aktuálnom. Je ich
+<b>{NUM(len(accounts))}, teda {PCT(len(accounts) / summary["accounts"] * 100)}
+posudzovaných účtov</b>, a v minuloročnom okne mali {EUR(accounts["previous"].sum())}.</p>
+<p>Nie sú to drobní zákazníci. Medián má {NUM(accounts["lifetime_orders"].median())}
+objednávok za život a najväčšie účty ich majú stovky. <b>Top 10 z nich tvorí
+{PCT(top_ten / accounts["previous"].sum() * 100)} GMV celej skupiny</b>, takže nejde
+o dlhý chvost, ale o niekoľko konkrétnych partnerov.</p>
+<p>{NUM(len(fresh))} účtov stíchlo pred najviac šiestimi mesiacmi
+({EUR(fresh["previous"].sum())} v minuloročnom okne) — tie sú ešte v dosahu.
+Zvyšok mlčí dlhšie.</p>
+"""
+
+
+def _churned_intro(metrics):
+    """Ako sa churnuté účty líšia od širšej skupiny odídených."""
+    accounts = metrics["churned_accounts"]
+    zero = metrics["zero_accounts"]
+
+    alive = len(zero) - len(accounts)
+    alive_gmv = zero["previous"].sum() - accounts["previous"].sum()
+
+    return f"""
+<p>Podmnožina predchádzajúcej skupiny: účty, ktoré nenakúpili už
+<b>{C.KPI_DIAG_CHURN_DAYS}+ dní</b>. Je ich {NUM(len(accounts))} z
+{NUM(len(zero))} odídených a v minuloročnom okne mali
+{EUR(accounts["previous"].sum())}, teda
+{PCT(accounts["previous"].sum() / zero["previous"].sum() * 100)} GMV odídenej skupiny.</p>
+<p>Zvyšných {NUM(alive)} účtov ({EUR(alive_gmv)}) nakúpilo za posledných
+{C.KPI_DIAG_CHURN_DAYS} dní — len netrafili {C.GMV_WINDOW_MONTHS}-mesačné okno KPI.
+<b>Toto je tá časť, ktorá je naozaj stratená; tá druhá je otázka časovania.</b>
+KPI ich pritom počíta rovnako, obe ako klesajúce.</p>
+"""
+
+
+def _cluster_text(cluster):
+    """Či sa odchody zhlukujú v čase."""
+    peak = cluster["customers"].idxmax()
+    peak_row = cluster.loc[peak]
+    share = peak_row["customers"] / cluster["customers"].sum() * 100
+
+    return f"""
+<p>Najviac účtov naposledy nakúpilo v {peak} — {NUM(peak_row["customers"])} účtov
+({PCT(share)} skupiny) s minuloročným GMV {EUR(peak_row["previous_gmv"])}. Ak sa
+niektorý vrchol kryje s prevádzkovou zmenou na našej strane, máme kandidáta
+na spoločnú príčinu; inak je to rozptýlený odchod bez jedného spúšťača.</p>
+"""
+
+
+def _accounts_table(accounts):
+    """Zoznam účtov skupiny."""
+    table = accounts.copy()
+    table.index = table["name"]
+    return R.render_table(
+        table,
+        [("country", "Krajina", str),
+         ("previous", "GMV pred rokom", EUR),
+         ("lifetime_gmv", "Lifetime GMV", EUR),
+         ("lifetime_orders", "Obj. za život", NUM),
+         ("mean_order", "Priemerná obj.", EUR),
+         ("median_order", "Mediánová obj.", EUR),
+         ("orders_per_month", "Obj./mesiac", lambda value: NUM(value, 1)),
+         ("last_order", "Posledná objednávka", lambda value: f"{value:%-d. %-m. %Y}"),
+         ("months_silent", "Mesiacov ticho", lambda value: NUM(value, 1))],
+        index_label="Účet",
+    )
+
+
+SECTION_BUILDERS = [
+    header,
+    order_count_section,
+    dropped_accounts_section,
+    single_order_section,
+    zero_accounts_section,
+    churned_accounts_section,
+]
+
+
+def build_all(metrics):
+    """Poskladá HTML všetkých sekcií a zoznam grafov."""
+    html_parts = []
+    figures = []
+    for position, builder in enumerate(SECTION_BUILDERS):
+        section_html, section_figures = builder(metrics)
+        html_parts.append(R.render_collapsible(section_html))
+        if position == 0:
+            html_parts.append(R.FOLD_TOOLBAR_HTML)
+        for figure in section_figures:
+            if figure["id"] not in C.HIDDEN_CHARTS:
+                figures.append(figure)
+    return "\n".join(html_parts), figures
