@@ -355,7 +355,8 @@ def zero_accounts_section(metrics):
 
 def churned_accounts_section(metrics):
     """Účty, ktoré nenakúpili už KPI_DIAG_CHURN_DAYS dní."""
-    return _account_group_section(
+    # Presmerované na novú funkciu špecifickú pre churn
+    return _churned_group_section(
         metrics,
         prefix="churned",
         heading="5. Churnuté účty",
@@ -364,12 +365,51 @@ def churned_accounts_section(metrics):
     )
 
 
-def _account_group_section(metrics, prefix, heading, group_note, intro):
-    """Sekcia o jednej skupine účtov: graf v čase, zhluk odchodov a zoznam.
+# --- NOVÁ FUNKCIA PRIDANÁ POD PÔVODNÚ _account_group_section ---
+def _churned_group_section(metrics, prefix, heading, group_note, intro):
+    """Špeciálna sekcia pre churnuté účty s dodatočnými grafmi správania."""
+    accounts = metrics[f"{prefix}_accounts"]
+    cluster = metrics[f"{prefix}_cluster"]
+    chars = metrics[f"{prefix}_characteristics"]
 
-    Obe skupiny majú rovnakú štruktúru, líšia sa len výberom účtov a úvodom,
-    preto ich stavia jedna funkcia.
-    """
+    timeline_id = f"{prefix}_gmv_timeline"
+    cluster_id = f"{prefix}_last_order_cluster"
+    tenure_id = f"{prefix}_tenure"
+    orders_id = f"{prefix}_orders"
+    country_id = f"{prefix}_country"
+
+    figures = [
+        charts.account_gmv_timeline(metrics[f"{prefix}_monthly"],
+                                    metrics[f"{prefix}_monthly_orders"],
+                                    accounts, timeline_id, group_note),
+        charts.last_order_cluster(cluster, cluster_id, group_note),
+        charts.churn_tenure_chart(chars["tenure"], tenure_id, group_note, len(accounts)),
+        charts.churn_orders_chart(chars["orders"], orders_id, group_note, len(accounts)),
+        charts.churn_country_chart(chars["country"], country_id, group_note, len(accounts)),
+    ]
+
+    return f"""
+<h2>{heading}</h2>
+{intro}
+
+<h3>Kto sú títo zákazníci a ako sa správali?</h3>
+{_fig(figures, tenure_id)}
+{_fig(figures, orders_id)}
+{_fig(figures, country_id)}
+
+<h3>Kedy naposledy nakúpili</h3>
+{_fig(figures, cluster_id)}
+{_cluster_text(cluster)}
+
+<h3>Vyhľadanie konkrétneho účtu</h3>
+{_fig(figures, timeline_id)}
+
+{R.render_rollup(f"Zoznam všetkých {NUM(len(accounts))} účtov", _accounts_table(accounts))}
+""", figures
+
+
+def _account_group_section(metrics, prefix, heading, group_note, intro):
+    """Sekcia o jednej skupine účtov: graf v čase, zhluk odchodov a zoznam."""
     accounts = metrics[f"{prefix}_accounts"]
     cluster = metrics[f"{prefix}_cluster"]
     timeline_id = f"{prefix}_gmv_timeline"
@@ -392,7 +432,6 @@ def _account_group_section(metrics, prefix, heading, group_note, intro):
 {_cluster_text(cluster)}
 {R.render_rollup(f"Zoznam všetkých {NUM(len(accounts))} účtov", _accounts_table(accounts))}
 """, figures
-
 
 def _zero_intro(metrics):
     """Kto sú účty, ktoré prestali nakupovať."""
@@ -433,6 +472,10 @@ def _churned_intro(metrics):
 {C.KPI_DIAG_CHURN_DAYS} dní — len netrafili {C.GMV_WINDOW_MONTHS}-mesačné okno KPI.
 <b>Toto je tá časť, ktorá je naozaj stratená; tá druhá je otázka časovania.</b>
 KPI ich pritom počíta rovnako, obe ako klesajúce.</p>
+<p>Zvyšok sekcie je o tom, kto tá skupina je: ako dlho u nás nakupovali, koľko
+objednávok stihli, z ktorých trhov sú a kedy stíchli. Hľadá sa spoločný znak —
+ak ho skupina má, dá sa na ňom postaviť opatrenie; ak nie, je to
+{NUM(len(accounts))} nezávislých odchodov.</p>
 """
 
 

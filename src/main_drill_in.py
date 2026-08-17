@@ -49,24 +49,25 @@ def compute_metrics(df):
 
         **_single_order_metrics(df),
         **_zero_metrics(table, df),
+        **_churned_metrics(table, df),
     }
 
 
 def _zero_metrics(table, df):
-    """Metriky dvoch skupín účtov, ktoré prestali nakupovať.
+    """Metriky účtov, ktoré odišli do nuly (Sekcia 4)."""
+    zero = metrics_kpi_diagnostics.dropped_to_zero_accounts(table, df)
+    return _account_group_metrics("zero", zero, df)
 
-    Churnuté účty sú podmnožinou tých, ktoré odišli do nuly — líšia sa len
-    prahom ticha, preto majú rovnakú sadu metrík aj rovnaké grafy.
-    """
+def _churned_metrics(table, df):
+    """Metriky churnutých účtov s detailnými charakteristikami (Sekcia 5)."""
     zero = metrics_kpi_diagnostics.dropped_to_zero_accounts(table, df)
     churned = zero.loc[zero.index.intersection(
         metrics_kpi_diagnostics.churned_accounts(table, df).index)]
 
-    metrics = {}
-    metrics.update(_account_group_metrics("zero", zero, df))
-    metrics.update(_account_group_metrics("churned", churned, df))
+    metrics = _account_group_metrics("churned", churned, df)
+    # Pridáme charakteristiky výhradne len pre churnuté účty
+    metrics["churned_characteristics"] = metrics_kpi_diagnostics.churn_characteristics(churned, table)
     return metrics
-
 
 def _account_group_metrics(prefix, accounts, df):
     """Zoznam účtov, ich mesačné rady a zhluk poslednej objednávky."""

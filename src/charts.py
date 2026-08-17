@@ -744,3 +744,58 @@ def last_order_cluster(cluster, figure_id, group_note):
             f"GMV pred rokom: {formatting.format_eur(row['previous_gmv'])}",
         ]),
     )
+
+def churn_tenure_chart(tenure_df, figure_id, group_note, count):
+    """Ako dlho účty nakupovali, kým stíchli."""
+    return _figure(
+        figure_id,
+        "Dĺžka života pred odchodom",
+        f"Počet účtov — {group_note}. Čas od prvej po poslednú objednávku. Ukazuje, "
+        f"či odchádzajú skôr čerství zákazníci, teda problém akvizície a onboardingu, "
+        f"alebo zabehnutí odberatelia. Koše, do ktorých táto skupina padnúť nemôže, "
+        f"v grafe nie sú. {_population_note(count, 'účtami')}",
+        "bar",
+        tenure_df.index,
+        [_series("Účtov", tenure_df["customers"], C.COLOR_BLUE)],
+        value_format="count",
+    )
+
+
+def churn_orders_chart(orders_df, figure_id, group_note, count):
+    """Koľko objednávok účty stihli, kým stíchli."""
+    return _figure(
+        figure_id,
+        "Počet objednávok za život",
+        f"Počet účtov — {group_note}. Koľko objednávok stihli urobiť, kým prestali "
+        f"nakupovať. Ticho nad {C.KPI_DIAG_CHURN_DAYS} dní neznamená definitívny "
+        f"odchod, časť účtov sa môže vrátiť. Koše, do ktorých táto skupina padnúť "
+        f"nemôže, v grafe nie sú. {_population_note(count, 'účtami')}",
+        "bar",
+        orders_df.index,
+        [_series("Účtov", orders_df["customers"], C.COLOR_ORANGE)],
+        value_format="count",
+    )
+
+
+def churn_country_chart(country_df, figure_id, group_note, count):
+    """Z ktorých trhov churnuté účty pochádzajú."""
+    shown = int(country_df["customers"].sum())
+    return _figure(
+        figure_id,
+        f"Zloženie podľa krajiny (top {len(country_df)})",
+        f"Počet účtov — {group_note}, podľa fakturačnej krajiny. V grafe je "
+        f"{formatting.format_number(shown)} z {formatting.format_number(count)} účtov "
+        f"skupiny, zvyšok pripadá na menšie trhy. V hover je podiel na posudzovaných "
+        f"účtoch danej krajiny — pri malých trhoch stoja tie percentá na pár účtoch, "
+        f"preto je vedľa nich aj absolútny počet.",
+        "bar",
+        country_df.index,
+        [_series("Účtov", country_df["customers"], C.COLOR_TEAL)],
+        value_format="count",
+        hover_extras=_kpi_hover(country_df, lambda row: [
+            f"Podiel z posudzovaných účtov v krajine: "
+            f"{formatting.format_pct(row['churn_pct'])}",
+            f"{formatting.format_number(row['customers'])} z "
+            f"{formatting.format_number(row['assessed'])} posudzovaných účtov",
+        ]),
+    )

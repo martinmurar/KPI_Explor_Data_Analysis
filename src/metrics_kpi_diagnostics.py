@@ -411,6 +411,10 @@ def dropped_to_zero_accounts(table, df):
     accounts["months_silent"] = ((C.AS_OF - accounts["last_order"]).dt.days / 30.44).round(1)
     accounts["mean_order"] = df.groupby("cust")["gmv"].mean().reindex(accounts.index)
     accounts["median_order"] = df.groupby("cust")["gmv"].median().reindex(accounts.index)
+
+    first_order = data.first_order_per_customer(df).reindex(accounts.index)
+    accounts["tenure_months"] = ((accounts["last_order"] - first_order).dt.days / 30.44).round(1)
+
     accounts["orders_per_month"] = _orders_per_month(accounts, df)
     return accounts.sort_values("previous", ascending=False)
 
@@ -467,3 +471,51 @@ def _monthly_by_account(df, accounts, aggfunc):
     monthly = window.pivot_table(index="month", columns="cust", values="gmv",
                                  aggfunc=aggfunc, fill_value=0)
     return monthly.reindex(index=months, columns=accounts, fill_value=0).fillna(0)
+
+CHURN_TENURE_EDGES = [-1, 1, 3, 6, 12, 24, float("inf")]
+CHURN_TENURE_BUCKETS = ["< 1 mesiac", "1–3 mesiace", "3–6 mesiacov",
+                        "6–12 mesiacov", "1–2 roky", "> 2 roky"]
+
+CHURN_ORDERS_EDGES = [0, 1, 2, 3, 5, 10, float("inf")]
+CHURN_ORDERS_BUCKETS = ["1", "2", "3", "4–5", "6–10", "11+"]
+
+CHURN_TOP_COUNTRIES = 10
+
+
+def churn_characteristics(accounts, table):
+    """Rozdelenie churnutých účtov podľa dĺžky života, objednávok a krajiny."""
+    return {
+        "tenure": _bucket_counts(accounts["tenure_months"],
+                                 CHURN_TENURE_EDGES, CHURN_TENURE_BUCKETS),
+        "orders": _bucket_counts(accounts["lifetime_orders"],
+                                 CHURN_ORDERS_EDGES, CHURN_ORDERS_BUCKETS),
+        "country": _churn_by_country(accounts, table),
+    }
+
+
+def _bucket_counts(values, edges, labels):
+    """Počet účtov v každom koši, bez prázdnych košov.
+
+    Prázdne koše sa vyhadzujú, lebo časť z nich je pre túto skupinu
+    nedosiahnuteľná — churnutý účet je z menovateľa KPI, takže musí byť starší
+    než ACCOUNT_GROWTH_MIN_AGE_MONTHS a musel nakúpiť v minuloročnom okne.
+    Jedinú objednávku za život ani život kratší než mesiac mať nemôže a taký
+    kôš by v grafe vyzeral ako chyba výpočtu.
+    """
+    counts = pd.cut(values, bins=edges, labels=labels).value_counts().reindex(labels)
+    nonempty = counts.loc[counts > 0]
+    return nonempty.to_frame(name="customers")
+
+
+def _churn_by_country(accounts, table):
+    """Najpočetnejšie krajiny churnutých účtov a ich podiel v rámci krajiny.
+
+    Menovateľom podielu sú posudzované účty danej krajiny, nie všetci
+    zákazníci — churnutá skupina je podmnožinou menovateľa KPI a iný menovateľ
+    by dával podiely, ktoré sa s ničím v reporte nedajú porovnať.
+    """
+    by_country = accounts["country"].value_counts().nlargest(CHURN_TOP_COUNTRIES)
+    country_dist = by_country.to_frame(name="customers")
+    country_dist["assessed"] = table["country"].value_counts().reindex(country_dist.index)
+    country_dist["churn_pct"] = country_dist["customers"] / country_dist["assessed"] * 100
+    return country_dist
