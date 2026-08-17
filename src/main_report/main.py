@@ -9,16 +9,16 @@ Použitie:
 import argparse
 import sys
 
-from src import constants as C
-import data
-import metrics_account_growth
-import metrics_bridge
-import metrics_churn
-import metrics_kpi_diagnostics
-import metrics_concentration
-import metrics_trend
-import report
-import sections
+from src.common import constants as C
+from src.common import data
+from src.common import metrics_account_growth
+from src.common import metrics_bridge
+from src.main_report import metrics_churn
+from src.common import metrics_kpi_diagnostics
+from src.main_report import metrics_concentration
+from src.main_report import metrics_trend
+from src.common import report
+from src.main_report import sections
 
 
 def compute_metrics(df):

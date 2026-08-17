@@ -14,7 +14,7 @@ Rozhodnutia:
 
 import pandas as pd
 
-from src import constants as C
+from src.common import constants as C
 
 
 def load_orders(path):

@@ -1,16 +1,27 @@
 # -*- coding: utf-8 -*-
 """Konfigurácia a konštanty pre EDA rastu GMV."""
 
+import pathlib
+
 import pandas as pd
 
 # ── vstup a výstup ────────────────────────────────────────────────────────────
-# INPUT_XLSX = "../data/b2b_orders_cleaned.xlsx"
-INPUT_XLSX = "../data/b2b_orders_cleaned_w_company_name_3.xlsx"
-OUTPUT_HTML = "../data/b2b_gmv_eda.html"
+# Cesty sa odvodzujú od umiestnenia tohto súboru, nie od aktuálneho adresára —
+# vstupné body sú v dvoch rôznych podpriečinkoch a rovnaká relatívna cesta by
+# v každom z nich ukazovala inam.
+PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[2]
+DATA_DIR = PROJECT_ROOT / "data"
+
+# INPUT_XLSX = str(DATA_DIR / "b2b_orders_cleaned.xlsx")
+INPUT_XLSX = str(DATA_DIR / "b2b_orders_cleaned_w_company_name_3.xlsx")
+OUTPUT_HTML = str(DATA_DIR / "b2b_gmv_eda.html")
 
 # Druhý, samostatný report — drill-in do KPI account growth. Má vlastný vstupný
 # bod (main_drill_in.py) a hlavného reportu sa nedotýka.
-OUTPUT_HTML_DRILL_IN = "../data/b2b_account_growth_drill_in.html"
+OUTPUT_HTML_DRILL_IN = str(DATA_DIR / "b2b_account_growth_drill_in.html")
+
+# Do hlavičky reportu ide len názov súboru — absolútna cesta by tam zavadzala.
+INPUT_LABEL = pathlib.Path(INPUT_XLSX).name
 
 # Status zrušenej objednávky. Zrušené objednávky sa z datasetu vyhadzujú —
 # nie sú tržbou a v exporte `_3` tvoria tretinu GMV.

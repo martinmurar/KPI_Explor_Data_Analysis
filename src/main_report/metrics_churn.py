@@ -16,9 +16,9 @@ _accounts_active_in_period.
 
 import pandas as pd
 
-from src import constants as C
-import data
-import metrics_bridge
+from src.common import constants as C
+from src.common import data
+from src.common import metrics_bridge
 
 
 # ── churn v čase ──────────────────────────────────────────────────────────────

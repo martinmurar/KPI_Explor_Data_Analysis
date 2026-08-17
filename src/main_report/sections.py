@@ -7,12 +7,12 @@ Každá funkcia vytvorí HTML jednej sekcie a zoznam grafov, ktoré v nej sú.
 
 import pandas as pd
 
-from src import constants as C
-import charts
-import data
-import metrics_account_growth
-import metrics_kpi_diagnostics as MD
-import report as R
+from src.common import constants as C
+from src.main_report import charts
+from src.common import data
+from src.common import metrics_account_growth
+from src.common import metrics_kpi_diagnostics as MD
+from src.common import report as R
 
 EUR = R.format_eur
 PCT = R.format_pct
@@ -71,7 +71,7 @@ def _header_facts(quality):
 
     return f"""
 <ul class="lead">
-<li>Zdroj: <code>{C.INPUT_XLSX}</code></li>
+<li>Zdroj: <code>{C.INPUT_LABEL}</code></li>
 <li>Zobrazované obdobie: {start:%-d.\u00a0%-m.\u00a0%Y} – {C.AS_OF:%-d.\u00a0%-m.\u00a0%Y}</li>
 <li>Objednávky: {NUM(quality["orders"])}</li>
 <li>Zákazníci: {NUM(quality["customers"])}</li>

@@ -12,12 +12,12 @@ Použitie:
 import argparse
 import sys
 
-from src import constants as C
-import data
-import metrics_account_growth
-import metrics_kpi_diagnostics
-import report
-import sections_drill_in
+from src.common import constants as C
+from src.common import data
+from src.common import metrics_account_growth
+from src.common import metrics_kpi_diagnostics
+from src.common import report
+from src.drill_in import sections_drill_in
 
 
 def compute_metrics(df):

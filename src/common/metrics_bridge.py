@@ -14,8 +14,8 @@ Komponenty sú vzájomne vylučujúce a ich súčet sa presne rovná celkovej zm
 import numpy as np
 import pandas as pd
 
-from src import constants as C
-import data
+from src.common import constants as C
+from src.common import data
 
 
 def customer_comparison(df, current_start, current_end):

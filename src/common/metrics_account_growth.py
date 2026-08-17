@@ -18,9 +18,9 @@ ktoré leží v rastúcich účtoch. Ukazuje, či nevážené KPI a tržby hovor
 
 import pandas as pd
 
-from src import constants as C
-import data
-import metrics_bridge
+from src.common import constants as C
+from src.common import data
+from src.common import metrics_bridge
 
 
 # Skupiny, na ktoré sa rozpadajú posudzované účty. Prvé dve sú rozhodnuté binárne —

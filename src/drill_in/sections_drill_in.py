@@ -6,10 +6,10 @@ Samostatný report, ktorý rozoberá hodnotu KPI na skupiny účtov. Hlavný rep
 sedí a čo s ním spraví odfiltrovanie spodných extrémov.
 """
 
-from src import constants as C
-import charts
-import metrics_kpi_diagnostics as MD
-import report as R
+from src.common import constants as C
+from src.drill_in import charts
+from src.common import metrics_kpi_diagnostics as MD
+from src.common import report as R
 
 EUR = R.format_eur
 PCT = R.format_pct
@@ -41,7 +41,7 @@ def header(metrics):
     html = f"""
 <h1>Account growth — drill-in</h1>
 <ul class="lead">
-<li>Zdroj: <code>{C.INPUT_XLSX}</code></li>
+<li>Zdroj: <code>{C.INPUT_LABEL}</code></li>
 <li>Stav k: {C.AS_OF:%-d.\u00a0%-m.\u00a0%Y}</li>
 </ul>
 {R.render_kpi_cards(cards)}

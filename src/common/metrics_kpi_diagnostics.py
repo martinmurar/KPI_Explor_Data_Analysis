@@ -14,9 +14,9 @@ koľko priestoru v KPI leží v danom mechanizme, nie koľko sa z neho získa.
 
 import pandas as pd
 
-from src import constants as C
-import data
-import metrics_bridge
+from src.common import constants as C
+from src.common import data
+from src.common import metrics_bridge
 
 
 # Popisky skupín podľa zmeny počtu objednávok. Poradie je od najlepšej.

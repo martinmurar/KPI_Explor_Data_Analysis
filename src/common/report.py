@@ -12,7 +12,7 @@ import re
 
 import pandas as pd
 
-import formatting
+from src.common import formatting
 
 CHARTJS_CDN = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"
 
