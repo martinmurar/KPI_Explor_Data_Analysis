@@ -11,7 +11,7 @@ from src.common import formatting
 
 
 def kpi_by_order_count(breakdown, reference_pct, filtered=None):
-    """KPI osobitne pre každý kôš podľa počtu objednávok za rok.
+    """KPI osobitne pre každý kôš podľa počtu objednávok v okne frekvencie.
 
     Ak je zadaný filtered, vykreslí sa ako užšia svetlá séria cez plnú — ten
     istý rez nad datasetom bez spodných extrémov. Prekryv namiesto stĺpcov
@@ -30,7 +30,7 @@ def kpi_by_order_count(breakdown, reference_pct, filtered=None):
 
     return base.figure(
         "kpi_by_order_count",
-        f"Account growth podľa počtu objednávok za {C.FREQUENCY_WINDOW_MONTHS} mesiacov",
+        f"Account growth podľa počtu objednávok za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov",
         f"V %. Kôš určuje počet objednávok za posledných {C.FREQUENCY_WINDOW_MONTHS} "
         f"mesiacov. {base.population_note(int(breakdown['customers'].sum()), 'posudzovanými účtami')} "
         f"Farba spodnej série: zelená nad cieľom {C.ACCOUNT_GROWTH_TARGET_PCT} %, "
@@ -111,12 +111,12 @@ def _order_count_hover(breakdown):
 
 
 def dropped_activity_split(split):
-    """Vyradené účty podľa aktivity za rok, rozdelené na rastúce a klesajúce."""
+    """Vyradené účty podľa aktivity v okne frekvencie, rozdelené na rastúce a klesajúce."""
     return base.figure(
         "dropped_activity",
-        "Účty vyradené filtrom podľa aktivity za posledný rok",
+        f"Účty vyradené filtrom podľa aktivity za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov",
         f"Počet účtov. Ľavá skupina je z definície celá klesajúca — bez objednávky "
-        f"za {C.FREQUENCY_WINDOW_MONTHS} mesiacov nemá účet GMV ani v okne KPI. "
+        f"za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov nemá účet GMV ani v okne KPI. "
         f"{base.population_note(int(split['customers'].sum()), 'účtami vyradenými z menovateľa')}",
         "bar",
         split.index,
@@ -130,7 +130,7 @@ def dropped_activity_split(split):
         hover_extras=base.kpi_hover(split, lambda row: [
             f"Účtov spolu: {formatting.format_number(row['customers'])}",
             f"Lifetime GMV: {formatting.format_eur(row['lifetime_gmv'])}",
-            f"GMV za rok: {formatting.format_eur(row['gmv_12m'])}",
+            f"GMV za posledných {C.FREQUENCY_WINDOW_MONTHS} mes.: {formatting.format_eur(row['gmv_12m'])}",
         ]),
     )
 
@@ -302,10 +302,10 @@ def credit_memo_causes(causes):
         "credit_memo_causes",
         "Objednávky s dobropisom podľa príčiny",
         f"Počet objednávok. Príčina je ručne priradená podľa toho, čo sa "
-        f"k objednávke našlo v Slacku — nie je to pole z Magenta. Posledné dve "
-        f"skupiny nie sú príčiny: šedá je hranica zistiteľnosti, svetlomodrá sú "
-        f"objednávky, ktoré do analýzy strát nepatria. V hover je GMV skupiny "
-        f"a výška dobropisu. {base.population_note(int(causes['orders'].sum()), 'objednávkami')}",
+        f"k objednávke našlo v Slacku — nie je to pole z Magenta. Sivá skupina "
+        f"„{C.CREDIT_MEMO_NO_TRACE}“ nie je príčina, ale hranica zistiteľnosti. "
+        f"V hover je GMV skupiny a výška dobropisu. "
+        f"{base.population_note(int(causes['orders'].sum()), 'objednávkami')}",
         "bar",
         causes.index,
         [base.series("Objednávok", causes["orders"], C.COLOR_BLUE, point_colors=colors)],

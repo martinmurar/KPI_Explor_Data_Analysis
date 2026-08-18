@@ -76,6 +76,7 @@ def _base_metrics(df):
         "band_window": metrics_churn.band_window(),
         "top_band_detail": metrics_churn.top_band_detail(df),
         "single_order": metrics_churn.single_order_share(df),
+        "single_order_totals": metrics_churn.single_order_totals(df),
         "frequency": metrics_churn.frequency_histogram(df),
         "frequency_window": metrics_churn.frequency_window(),
     }

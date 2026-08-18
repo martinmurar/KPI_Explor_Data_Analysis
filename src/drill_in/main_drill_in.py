@@ -50,7 +50,7 @@ def compute_metrics(df):
 
         **_single_order_metrics(df),
         **_zero_metrics(table, df),
-        **_credit_memo_metrics(),
+        **_credit_memo_metrics(df),
         **_churned_metrics(table, df),
     }
 
@@ -83,9 +83,10 @@ def _account_group_metrics(prefix, accounts, df):
     }
 
 
-def _credit_memo_metrics():
-    """Objednávky s dobropisom. Nezávisia od exportu objednávok, majú vlastné CSV."""
-    memos = metrics_credit_memos.load_credit_memos()
+def _credit_memo_metrics(df):
+    """Objednávky s dobropisom. Zoznam má vlastné CSV, df slúži na odfiltrovanie
+    zrušených objednávok."""
+    memos = metrics_credit_memos.load_credit_memos(df)
     return {
         "credit_memos": memos,
         "credit_memo_causes": metrics_credit_memos.causes(memos),

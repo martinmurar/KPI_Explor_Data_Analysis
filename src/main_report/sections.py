@@ -450,6 +450,7 @@ do nuly.</b></p>
 def loyalty_section(metrics):
     """Zákazníci s jednou objednávkou a frekvencia objednávania."""
     single = metrics["single_order"]
+    totals = metrics["single_order_totals"]
     frequency = metrics["frequency"]
 
     figures = [
@@ -486,6 +487,12 @@ a medián LTV z {EUR(first["median_ltv"])} na {EUR(last["median_ltv"])}. <b>LTV<
 celkové GMV, ktoré zákazník utratil od svojej prvej objednávky do
 {C.AS_OF:%-d.\u00a0%-m.\u00a0%Y} — teda doterajšia, nie predikovaná hodnota. Akvizícia
 rastie v počte a klesá v kvalite.</p>
+<p>Naprieč všetkými kohortami má jedinú objednávku za život
+<b>{NUM(totals["single"])} zákazníkov z {NUM(totals["customers"])}</b>, teda
+{PCT(totals["single_pct"])}. Časť z nich je ale čerstvá akvizícia, ktorá druhú
+objednávku ešte len môže urobiť — tých, ktorých prvá objednávka je staršia než
+{C.SINGLE_ORDER_MIN_AGE_MONTHS} mesiacov a druhá už nikdy neprišla, je
+{NUM(totals["mature_single"])} ({PCT(totals["mature_single_pct"])}).</p>
 {_fig(figures, "frequency_histogram")}
 <p>Zahrnutí sú zákazníci, ktorí za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov
 aspoň raz nakúpili — {NUM(total_base)} zákazníkov. <b>Najväčšia skupina má jedinú

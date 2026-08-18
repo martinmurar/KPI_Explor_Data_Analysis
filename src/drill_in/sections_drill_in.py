@@ -60,7 +60,7 @@ def order_count_section(metrics):
     ]
 
     return f"""
-<h2>1. KPI podľa počtu objednávok za {C.FREQUENCY_WINDOW_MONTHS} mesiacov</h2>
+<h2>1. KPI podľa počtu objednávok za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov</h2>
 {_dataset_definitions(metrics)}
 {_fig(figures, "kpi_by_order_count")}
 {_filtered_text(metrics)}
@@ -79,13 +79,19 @@ def _dataset_definitions(metrics):
     return f"""
 <p><b>Celý dataset</b> — účty, ktoré KPI posudzuje: staršie ako
 {C.ACCOUNT_GROWTH_MIN_AGE_MONTHS} mesiacov a s nenulovým GMV aspoň v jednom z dvoch
-{C.GMV_WINDOW_MONTHS}-mesačných okien. Je ich {NUM(full["accounts"])}.</p>
+{C.GMV_WINDOW_MONTHS}-mesačných okien. Spolu ich je {NUM(full["accounts"])}.</p>
 <p><b>Bez spodných extrémov</b> — tie isté účty, ale bez zákazníkov, ktorí za celý
 život minuli menej než {EUR(C.SMALL_VETERAN_LIFETIME_GMV)}. Zostane
 {NUM(filtered["accounts"])} účtov, teda o {NUM(full["accounts"] - filtered["accounts"])}
 menej.</p>
-<p class="small">Filter má aj podmienku veku {C.SMALL_VETERAN_AGE_MONTHS} mesiacov, tá
-sa tu ale neprejaví — menovateľ mladšie účty neobsahuje.</p>
+<p><b>Prečo tu nie je variant „bez účtov s jedinou objednávkou“.</b> Taký filter by
+nemal čo odfiltrovať — účet s jedinou objednávkou v menovateli KPI nikdy nie je.
+Musel by naraz spĺňať dve podmienky, ktoré sa pri jedinej objednávke vylučujú:
+prvá objednávka staršia než {C.ACCOUNT_GROWTH_MIN_AGE_MONTHS} mesiacov a zároveň
+objednávka aspoň v jednom z dvoch okien. Ak tá jediná objednávka padne do okna,
+účet je príliš mladý; ak je dosť stará, do okna nepadne.</p>
+<p class="small">Z toho istého dôvodu sa neprejaví ani veková podmienka filtra
+({C.SMALL_VETERAN_AGE_MONTHS} mesiacov) — menovateľ mladšie účty neobsahuje.</p>
 """
 
 
@@ -186,9 +192,10 @@ def _dropped_split_text(split):
 
     return f"""
 <p>Skupina sa rozpadá na dve polovice s opačným účinkom.
-{NUM(dormant["customers"])} účtov nenakúpilo za rok vôbec nič — tie sú v menovateli
-mŕtvou váhou a ich odstránenie KPI dvíha. Druhých {NUM(active["customers"])} účtov
-za rok nakúpilo a {NUM(active["growing"])} z nich je rastúcich, čo je
+{NUM(dormant["customers"])} účtov nenakúpilo za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov
+vôbec nič — tie sú v menovateli mŕtvou váhou a ich odstránenie KPI dvíha. Druhých
+{NUM(active["customers"])} účtov v tom istom okne nakúpilo a {NUM(active["growing"])}
+z nich je rastúcich, čo je
 {PCT(active["growing"] / active["customers"] * 100)}, teda výrazne viac než celkové
 KPI. <b>Filter vezme obe skupiny naraz a ich účinky sa takmer vyrušia.</b> Preto sa
 KPI po odfiltrovaní nepohne nahor.</p>
@@ -210,15 +217,17 @@ def _dropped_profile(metrics):
 <h3>Čo sú zač</h3>
 <p>Fitness centrá, telocvične a malé e-shopy s doplnkami — v zozname nižšie sú názvy
 ako gym, sport či webáruház. <b>Ani jedna firma, ktorá by vyzerala ako
-veľkoodberateľ.</b> Za posledný rok minuli spolu {EUR(detail["gmv_12m"].sum())}, teda
-{EUR(monthly)} mesačne. Najväčší posudzovaný účet ({R.escape(largest["name"])}) urobil
-za ten istý rok {EUR(largest["gmv_12m"])} — celá vyradená skupina je oproti nemu
+veľkoodberateľ.</b> Za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov minuli spolu
+{EUR(detail["gmv_12m"].sum())}, teda {EUR(monthly)} mesačne. Najväčší posudzovaný účet
+({R.escape(largest["name"])}) urobil v tom istom okne {EUR(largest["gmv_12m"])} — celá
+vyradená skupina je oproti nemu
 zaokrúhľovacia chyba.</p>
 <p>Nie je to skupina, ktorá raz vypadla. <b>Nikto z nich nemá viac než
 {NUM(detail["lifetime_orders"].max())} objednávok za celý život</b>, typicky
 {NUM(detail["lifetime_orders"].median())}, a to za obdobie niekoľkých rokov. Sú to
 zákazníci, ktorí si nás dvakrát-trikrát vyskúšali a nezostali.</p>
-<p>{NUM(len(dormant))} z nich nenakúpilo za posledný rok nič a posledná objednávka im
+<p>{NUM(len(dormant))} z nich nenakúpilo za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov nič
+a posledná objednávka im
 padá medzi {dormant["last_order"].min():%-m/%Y} a {dormant["last_order"].max():%-m/%Y}.
 Tí sa už nevrátia a v menovateli sedeli len ako mŕtva váha.
 Geograficky: {_country_list(countries)}.</p>
@@ -241,9 +250,9 @@ def _dropped_table(detail):
         table,
         [("country", "Krajina", str),
          ("lifetime_gmv", "Lifetime GMV", EUR),
-         ("gmv_12m", "GMV za rok", EUR),
+         ("gmv_12m", f"GMV za posledných {C.FREQUENCY_WINDOW_MONTHS} mes.", EUR),
          ("lifetime_orders", "Obj. celkom", NUM),
-         ("orders_12m", "Obj. za rok", NUM),
+         ("orders_12m", f"Obj. za posledných {C.FREQUENCY_WINDOW_MONTHS} mes.", NUM),
          ("last_order", "Posledná objednávka", lambda value: f"{value:%-d. %-m. %Y}"),
          ("growing", "Rastie", lambda value: "áno" if value else "nie")],
         index_label="Účet",
@@ -274,17 +283,15 @@ def single_order_section(metrics):
 
 
 def _single_intro(metrics):
-    """Veľkosť skupiny a prečo sa mladí zákazníci nepočítajú."""
+    """Veľkosť skupiny a aká je jej váha v tržbách."""
     single = metrics["single_orders"]
     quality = metrics["full_quality"]
 
     return f"""
-<p>Zákazníci, ktorí za celý život — teda od začiatku dát — objednali práve raz.
-Počítajú sa len tí, ktorých objednávka je staršia ako
-{C.SINGLE_ORDER_MIN_AGE_MONTHS} mesiacov: kto nakúpil nedávno, ešte mal čas vrátiť sa
-a medzi stratených nepatrí. <b>Je ich {NUM(len(single))}, teda
-{PCT(len(single) / quality["customers"] * 100)} databázy, ale len
-{EUR(single["gmv"].sum())} GMV</b>, čo je
+<p>Zákazníci, ktorí za celý život objednali práve raz. Počítajú sa len tí,
+ktorých objednávka je staršia ako {C.SINGLE_ORDER_MIN_AGE_MONTHS} mesiacov.
+<b>Je ich {NUM(len(single))}, teda {PCT(len(single) / quality["customers"] * 100)}
+databázy, ale len {EUR(single["gmv"].sum())} GMV</b>, čo je
 {PCT(single["gmv"].sum() / quality["gmv"] * 100)} tržieb.</p>
 """
 
@@ -313,9 +320,7 @@ def _single_year_text(metrics):
     return f"""
 <p>Skupina sa neplní jednorazovo, pribúda každý rok — najviac v roku {peak}
 ({NUM(by_year.loc[peak, "customers"])} zákazníkov). Nie je to teda dôsledok jednej
-zlej kampane, ale trvalý stav: <b>akvizícia funguje, druhý nákup nie.</b>
-Posledný rok v grafe je nekompletný, lebo posledných
-{C.SINGLE_ORDER_MIN_AGE_MONTHS} mesiacov sa zámerne nepočíta.</p>
+zlej kampane, ale trvalý stav: <b>akvizícia funguje, druhý nákup nie.</b></p>
 """
 
 
@@ -455,7 +460,22 @@ o dlhý chvost, ale o niekoľko konkrétnych partnerov.</p>
 <p>{NUM(len(fresh))} účtov stíchlo pred najviac šiestimi mesiacmi
 ({EUR(fresh["previous"].sum())} v minuloročnom okne) — tie sú ešte v dosahu.
 Zvyšok mlčí dlhšie.</p>
+{_decathlon_note()}
 """
+
+
+def _decathlon_note():
+    """Najväčší účet skupiny odišiel do nuly len zdanlivo.
+
+    Zákazník je e-mail, takže zmena kontaktnej osoby vyzerá ako odchod jedného
+    účtu a akvizícia druhého. Decathlon je najviditeľnejší prípad, ale ten istý
+    mechanizmus môže byť aj za ďalšími účtami v zozname.
+    """
+    return R.render_note(
+        "<b>Najväčší účet skupiny neodišiel — len zmenil e-mail.</b> "
+        "Decathlon SK prešiel na inú kontaktnú osobu a nakupuje ďalej pod novou "
+        "adresou. Pôvodný účet tak vyzerá ako odchod do nuly a nový ako čerstvá "
+        "akvizícia, hoci firma nakupuje bez prerušenia.")
 
 
 def _churned_intro(metrics):
@@ -473,9 +493,7 @@ def _churned_intro(metrics):
 {EUR(accounts["previous"].sum())}, teda
 {PCT(accounts["previous"].sum() / zero["previous"].sum() * 100)} GMV odídenej skupiny.</p>
 <p>Zvyšných {NUM(alive)} účtov ({EUR(alive_gmv)}) nakúpilo za posledných
-{C.KPI_DIAG_CHURN_DAYS} dní — len netrafili {C.GMV_WINDOW_MONTHS}-mesačné okno KPI.
-<b>Toto je tá časť, ktorá je naozaj stratená; tá druhá je otázka časovania.</b>
-KPI ich pritom počíta rovnako, obe ako klesajúce.</p>
+{C.KPI_DIAG_CHURN_DAYS} dní — len netrafili {C.GMV_WINDOW_MONTHS}-mesačné okno KPI.</p>
 <p>Zvyšok sekcie je o tom, kto tá skupina je: ako dlho u nás nakupovali, koľko
 objednávok stihli, z ktorých trhov sú a kedy stíchli. Hľadá sa spoločný znak —
 ak ho skupina má, dá sa na ňom postaviť opatrenie; ak nie, je to
@@ -524,7 +542,7 @@ def credit_memo_section(metrics):
     figures = [charts.credit_memo_causes(causes)]
 
     return f"""
-<h2>4. Objednávky s dobropisom</h2>
+<h2>4. One-time objednávky s dobropisom</h2>
 {_credit_memo_intro(memos, metrics["single_orders"])}
 {_fig(figures, "credit_memo_causes")}
 {_credit_memo_causes_table(causes)}
@@ -542,24 +560,16 @@ def _credit_memo_intro(memos, single):
     z Slacku, a medzi nálezy nepatria.
     """
     found = int((memos["slack_link"] != "").sum())
-    outside = metrics_credit_memos.outside_single_orders(memos, single)
 
     return f"""
-<p><b>Ako zoznam vznikol.</b> Východiskom je zoznam objednávok účtov, ktoré za
-celý život urobili práve jednu objednávku (skupina zo sekcie 3) — je ich
+<p>Východiskom je zoznam objednávok účtov, ktoré za
+celý život urobili práve jednu objednávku — je ich
 {NUM(len(single))}. Tie sa preverili v Magente a <b>{NUM(len(memos))} z nich má
-vystavený dobropis</b> — tie sú v tejto sekcii. Ku každej z nich sa potom
+vystavený dobropis</b>. Ku každej z nich sa potom
 prehľadal Slack a z toho, čo sa našlo, je odvodený dôvod dobropisu.</p>
-<p class="small">Kontrola v Magente bežala nad zoznamom spred filtra na zrušené
-objednávky, takže {NUM(len(outside))} z {NUM(len(memos))} objednávok v dnešnej
-skupine {NUM(len(single))} už nie je — ich jediná objednávka je zrušená
-a zákazník tým z datasetu vypadol úplne.</p>
 <p>Spolu je to {EUR(memos["gmv"].sum())}, dobropisovaných z toho bolo
 {EUR(memos["total_refund"].sum())}, teda
-{PCT(memos["total_refund"].sum() / memos["gmv"].sum() * 100)}. Dobropis je
-najbližšia vec k priznanému problému, akú v dátach máme — a keďže ide zároveň
-o zákazníkov, ktorí sa už nikdy nevrátili, je to najlepšie miesto, kde hľadať
-dôvod odchodu.</p>
+{PCT(memos["total_refund"].sum() / memos["gmv"].sum() * 100)}.</p>
 <p>V Slacku sa hľadalo číslo objednávky, e-mail zákazníka aj názov firmy; niečo
 sa našlo k {NUM(found)} z nich. <b>Príčiny sú priradené ručne, nie sú to dáta
 z Magenta</b>, a mlčanie Slacku neznamená, že problém nebol — len že sa o ňom
@@ -580,19 +590,16 @@ def _credit_memo_coverage_note(memos, single, found):
     unknown = len(single) - found
 
     return R.render_note(
-        f"<b>Toto je vysvetlenie {PCT(found_pct)} skupiny, nie jej obrazu.</b> "
+        f"<b>Toto je vysvetlenie {PCT(found_pct)} skupiny.</b> "
         f"Účtov s jedinou objednávkou za život je {NUM(len(single))}. Dobropis "
         f"má z nich {NUM(len(memos))} ({PCT(memo_pct)}) a stopu v Slacku sme "
         f"našli pri {NUM(found)} ({PCT(found_pct)}). "
         f"<b>Pri zvyšných {NUM(unknown)} účtoch nevieme o dôvode nevrátenia sa "
-        f"vôbec nič</b> — nesťažovali sa, nereklamovali, nikto o nich nepísal. "
-        f"Odišli ticho.<br><br>"
+        f"vôbec nič</b> — nesťažovali sa, nereklamovali.<br><br>"
         f"Rozdelenie príčin nižšie preto neopisuje, prečo zákazníci odchádzajú. "
-        f"Opisuje, prečo odchádzali tí, ktorí po sebe nechali písomnú stopu — "
-        f"a to je zo svojej podstaty výber tých hlasnejších prípadov. "
+        f"Opisuje, prečo odchádzali tí, ktorí po sebe nechali písomnú stopu. "
         f"Tichá väčšina môže odchádzať z úplne iných dôvodov (cena, konkurencia, "
-        f"sortiment, jednorazová potreba) a v dátach, ktoré máme, ich nezistíme. "
-        f"Zistiť sa dajú jedine tak, že sa tých zákazníkov niekto spýta."
+        f"sortiment, jednorazová potreba). "
     )
 
 
@@ -619,14 +626,9 @@ def _credit_memo_text(causes):
 za {EUR(top_row["gmv"])}.</b> Nie je to len najpočetnejšia skupina, ale aj
 najdrahšia: sama tvorí {PCT(top_row["gmv"] / causes["gmv"].sum() * 100)} GMV
 celého zoznamu. Stratený balík, položka, ktorá nebola na sklade, alebo zásielka
-rozdelená na jedenásť kusov bez informovania zákazníka — to sú prevádzkové
-zlyhania, nie nedorozumenia.</p>
+rozdelená na jedenásť kusov bez informovania zákazníka.</p>
 <p>Zvyšné zistené príčiny sú miernejšie: nesprávne fakturačné údaje, faktúra,
-ktorá nedorazila do ABRY, nezodpovedaný mail. Samy o sebe zákazníka nestoja, ale
-kombinujú sa s tým prvým.</p>
-<p class="small">GMV skupín je silne ovplyvnené jednou objednávkou za
-{EUR(287030)} — bez nej by boli skupiny porovnateľné. Počty objednávok sú preto
-spoľahlivejším signálom než GMV.</p>
+ktorá nedorazila do ABRY, nezodpovedaný mail.</p>
 """
 
 

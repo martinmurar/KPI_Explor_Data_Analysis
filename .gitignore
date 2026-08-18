@@ -2,3 +2,4 @@
 .DS_Store
 .idea/
 src/__pycache__/
+data/orders_sku.csv

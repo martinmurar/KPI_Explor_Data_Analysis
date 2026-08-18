@@ -107,7 +107,7 @@ def _customers_by_band(df):
     """
     start, end = metrics_bridge.gmv_window(C.AS_OF, C.GMV_WINDOW_MONTHS)
     comparison = metrics_bridge.customer_comparison(df, start, end)
-    age_cutoff = C.AS_OF - pd.DateOffset(months=C.ACCOUNT_GROWTH_MIN_AGE_MONTHS)
+    age_cutoff = C.AS_OF - pd.DateOffset(months=C.SINGLE_ORDER_MIN_AGE_MONTHS)
 
     is_active_before = comparison["previous"] > 0
     is_mature = comparison["first_order"] <= age_cutoff
@@ -220,6 +220,33 @@ def single_order_share(df):
             "is_immature": year == C.PARTIAL_YEAR,
         })
     return pd.DataFrame(rows).set_index("cohort_year")
+
+
+def single_order_totals(df):
+    """Koľko zákazníkov objednalo za celý život práve raz.
+
+    Dve čísla, lebo bez veku sa dá to prvé čítať príliš čierne: časť tých
+    účtov je čerstvá akvizícia, ktorá druhú objednávku ešte len môže urobiť.
+    Prah veku je SINGLE_ORDER_MIN_AGE_MONTHS, teda ten istý, aký používa
+    drill-in — inak by tá istá veta mala v dvoch reportoch dve rôzne čísla.
+    """
+    orders = df.groupby("cust").size()
+    first_order = data.first_order_per_customer(df)
+    cutoff = C.AS_OF - pd.DateOffset(months=C.SINGLE_ORDER_MIN_AGE_MONTHS)
+
+    is_single = orders == 1
+    is_mature = first_order < cutoff
+    customers = len(orders)
+
+    return {
+        "customers": customers,
+        "single": int(is_single.sum()),
+        "single_pct": is_single.sum() / customers * 100,
+        "mature_single": int((is_single & is_mature).sum()),
+        "mature_single_pct": (is_single & is_mature).sum() / customers * 100,
+    }
+
+
 # ── frekvencia objednávania ───────────────────────────────────────────────────
 def orders_per_customer_last_year(df):
     """Počet objednávok každého zákazníka za okno frekvencie."""

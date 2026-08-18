@@ -52,10 +52,10 @@ def _active_in_both(table):
 
 
 def kpi_by_order_count(table, df):
-    """KPI počítané osobitne pre každý kôš podľa počtu objednávok za rok.
+    """KPI počítané osobitne pre každý kôš podľa počtu objednávok v okne frekvencie.
 
     Kôš určuje počet objednávok za posledných FREQUENCY_WINDOW_MONTHS mesiacov,
-    teda za aktuálne obdobie. Kôš 0 preto vyjde nutne 0 % — kto za rok nenakúpil,
+    teda za aktuálne obdobie. Kôš 0 preto vyjde nutne 0 % — kto v tom okne nenakúpil,
     nemá GMV ani v kratšom okne KPI a je automaticky klesajúci. Nie je to chyba
     rezu, ale jeho hlavný nález: ukazuje, koľko posudzovaných účtov je mŕtvych.
     """
@@ -71,7 +71,7 @@ def kpi_by_order_count(table, df):
 
 
 def _orders_last_year(table, df):
-    """Počet objednávok každého posudzovaného účtu za posledný rok."""
+    """Počet objednávok každého posudzovaného účtu za okno FREQUENCY_WINDOW_MONTHS."""
     start, end = metrics_bridge.gmv_window(C.AS_OF, C.FREQUENCY_WINDOW_MONTHS)
     window = data.orders_in_window(df, start, end)
     counts = window.groupby("cust").size()
@@ -247,9 +247,9 @@ def _thin_share(table):
 
 
 # ── účty vyradené filtrom spodných extrémov ───────────────────────────────────
-# Popisky rozpadu vyradených účtov podľa aktivity za posledný rok.
-DROPPED_DORMANT = "Bez objednávky za rok"
-DROPPED_ACTIVE = "Aspoň jedna objednávka za rok"
+# Popisky rozpadu vyradených účtov podľa aktivity v okne FREQUENCY_WINDOW_MONTHS.
+DROPPED_DORMANT = f"Bez objednávky za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov"
+DROPPED_ACTIVE = f"Aspoň jedna objednávka za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov"
 DROPPED_ACTIVITY_ORDER = [DROPPED_DORMANT, DROPPED_ACTIVE]
 
 
@@ -278,7 +278,7 @@ def dropped_accounts(table, filtered_table, df):
 
 
 def dropped_activity_split(detail):
-    """Vyradené účty rozdelené podľa aktivity za rok a podľa príznaku rastu.
+    """Vyradené účty rozdelené podľa aktivity v okne frekvencie a podľa príznaku rastu.
 
     Rozdelenie ukazuje, prečo filter KPI nezdvihol: v jednej skupine sú samé
     klesajúce účty, v druhej prevažne rastúce, a filter vzal obe naraz.
@@ -300,7 +300,7 @@ def dropped_activity_split(detail):
 
 
 def largest_account(table, df):
-    """Najväčší posudzovaný účet podľa GMV za posledný rok.
+    """Najväčší posudzovaný účet podľa GMV za okno FREQUENCY_WINDOW_MONTHS.
 
     Slúži ako mierka pre vyradenú skupinu — bez porovnania s niečím známym je
     súčet za štyridsiatku drobných účtov len ďalšie číslo.

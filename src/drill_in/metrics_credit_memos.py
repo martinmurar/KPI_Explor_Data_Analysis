@@ -12,13 +12,20 @@ import pandas as pd
 from src.common import constants as C
 
 
-def load_credit_memos():
-    """Objednávky s dobropisom, spojené s anotáciou z Slacku."""
+def load_credit_memos(df):
+    """Objednávky s dobropisom, spojené s anotáciou z Slacku.
+
+    Zrušené objednávky sa vyhadzujú. Zoznam vznikol nad exportom, ktorý ešte
+    obsahoval `canceled`, takže sú v ňom aj objednávky, ktoré nikdy nevznikli —
+    dobropis na ne síce bol vystavený, ale ako dôvod odchodu zákazníka nič
+    nehovoria. Test je príslušnosť do už očisteného datasetu objednávok.
+    """
     orders = pd.read_csv(C.CREDIT_MEMO_CSV, dtype={"order_number": str})
     notes = pd.read_csv(C.CREDIT_MEMO_NOTES_CSV, dtype={"order_number": str})
 
     memos = orders.merge(notes, on="order_number", how="left", validate="one_to_one")
     _check_annotations(memos)
+    memos = memos.loc[memos["order_number"].isin(df["increment_id"])]
 
     memos["order_date"] = pd.to_datetime(memos["order_date"])
     memos["note"] = memos["note"].fillna("")
@@ -51,6 +58,7 @@ def causes(memos):
     )
     grouped = grouped.reindex(C.CREDIT_MEMO_CATEGORIES).fillna(0)
     grouped["orders"] = grouped["orders"].astype(int)
+    grouped = grouped.loc[grouped["orders"] > 0]
     grouped["refund_pct"] = grouped["refund"] / grouped["gmv"] * 100
     return grouped
 
@@ -62,14 +70,5 @@ def explained(causes_table):
     hranicou toho, čo sa dalo zistiť.
     """
     excluded = [C.CREDIT_MEMO_NO_TRACE, C.CREDIT_MEMO_IRRELEVANT]
-    return causes_table.drop(index=excluded)
+    return causes_table.drop(index=excluded, errors="ignore")
 
-
-def outside_single_orders(memos, single_orders):
-    """Objednávky zo zoznamu, ktoré dnes medzi jednorazovými už nie sú.
-
-    Zoznam vznikol nad datasetom spred filtra na zrušené objednávky. Zákazník,
-    ktorého jediná objednávka bola zrušená, dnes v dátach nie je vôbec, takže
-    jeho objednávka v aktuálnej skupine jednorazových chýba.
-    """
-    return memos.loc[~memos["order_number"].isin(single_orders["increment_id"])]
