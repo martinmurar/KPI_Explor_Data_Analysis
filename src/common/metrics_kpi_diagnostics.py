@@ -54,10 +54,11 @@ def _active_in_both(table):
 def kpi_by_order_count(table, df):
     """KPI počítané osobitne pre každý kôš podľa počtu objednávok v okne frekvencie.
 
-    Kôš určuje počet objednávok za posledných FREQUENCY_WINDOW_MONTHS mesiacov,
-    teda za aktuálne obdobie. Kôš 0 preto vyjde nutne 0 % — kto v tom okne nenakúpil,
-    nemá GMV ani v kratšom okne KPI a je automaticky klesajúci. Nie je to chyba
-    rezu, ale jeho hlavný nález: ukazuje, koľko posudzovaných účtov je mŕtvych.
+    Kôš určuje počet objednávok za posledných KPI_DIAG_WINDOW_MONTHS mesiacov,
+    teda za obdobie, ktoré presne pokrýva obe okná KPI. Kôš 0 preto vyjde vždy
+    prázdny — posudzovaný účet musí mať GMV aspoň v jednom z okien, takže bez
+    objednávky v tomto okne by v menovateli vôbec nebol. Prázdne koše sa
+    nevykresľujú.
     """
     buckets = _orders_last_year(table, df).map(_order_count_bucket)
 
@@ -71,8 +72,8 @@ def kpi_by_order_count(table, df):
 
 
 def _orders_last_year(table, df):
-    """Počet objednávok každého posudzovaného účtu za okno FREQUENCY_WINDOW_MONTHS."""
-    start, end = metrics_bridge.gmv_window(C.AS_OF, C.FREQUENCY_WINDOW_MONTHS)
+    """Počet objednávok každého posudzovaného účtu za okno KPI_DIAG_WINDOW_MONTHS."""
+    start, end = metrics_bridge.gmv_window(C.AS_OF, C.KPI_DIAG_WINDOW_MONTHS)
     window = data.orders_in_window(df, start, end)
     counts = window.groupby("cust").size()
     return counts.reindex(table.index).fillna(0).astype(int)
@@ -247,10 +248,10 @@ def _thin_share(table):
 
 
 # ── účty vyradené filtrom spodných extrémov ───────────────────────────────────
-# Popisky rozpadu vyradených účtov podľa aktivity v okne FREQUENCY_WINDOW_MONTHS.
-DROPPED_DORMANT = f"Bez objednávky za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov"
-DROPPED_ACTIVE = f"Aspoň jedna objednávka za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov"
-DROPPED_ACTIVITY_ORDER = [DROPPED_DORMANT, DROPPED_ACTIVE]
+# Popisky rozpadu vyradených účtov podľa toho, či ich KPI vidí ako rastúce.
+DROPPED_GROWING = "Rastúce"
+DROPPED_DECLINING = "Klesajúce"
+DROPPED_GROWTH_ORDER = [DROPPED_GROWING, DROPPED_DECLINING]
 
 
 def dropped_accounts(table, filtered_table, df):
@@ -263,7 +264,7 @@ def dropped_accounts(table, filtered_table, df):
     „Za celý život“ znamená od začiatku dát, nie od C.DISPLAY_START_YEAR.
     """
     dropped = table.index.difference(filtered_table.index)
-    start, end = metrics_bridge.gmv_window(C.AS_OF, C.FREQUENCY_WINDOW_MONTHS)
+    start, end = metrics_bridge.gmv_window(C.AS_OF, C.KPI_DIAG_WINDOW_MONTHS)
     window = data.orders_in_window(df, start, end)
     names = data.company_names(df)
 
@@ -271,41 +272,41 @@ def dropped_accounts(table, filtered_table, df):
     detail["name"] = [names.get(cust, cust) for cust in detail.index]
     detail["lifetime_gmv"] = df.groupby("cust")["gmv"].sum().reindex(dropped)
     detail["lifetime_orders"] = df.groupby("cust").size().reindex(dropped)
-    detail["gmv_12m"] = window.groupby("cust")["gmv"].sum().reindex(dropped).fillna(0.0)
-    detail["orders_12m"] = window.groupby("cust").size().reindex(dropped).fillna(0).astype(int)
+    detail["gmv_window"] = window.groupby("cust")["gmv"].sum().reindex(dropped).fillna(0.0)
+    detail["orders_window"] = window.groupby("cust").size().reindex(dropped).fillna(0).astype(int)
     detail["last_order"] = data.last_order_per_customer(df, as_of=C.AS_OF).reindex(dropped)
     return detail.sort_values("lifetime_gmv", ascending=False)
 
 
-def dropped_activity_split(detail):
-    """Vyradené účty rozdelené podľa aktivity v okne frekvencie a podľa príznaku rastu.
+def dropped_growth_split(detail):
+    """Vyradené účty rozdelené podľa toho, či ich KPI počíta ako rastúce.
 
-    Rozdelenie ukazuje, prečo filter KPI nezdvihol: v jednej skupine sú samé
-    klesajúce účty, v druhej prevažne rastúce, a filter vzal obe naraz.
+    Delenie podľa aktivity by tu nedávalo zmysel: okno KPI_DIAG_WINDOW_MONTHS
+    presne pokrýva obe okná KPI, takže posudzovaný účet v ňom nemôže mať nula
+    objednávok. Zmysluplný rez je preto rast, nie aktivita.
     """
-    dormant = detail.loc[detail["orders_12m"] == 0]
-    active = detail.loc[detail["orders_12m"] > 0]
+    growing = detail.loc[detail["growing"]]
+    declining = detail.loc[~detail["growing"]]
 
     rows = []
-    for label, members in [(DROPPED_DORMANT, dormant), (DROPPED_ACTIVE, active)]:
+    for label, members in [(DROPPED_GROWING, growing), (DROPPED_DECLINING, declining)]:
         rows.append({
             "segment": label,
             "customers": len(members),
-            "growing": int(members["growing"].sum()),
-            "declining": int((~members["growing"]).sum()),
+            "share_pct": len(members) / len(detail) * 100,
             "lifetime_gmv": members["lifetime_gmv"].sum(),
-            "gmv_12m": members["gmv_12m"].sum(),
+            "gmv_window": members["gmv_window"].sum(),
         })
     return pd.DataFrame(rows).set_index("segment")
 
 
 def largest_account(table, df):
-    """Najväčší posudzovaný účet podľa GMV za okno FREQUENCY_WINDOW_MONTHS.
+    """Najväčší posudzovaný účet podľa GMV za okno KPI_DIAG_WINDOW_MONTHS.
 
     Slúži ako mierka pre vyradenú skupinu — bez porovnania s niečím známym je
     súčet za štyridsiatku drobných účtov len ďalšie číslo.
     """
-    start, end = metrics_bridge.gmv_window(C.AS_OF, C.FREQUENCY_WINDOW_MONTHS)
+    start, end = metrics_bridge.gmv_window(C.AS_OF, C.KPI_DIAG_WINDOW_MONTHS)
     window = data.orders_in_window(df, start, end)
     gmv = window.groupby("cust")["gmv"].sum().reindex(table.index).fillna(0.0)
     cust = gmv.idxmax()
@@ -481,16 +482,32 @@ CHURN_ORDERS_BUCKETS = ["1", "2", "3", "4–5", "6–10", "11+"]
 
 CHURN_TOP_COUNTRIES = 10
 
+# Dolná hranica posledného koša dĺžky života. Berie sa z hrán košov, aby
+# tabuľka dlhoročných účtov obsahovala presne ten kôš, ktorý je v grafe.
+CHURN_LONG_TENURE_MONTHS = CHURN_TENURE_EDGES[-2]
+
 
 def churn_characteristics(accounts, table):
     """Rozdelenie churnutých účtov podľa dĺžky života, objednávok a krajiny."""
     return {
         "tenure": _bucket_counts(accounts["tenure_months"],
                                  CHURN_TENURE_EDGES, CHURN_TENURE_BUCKETS),
+        "long_tenure": long_tenure_accounts(accounts),
         "orders": _bucket_counts(accounts["lifetime_orders"],
                                  CHURN_ORDERS_EDGES, CHURN_ORDERS_BUCKETS),
         "country": _churn_by_country(accounts, table),
     }
+
+
+def long_tenure_accounts(accounts):
+    """Churnuté účty z posledného koša dĺžky života, od najväčšieho GMV.
+
+    Sú to zabehnutí odberatelia — nakupovali u nás dlhšie než
+    CHURN_LONG_TENURE_MONTHS mesiacov a aj tak stíchli. Za ich odchodom nebude
+    zlý onboarding, takže sa oplatí pozrieť sa na ne po jednom.
+    """
+    long_lived = accounts.loc[accounts["tenure_months"] > CHURN_LONG_TENURE_MONTHS]
+    return long_lived.sort_values("lifetime_gmv", ascending=False)
 
 
 def _bucket_counts(values, edges, labels):

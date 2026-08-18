@@ -46,7 +46,7 @@ def compute_metrics(df):
             metrics_kpi_diagnostics.kpi_by_order_count(filtered_table, filtered_df),
 
         "dropped_accounts": dropped,
-        "dropped_activity": metrics_kpi_diagnostics.dropped_activity_split(dropped),
+        "dropped_growth": metrics_kpi_diagnostics.dropped_growth_split(dropped),
         "dropped_by_country": metrics_kpi_diagnostics.dropped_by_country(dropped),
         "largest_account": metrics_kpi_diagnostics.largest_account(table, df),
 
@@ -120,6 +120,7 @@ def _group_item_metrics(prefix, group):
         f"{prefix}_by_sku": sku_totals,
         f"{prefix}_profile": metrics_order_items.basket_profile(items),
         f"{prefix}_concentration": metrics_order_items.concentration(sku_totals),
+        f"{prefix}_gift": metrics_order_items.gift_or_sample(items),
     }
 
 

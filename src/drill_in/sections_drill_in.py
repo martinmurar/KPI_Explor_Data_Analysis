@@ -19,6 +19,13 @@ EUR = R.format_eur
 PCT = R.format_pct
 NUM = R.format_number
 
+MONTHS_PER_YEAR = 12
+
+
+def YEARS(months, decimals=1):
+    """Mesiace vyjadrené v rokoch."""
+    return NUM(months / MONTHS_PER_YEAR, decimals)
+
 
 def _fig(figures, figure_id):
     """Vykreslí graf podľa jeho ID, alebo nič, ak je v C.HIDDEN_CHARTS."""
@@ -63,7 +70,7 @@ def order_count_section(metrics):
     ]
 
     return f"""
-<h2>1. KPI podľa počtu objednávok za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov</h2>
+<h2>1. KPI podľa počtu objednávok za posledných {C.KPI_DIAG_WINDOW_MONTHS} mesiacov</h2>
 {_dataset_definitions(metrics)}
 {_fig(figures, "kpi_by_order_count")}
 {_filtered_text(metrics)}
@@ -154,15 +161,15 @@ def _bucket_list(buckets):
 def dropped_accounts_section(metrics):
     """Kto sú účty, ktoré filter vyradí z menovateľa."""
     detail = metrics["dropped_accounts"]
-    split = metrics["dropped_activity"]
+    split = metrics["dropped_growth"]
 
-    figures = [charts.dropped_activity_split(split)]
+    figures = [charts.dropped_growth_split(split, metrics["diag_summary"]["growing_pct"])]
 
     return f"""
 <h2>2. Kto sú vyradené účty</h2>
 {_dropped_intro(metrics)}
-{_fig(figures, "dropped_activity")}
-{_dropped_split_text(split)}
+{_fig(figures, "dropped_growth")}
+{_dropped_split_text(split, metrics["diag_summary"]["growing_pct"])}
 {_dropped_profile(metrics)}
 {_dropped_table(detail)}
 """, figures
@@ -181,29 +188,28 @@ def _dropped_intro(metrics):
 z nich v menovateli KPI nikdy nebola. Zaujímavých je
 <b>{NUM(len(detail))} účtov, ktoré v ňom boli a vypadli z neho</b> — len tie hýbu
 hodnotou KPI. Za celý život, teda od začiatku dát, majú spolu
-{EUR(detail["lifetime_gmv"].sum())}; za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov
-{EUR(detail["gmv_12m"].sum())}. Žiadny z nich nemá viac ako
+{EUR(detail["lifetime_gmv"].sum())}; za posledných {C.KPI_DIAG_WINDOW_MONTHS} mesiacov
+{EUR(detail["gmv_window"].sum())}. Žiadny z nich nemá viac ako
 {NUM(detail["lifetime_orders"].max())} objednávok za život, medián je
 {NUM(detail["lifetime_orders"].median())}.</p>
 """
 
 
-def _dropped_split_text(split):
-    """Prečo skupina KPI nezdvihne."""
-    dormant = split.loc[MD.DROPPED_DORMANT]
-    active = split.loc[MD.DROPPED_ACTIVE]
+def _dropped_split_text(split, reference_pct):
+    """Prečo filter KPI nezdvihne, ale zrazí."""
+    growing = split.loc[MD.DROPPED_GROWING]
+    declining = split.loc[MD.DROPPED_DECLINING]
 
     return f"""
-<p>Skupina sa rozpadá na dve polovice s opačným účinkom.
-{NUM(dormant["customers"])} účtov nenakúpilo za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov
-vôbec nič — tie sú v menovateli mŕtvou váhou a ich odstránenie KPI dvíha. Druhých
-{NUM(active["customers"])} účtov v tom istom okne nakúpilo a {NUM(active["growing"])}
-z nich je rastúcich, čo je
-{PCT(active["growing"] / active["customers"] * 100)}, teda výrazne viac než celkové
-KPI. <b>Filter vezme obe skupiny naraz a ich účinky sa takmer vyrušia.</b> Preto sa
-KPI po odfiltrovaní nepohne nahor.</p>
-<p class="small">Rastúci účet v druhej skupine typicky urobil jednu objednávku za
-pár stoviek eur proti nule spred roka. Formálne rast, ekonomicky šum.</p>
+<p>Z {NUM(int(split["customers"].sum()))} vyradených účtov je
+{NUM(growing["customers"])} rastúcich a {NUM(declining["customers"])} klesajúcich,
+teda <b>{PCT(growing["share_pct"])} rastúcich oproti celkovému KPI
+{PCT(reference_pct)}</b>. Filter teda neodoberá mŕtvu váhu — odoberá skupinu,
+ktorá je nadpriemerne rastúca.</p>
+<p><b>Preto sa KPI po odfiltrovaní nepohne nahor, ale nadol.</b> Malý účet, ktorý
+urobil jednu objednávku za pár stoviek eur proti nule spred roka, je formálne
+rastúci; ekonomicky je to šum, ale KPI ho počíta rovnako ako strategického
+partnera. Vyhodením takých účtov sa KPI zbaví lacných bodov.</p>
 """
 
 
@@ -213,15 +219,14 @@ def _dropped_profile(metrics):
     largest = metrics["largest_account"]
     countries = metrics["dropped_by_country"]
 
-    dormant = detail.loc[detail["orders_12m"] == 0]
-    monthly = detail["gmv_12m"].sum() / C.FREQUENCY_WINDOW_MONTHS
+    monthly = detail["gmv_window"].sum() / C.KPI_DIAG_WINDOW_MONTHS
 
     return f"""
 <h3>Čo sú zač</h3>
 <p>Fitness centrá, telocvične a malé e-shopy s doplnkami — v zozname nižšie sú názvy
 ako gym, sport či webáruház. <b>Ani jedna firma, ktorá by vyzerala ako
-veľkoodberateľ.</b> Za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov minuli spolu
-{EUR(detail["gmv_12m"].sum())}, teda {EUR(monthly)} mesačne. Najväčší posudzovaný účet
+veľkoodberateľ.</b> Za posledných {C.KPI_DIAG_WINDOW_MONTHS} mesiacov minuli spolu
+{EUR(detail["gmv_window"].sum())}, teda {EUR(monthly)} mesačne. Najväčší posudzovaný účet
 ({R.escape(largest["name"])}) urobil v tom istom okne {EUR(largest["gmv_12m"])} — celá
 vyradená skupina je oproti nemu
 zaokrúhľovacia chyba.</p>
@@ -229,10 +234,8 @@ zaokrúhľovacia chyba.</p>
 {NUM(detail["lifetime_orders"].max())} objednávok za celý život</b>, typicky
 {NUM(detail["lifetime_orders"].median())}, a to za obdobie niekoľkých rokov. Sú to
 zákazníci, ktorí si nás dvakrát-trikrát vyskúšali a nezostali.</p>
-<p>{NUM(len(dormant))} z nich nenakúpilo za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov nič
-a posledná objednávka im
-padá medzi {dormant["last_order"].min():%-m/%Y} a {dormant["last_order"].max():%-m/%Y}.
-Tí sa už nevrátia a v menovateli sedeli len ako mŕtva váha.
+<p>Posledná objednávka im padá medzi
+{detail["last_order"].min():%-m/%Y} a {detail["last_order"].max():%-m/%Y}.
 Geograficky: {_country_list(countries)}.</p>
 """
 
@@ -253,9 +256,9 @@ def _dropped_table(detail):
         table,
         [("country", "Krajina", str),
          ("lifetime_gmv", "Lifetime GMV", EUR),
-         ("gmv_12m", f"GMV za posledných {C.FREQUENCY_WINDOW_MONTHS} mes.", EUR),
+         ("gmv_window", f"GMV za posledných {C.KPI_DIAG_WINDOW_MONTHS} mes.", EUR),
          ("lifetime_orders", "Obj. celkom", NUM),
-         ("orders_12m", f"Obj. za posledných {C.FREQUENCY_WINDOW_MONTHS} mes.", NUM),
+         ("orders_window", f"Obj. za posledných {C.KPI_DIAG_WINDOW_MONTHS} mes.", NUM),
          ("last_order", "Posledná objednávka", lambda value: f"{value:%-d. %-m. %Y}"),
          ("growing", "Rastie", lambda value: "áno" if value else "nie")],
         index_label="Účet",
@@ -404,17 +407,18 @@ def _churned_group_section(metrics, prefix, heading, group_note, intro):
 <h2>{heading}</h2>
 {intro}
 
+<h3>Vyhľadanie konkrétneho účtu</h3>
+{_fig(figures, timeline_id)}
+
 <h3>Kto sú títo zákazníci a ako sa správali?</h3>
 {_fig(figures, tenure_id)}
+{_long_tenure_block(chars["long_tenure"], accounts)}
 {_fig(figures, orders_id)}
 {_fig(figures, country_id)}
 
 <h3>Kedy naposledy nakúpili</h3>
 {_fig(figures, cluster_id)}
 {_cluster_text(cluster)}
-
-<h3>Vyhľadanie konkrétneho účtu</h3>
-{_fig(figures, timeline_id)}
 
 {R.render_rollup(f"Zoznam všetkých {NUM(len(accounts))} účtov", _accounts_table(accounts))}
 """, figures
@@ -518,6 +522,55 @@ def _cluster_text(cluster):
 niektorý vrchol kryje s prevádzkovou zmenou na našej strane, máme kandidáta
 na spoločnú príčinu; inak je to rozptýlený odchod bez jedného spúšťača.</p>
 """
+
+
+def _long_tenure_block(long_tenure, accounts):
+    """Najvyšší kôš grafu dĺžky života rozpísaný po účtoch."""
+    if long_tenure.empty:
+        return ""
+    return f"""
+{_long_tenure_text(long_tenure, accounts)}
+{R.render_rollup(f"Zoznam {NUM(len(long_tenure))} účtov z koša "
+                 f"{MD.CHURN_TENURE_BUCKETS[-1]}", _long_tenure_table(long_tenure))}
+"""
+
+
+def _long_tenure_text(long_tenure, accounts):
+    """Čo najvyšší kôš znamená v peniazoch."""
+    gmv_share = long_tenure["lifetime_gmv"].sum() / accounts["lifetime_gmv"].sum() * 100
+    top_five = long_tenure["lifetime_gmv"].head(5).sum()
+
+    return f"""
+<p>Najvyšší kôš je zároveň ten najdrahší. <b>{NUM(len(long_tenure))} účtov, ktoré
+u nás nakupovali dlhšie než {YEARS(MD.CHURN_LONG_TENURE_MONTHS, 0)} roky</b>, je
+{PCT(len(long_tenure) / len(accounts) * 100)} skupiny, ale
+{PCT(gmv_share)} jej lifetime GMV ({EUR(long_tenure["lifetime_gmv"].sum())}).
+Medián dĺžky života je tu {YEARS(long_tenure["tenure_months"].median())} roka,
+takže zlý onboarding to nevysvetlí — títo zákazníci boli zabehnutí.</p>
+<p>Ani v rámci koša nie sú si účty rovné: <b>top 5 z nich drží
+{PCT(top_five / long_tenure["lifetime_gmv"].sum() * 100)} jeho lifetime GMV</b>.
+Medián ticha je {NUM(long_tenure["months_silent"].median(), 1)} mesiacov — čím
+kratšie mlčia, tým väčšiu šancu má oslovenie.</p>
+"""
+
+
+def _long_tenure_table(long_tenure):
+    """Účty z najvyššieho koša, od najväčšieho lifetime GMV."""
+    table = long_tenure.copy()
+    table.index = table["name"]
+    return R.render_table(
+        table,
+        [("country", "Krajina", str),
+         ("tenure_months", "Nakupovali (rokov)", YEARS),
+         ("lifetime_orders", "Obj. za život", NUM),
+         ("orders_per_month", "Obj./mesiac", lambda value: NUM(value, 1)),
+         ("lifetime_gmv", "Lifetime GMV", EUR),
+         ("previous", "GMV pred rokom", EUR),
+         ("mean_order", "Priemerná obj.", EUR),
+         ("last_order", "Posledná objednávka", lambda value: f"{value:%-d. %-m. %Y}"),
+         ("months_silent", "Mesiacov ticho", lambda value: NUM(value, 1))],
+        index_label="Účet",
+    )
 
 
 def _accounts_table(accounts):
@@ -750,7 +803,24 @@ def _order_items_intro(metrics, prefix, lead):
 <p>Medián objednávky: {NUM(profile["median_lines"])} riadkov,
 {NUM(profile["median_units"])} kusov, {EUR(profile["median_gmv"])}.
 Jediný riadok má {PCT(profile["single_line_pct"])} objednávok.</p>
+{_gift_text(metrics[f"{prefix}_gift"], prefix)}
 {_sku_names_note(metrics[f"{prefix}_by_sku"])}
+"""
+
+
+def _gift_text(gift, prefix):
+    """Aká časť skupiny mala v objednávke darček alebo vzorku.
+
+    Pri jednorazových zákazníkoch je objednávka a účet to isté, preto sa dá
+    hovoriť o podiele účtov; pri bežných zákazníkoch len o podiele objednávok.
+    """
+    unit = "účtov" if prefix == SINGLE_ITEMS else "objednávok"
+
+    return f"""
+<p><b>Darček alebo vzorku obsahovalo {PCT(gift["share_pct"])} {unit}</b>
+({NUM(gift["orders_with_gift"])} z {NUM(gift["orders"])}). Rozpoznaných je
+{NUM(gift["products"])} takých produktov — nie sú to predané kusy, pribalíme
+ich my.</p>
 """
 
 

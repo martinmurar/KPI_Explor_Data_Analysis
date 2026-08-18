@@ -10,6 +10,7 @@ zmysel pre jednorazových zákazníkov aj pre bežných.
 """
 
 import os
+import re
 
 import pandas as pd
 
@@ -139,3 +140,28 @@ def save_sku_names(names):
 def load_cached_items(cache_path):
     """Položky skupiny z odloženej cache, alebo None ak cache nie je."""
     return order_items.cached_items(cache_path)
+
+
+def gift_or_sample(items):
+    """Koľko objednávok skupiny obsahovalo darček alebo vzorku.
+
+    Hľadá sa v kóde aj v názve produktu — vzorky a darčeky nemajú v dátach
+    vlastný príznak. Pri jednorazových zákazníkoch je objednávka a účet to isté,
+    takže podiel objednávok je zároveň podielom účtov.
+    """
+    names = load_sku_names()
+    pattern = re.compile(C.GIFT_SAMPLE_PATTERN, re.IGNORECASE)
+
+    matching = set()
+    for sku in items["sku"].unique():
+        if pattern.search(sku) or pattern.search(names.get(sku, "")):
+            matching.add(sku)
+
+    orders = items["increment_id"].nunique()
+    with_gift = items.loc[items["sku"].isin(matching), "increment_id"].nunique()
+    return {
+        "products": len(matching),
+        "orders": orders,
+        "orders_with_gift": with_gift,
+        "share_pct": with_gift / orders * 100 if orders else 0.0,
+    }

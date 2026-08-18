@@ -60,6 +60,10 @@ SKU_LABEL_MAX_CHARS = 32
 # rovnaké. Vyhadzujú sa po častiach oddelených pomlčkou.
 SKU_LABEL_DROP = ("GymBeam",)
 
+# Vzorky a darčeky nie sú predaj — do objednávky ich pribalíme my. Rozpoznávajú
+# sa podľa názvu aj kódu produktu, lebo v dátach nemajú vlastný príznak.
+GIFT_SAMPLE_PATTERN = r"(gift|sample|vzork|darcek|darček)"
+
 # ── analýza produktov (tretí report) ──────────────────────────────────────────
 OUTPUT_HTML_PRODUCTS = str(DATA_DIR / "b2b_products.html")
 
@@ -200,6 +204,12 @@ ACCOUNT_GROWTH_HISTORY_START = pd.Timestamp(year=DISPLAY_START_YEAR, month=1, da
 # ── diagnostika KPI account growth (druhý report) ─────────────────────────────
 # Účet s najviac týmto počtom objednávok v oboch oknách je porovnávaný na
 # základe jednotiek udalostí — tam KPI meria hlavne časovanie.
+# Okno, za ktoré drill-in počíta objednávky posudzovaných účtov. Nie je to
+# FREQUENCY_WINDOW_MONTHS z hlavného reportu: 15 mesiacov presne pokryje obe
+# okná KPI (minuloročné aj aktuálne), takže „účet bez objednávky v okne“ je
+# skutočne mŕtvy účet a nie účet, ktorý nakúpil tesne pred 12-mesačnou hranicou.
+KPI_DIAG_WINDOW_MONTHS = ACCOUNT_GROWTH_MIN_AGE_MONTHS
+
 KPI_DIAG_THIN_ORDERS = 2
 
 # Po koľkých dňoch bez objednávky sa účet v diagnostike považuje za churnutý.

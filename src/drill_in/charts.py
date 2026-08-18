@@ -30,8 +30,8 @@ def kpi_by_order_count(breakdown, reference_pct, filtered=None):
 
     return base.figure(
         "kpi_by_order_count",
-        f"Account growth podľa počtu objednávok za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov",
-        f"V %. Kôš určuje počet objednávok za posledných {C.FREQUENCY_WINDOW_MONTHS} "
+        f"Account growth podľa počtu objednávok za posledných {C.KPI_DIAG_WINDOW_MONTHS} mesiacov",
+        f"V %. Kôš určuje počet objednávok za posledných {C.KPI_DIAG_WINDOW_MONTHS} "
         f"mesiacov. {base.population_note(int(breakdown['customers'].sum()), 'posudzovanými účtami')} "
         f"Farba spodnej série: zelená nad cieľom {C.ACCOUNT_GROWTH_TARGET_PCT} %, "
         f"červená pod celkovým KPI. Svetlá séria navrchu je ten istý rez nad datasetom "
@@ -110,30 +110,28 @@ def _order_count_hover(breakdown):
     ])
 
 
-def dropped_activity_split(split):
-    """Vyradené účty podľa aktivity v okne frekvencie, rozdelené na rastúce a klesajúce."""
+def dropped_growth_split(split, reference_pct):
+    """Vyradené účty podľa toho, či ich KPI počíta ako rastúce."""
     return base.figure(
-        "dropped_activity",
-        f"Účty vyradené filtrom podľa aktivity za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov",
-        f"Počet účtov. Ľavá skupina je z definície celá klesajúca — bez objednávky "
-        f"za posledných {C.FREQUENCY_WINDOW_MONTHS} mesiacov nemá účet GMV ani v okne KPI. "
+        "dropped_growth",
+        "Účty vyradené filtrom podľa rastu",
+        f"Počet účtov. Celkové KPI je {formatting.format_pct(reference_pct)} — ak je "
+        f"podiel rastúcich v tejto skupine vyšší, filter odoberá nadpriemerne "
+        f"rastúce účty a KPI po ňom klesne. "
         f"{base.population_note(int(split['customers'].sum()), 'účtami vyradenými z menovateľa')}",
         "bar",
         split.index,
-        [
-            base.series("Rastúce", split["growing"], C.KPI_DIAG_COLOR_GOOD),
-            base.series("Klesajúce", split["declining"], C.KPI_DIAG_COLOR_BAD),
-        ],
+        [base.series("Účtov", split["customers"], C.COLOR_BLUE,
+                     point_colors=[C.KPI_DIAG_COLOR_GOOD, C.KPI_DIAG_COLOR_BAD])],
         height=260,
-        stacked=True,
         value_format="count",
         hover_extras=base.kpi_hover(split, lambda row: [
-            f"Účtov spolu: {formatting.format_number(row['customers'])}",
+            f"Podiel skupiny: {formatting.format_pct(row['share_pct'])}",
             f"Lifetime GMV: {formatting.format_eur(row['lifetime_gmv'])}",
-            f"GMV za posledných {C.FREQUENCY_WINDOW_MONTHS} mes.: {formatting.format_eur(row['gmv_12m'])}",
+            f"GMV za posledných {C.KPI_DIAG_WINDOW_MONTHS} mes.: "
+            f"{formatting.format_eur(row['gmv_window'])}",
         ]),
     )
-
 
 def order_value_mix(mix):
     """Rozdelenie hodnoty prvej objednávky: jednorazoví vs opakujúci zákazníci."""
