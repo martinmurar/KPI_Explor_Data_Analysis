@@ -23,6 +23,42 @@ OUTPUT_HTML_DRILL_IN = str(DATA_DIR / "b2b_account_growth_drill_in.html")
 # Do hlavičky reportu ide len názov súboru — absolútna cesta by tam zavadzala.
 INPUT_LABEL = pathlib.Path(INPUT_XLSX).name
 
+# ── položky objednávok ────────────────────────────────────────────────────────
+# Export SKU jednotlivých objednávok. Má cez 4 GB a takmer 95 mil. riadkov,
+# takže sa číta po častiach — nikdy nie celý naraz. Nie je súčasťou pipeline
+# žiadneho reportu, používajú ho len ad-hoc analýzy.
+ORDER_ITEMS_CSV = str(DATA_DIR / "orders_sku.csv")
+
+# Koľko riadkov naraz drží v pamäti jeden prechod. 2 mil. riadkov je zhruba
+# 300 MB — bezpečné aj na stroji s 3 GB pamäte.
+ORDER_ITEMS_CHUNK_ROWS = 2_000_000
+
+# Odložené výsledky filtrovania pre jednotlivé skupiny zákazníkov.
+SINGLE_ORDER_ITEMS_CSV = str(DATA_DIR / "single_order_items.csv")
+REGULAR_ORDER_ITEMS_CSV = str(DATA_DIR / "regular_order_items.csv")
+
+# Koľko najsilnejších SKU sa vypisuje v grafe a v tabuľke.
+SINGLE_ORDER_ITEMS_TOP = 15
+
+# Úrovne, na ktorých sa meria koncentrácia GMV do najsilnejších SKU.
+SINGLE_ORDER_ITEMS_LEVELS = (10, 25, 50, 100)
+
+# Od akého podielu top 10 SKU na GMV sa nákup považuje za sústredený.
+SINGLE_ORDER_ITEMS_CONCENTRATED_PCT = 25
+
+# Mapa SKU → názov produktu. Vypĺňa sa ručne; skript single_order_items.py do
+# nej dopĺňa prázdne riadky pre SKU, ktoré sa v reporte zobrazujú. SKU bez
+# vyplneného názvu sa v grafe ukáže ako holé SKU.
+SKU_NAMES_CSV = str(DATA_DIR / "sku_names.csv")
+
+# Najdlhší popisok produktu v grafe. Dlhší sa skráti a plný názov zostane
+# v hover — v dvoch stĺpcoch vedľa seba by celé názvy zjedli plochu stĺpcov.
+SKU_LABEL_MAX_CHARS = 32
+
+# Časti názvu, ktoré v popisku nič nehovoria, lebo sú pri každom produkte
+# rovnaké. Vyhadzujú sa po častiach oddelených pomlčkou.
+SKU_LABEL_DROP = ("GymBeam",)
+
 # ── objednávky s dobropisom ───────────────────────────────────────────────────
 # Dva súbory zámerne oddelene: prvý je export objednávok, ku ktorým bol
 # vystavený dobropis, druhý je ručná anotácia z Slacku (príčina a odkaz na
@@ -63,6 +99,11 @@ HIDDEN_CHARTS = set()
 # aby prvý zobrazený bod mal platnú hodnotu. Zmena tejto jednej hodnoty
 # preráta všetky časové grafy a tabuľky v reporte naraz.
 DISPLAY_START_YEAR = 2024
+
+# Od ktorého roku sa berú objednávky bežných zákazníkov v analýze položiek.
+# Sortiment sa mení, porovnávať dnešný nákup s tým spred piatich rokov by
+# nedávalo zmysel. Definované až tu, lebo vychádza z DISPLAY_START_YEAR.
+ORDER_ITEMS_START_YEAR = DISPLAY_START_YEAR
 
 # Posledný deň dát. Používa sa ako "dnešný dátum" pre churn a rolling okná.
 AS_OF = pd.Timestamp("2026-07-31")

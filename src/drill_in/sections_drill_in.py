@@ -6,9 +6,12 @@ Samostatný report, ktorý rozoberá hodnotu KPI na skupiny účtov. Hlavný rep
 sedí a čo s ním spraví odfiltrovanie spodných extrémov.
 """
 
+import pathlib
+
 from src.common import constants as C
 from src.drill_in import charts
 from src.drill_in import metrics_credit_memos
+from src.drill_in import metrics_order_items as MOI
 from src.common import metrics_kpi_diagnostics as MD
 from src.common import report as R
 
@@ -356,7 +359,7 @@ def zero_accounts_section(metrics):
     return _account_group_section(
         metrics,
         prefix="zero",
-        heading="5. Účty, ktoré odišli do nuly",
+        heading="6. Účty, ktoré odišli do nuly",
         group_note="účty, ktoré odišli do nuly",
         intro=_zero_intro(metrics),
     )
@@ -368,7 +371,7 @@ def churned_accounts_section(metrics):
     return _churned_group_section(
         metrics,
         prefix="churned",
-        heading="6. Churnuté účty",
+        heading="7. Churnuté účty",
         group_note="churnuté účty",
         intro=_churned_intro(metrics),
     )
@@ -475,7 +478,9 @@ def _decathlon_note():
         "<b>Najväčší účet skupiny neodišiel — len zmenil e-mail.</b> "
         "Decathlon SK prešiel na inú kontaktnú osobu a nakupuje ďalej pod novou "
         "adresou. Pôvodný účet tak vyzerá ako odchod do nuly a nový ako čerstvá "
-        "akvizícia, hoci firma nakupuje bez prerušenia.")
+        "akvizícia, hoci firma nakupuje bez prerušenia. Je to dôsledok toho, že "
+        "zákazník je v dátach definovaný e-mailom, nie firmou — rovnaká zmena "
+        "kontaktu môže byť aj za ďalšími účtami v tomto zozname.")
 
 
 def _churned_intro(metrics):
@@ -649,12 +654,175 @@ def _credit_memo_table(memos):
     )
 
 
+SINGLE_ITEMS = "single_items"
+REGULAR_ITEMS = "regular_items"
+
+
+def order_items_section(metrics):
+    """Čo nakupujú jednorazoví a čo bežní zákazníci, vedľa seba.
+
+    Obe skupiny sú v jednej sekcii a v dvoch stĺpcoch zámerne — rebríčky produktov
+    dávajú zmysel hlavne v porovnaní a pod sebou sa porovnávajú zle.
+    """
+    if metrics[SINGLE_ITEMS] is None or metrics[REGULAR_ITEMS] is None:
+        return _order_items_missing(), []
+
+    left, left_figures = _order_items_column(
+        metrics, SINGLE_ITEMS,
+        heading="Jednorazoví zákazníci",
+        group_note="zákazníci s jedinou objednávkou za život",
+        lead="Položky objednávok zo skupiny zo sekcie 3, rozpadnuté na produkty.",
+    )
+    right, right_figures = _order_items_column(
+        metrics, REGULAR_ITEMS,
+        heading="Bežní zákazníci",
+        group_note=f"zákazníci s viac než jednou objednávkou, od {C.ORDER_ITEMS_START_YEAR}",
+        lead=(f"Zákazníci, ktorí za život nakúpili viac než raz; ich objednávky "
+              f"od roku {C.ORDER_ITEMS_START_YEAR}."),
+    )
+
+    return f"""
+<h2>5. Čo kto nakupuje</h2>
+{_order_items_lead()}
+{R.render_columns(list(zip(left, right)))}
+""", left_figures + right_figures
+
+
+def _order_items_lead():
+    """Prečo sú obe skupiny vedľa seba."""
+    return """
+<p>Vľavo tí, čo sa nevrátili, vpravo tí, čo sa vracajú. Rebríčky sú v oboch
+stĺpcoch rovnaké a v rovnakom poradí, takže sa dajú čítať naprieč: ak sa
+sortiment oboch skupín prekrýva, na produkte to nestojí; ak sa líši, je čo
+skúmať.</p>
+"""
+
+
+def _order_items_column(metrics, prefix, heading, group_note, lead):
+    """Bloky jedného stĺpca porovnania, v poradí zhora nadol.
+
+    Vracia zoznam, nie hotové HTML — každý blok je jedna bunka mriežky a musí
+    mať svoj náprotivok v druhom stĺpci, aby si riadky držali výšku.
+    """
+    sku_totals = metrics[f"{prefix}_by_sku"]
+    gmv_id = f"{prefix}_top_skus_gmv"
+    orders_id = f"{prefix}_top_skus_orders"
+
+    figures = [
+        charts.top_skus_by_gmv(sku_totals, C.SINGLE_ORDER_ITEMS_TOP, gmv_id, group_note),
+        charts.top_skus_by_orders(sku_totals, C.SINGLE_ORDER_ITEMS_TOP, orders_id, group_note),
+    ]
+
+    blocks = [
+        f"<h3>{heading}</h3>",
+        _order_items_intro(metrics, prefix, lead),
+        _fig(figures, gmv_id),
+        _fig(figures, orders_id),
+        _order_items_concentration(metrics, prefix),
+        R.render_rollup(f"Top {C.SINGLE_ORDER_ITEMS_TOP} produktov podľa GMV v tabuľke",
+                        _order_items_table(sku_totals, "gmv")),
+        R.render_rollup(f"Top {C.SINGLE_ORDER_ITEMS_TOP} produktov podľa počtu "
+                        f"objednávok v tabuľke",
+                        _order_items_table(sku_totals, "orders")),
+    ]
+    return blocks, figures
+
+
+def _order_items_missing():
+    """Sekcia bez dát. Vysvetlí, čo treba spustiť, a nespadne."""
+    return f"""
+<h2>5. Čo kto nakupuje</h2>
+{R.render_note(
+    "<b>Dáta o položkách nie sú načítané.</b> Zdrojový súbor "
+    f"<code>{pathlib.Path(C.ORDER_ITEMS_CSV).name}</code> má cez 4 GB a report "
+    "ho nečíta — číta len odloženú cache. Vyrob ju spustením "
+    "<code>python3 -m src.drill_in.build_order_items</code> a report vygeneruj znova.")}
+"""
+
+
+def _order_items_intro(metrics, prefix, lead):
+    """Veľkosť skupiny a profil košíka."""
+    profile = metrics[f"{prefix}_profile"]
+
+    return f"""
+<p>{lead} Je to {NUM(profile["orders"])} objednávok,
+{NUM(profile["lines"])} riadkov a <b>{NUM(profile["skus"])} rôznych produktov</b>.</p>
+<p>Medián objednávky: {NUM(profile["median_lines"])} riadkov,
+{NUM(profile["median_units"])} kusov, {EUR(profile["median_gmv"])}.
+Jediný riadok má {PCT(profile["single_line_pct"])} objednávok.</p>
+{_sku_names_note(metrics[f"{prefix}_by_sku"])}
+"""
+
+
+def _sku_names_note(sku_totals):
+    """Upozorní, ak zobrazené SKU ešte nemajú doplnený názov produktu."""
+    displayed = MOI.displayed_skus(sku_totals)
+    unnamed = int((displayed["label"] == displayed.index).sum())
+    if unnamed == 0:
+        return ""
+
+    return f"""
+<p class="small">{NUM(unnamed)} z {NUM(len(displayed))} zobrazených produktov
+zatiaľ nemá doplnený názov a je v grafe uvedený svojím kódom. Názvy sa dopĺňajú
+do <code>{pathlib.Path(C.SKU_NAMES_CSV).name}</code>.</p>
+"""
+
+
+def _order_items_concentration(metrics, prefix):
+    """Či sa GMV skupiny sústreďuje do zopár SKU."""
+    concentration = metrics[f"{prefix}_concentration"]
+    top = concentration.iloc[0]
+
+    return f"""
+<p>{top.name} tvorí {PCT(top["gmv_share_pct"])} GMV skupiny.
+{_concentration_list(concentration)}
+{_concentration_verdict(top["gmv_share_pct"])}</p>
+"""
+
+
+def _concentration_verdict(top_share_pct):
+    """Záver z koncentrácie. Prah je v C.SINGLE_ORDER_ITEMS_CONCENTRATED_PCT.
+
+    Veta sa mení podľa dát, nie je napísaná natvrdo — pri inom exporte by
+    tvrdenie o rozptýlenom nákupe mohlo byť nepravdivé.
+    """
+    if top_share_pct >= C.SINGLE_ORDER_ITEMS_CONCENTRATED_PCT:
+        return ("<b>Nákup sa sústreďuje do úzkej skupiny produktov.</b>")
+    return ("<b>Neexistuje hrsť produktov, na ktorej by sa dalo postaviť "
+            "opatrenie</b> — nakupuje sa naprieč sortimentom.")
+
+
+def _concentration_list(concentration):
+    """Ostatné úrovne koncentrácie do vety."""
+    parts = []
+    for label, row in concentration.iloc[1:].iterrows():
+        parts.append(f"{label} {PCT(row['gmv_share_pct'])}")
+    if not parts:
+        return ""
+    return "Ďalej: " + ", ".join(parts) + "."
+
+
+def _order_items_table(sku_totals, column):
+    """Najsilnejšie produkty v tabuľke, zoradené podľa zvolenej veličiny."""
+    return R.render_table(
+        sku_totals.sort_values(column, ascending=False).head(C.SINGLE_ORDER_ITEMS_TOP),
+        [("label", "Produkt", str),
+         ("gmv", "GMV", EUR),
+         ("gmv_share_pct", "Podiel na GMV", PCT),
+         ("orders", "Objednávok", NUM),
+         ("orders_share_pct", "Podiel objednávok", PCT),
+         ("qty", "Kusov", NUM)],
+        index_label="Kód",
+    )
+
+
 SECTION_BUILDERS = [
     header,
     order_count_section,
     dropped_accounts_section,
     single_order_section,
     credit_memo_section,
+    order_items_section,
     zero_accounts_section,
     churned_accounts_section,
 ]

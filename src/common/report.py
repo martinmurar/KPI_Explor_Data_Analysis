@@ -39,6 +39,12 @@ tr:hover td{background:#f7f6f1}
 .fig h4{margin:0 0 2px;font-size:14.5px;font-weight:500}
 .fig .cap{font-size:12.5px;color:var(--mut);margin:0 0 14px}
 .cv{position:relative;width:100%}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;
+ margin-inline:-110px}
+.cols h3{margin-top:0}
+.cols .fig{margin:16px 0 20px}
+@media (max-width:1280px){.cols{margin-inline:0}}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
 .lg{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 12px;font-size:12px;color:var(--ink2)}
 .lg span{display:flex;align-items:center;gap:5px}
 .lg i{width:10px;height:10px;border-radius:2px;display:inline-block}
@@ -424,6 +430,23 @@ def render_rollup(title, content):
     """
     return (f'<details class="roll"><summary>{escape(title)}</summary>\n'
             f"{content}</details>")
+
+
+def render_columns(rows):
+    """Dvojice blokov vedľa seba, na priame porovnanie.
+
+    rows je zoznam dvojíc (vľavo, vpravo). Každá dvojica je jeden riadok
+    mriežky, takže si oba stĺpce držia rovnakú výšku aj vtedy, keď je text
+    v jednom z nich dlhší — bez toho by sa grafy postupne rozišli a porovnať
+    by sa nedali.
+
+    Na užších obrazovkách sa stĺpce zložia pod seba; grafy vedľa seba majú
+    zmysel len dovtedy, kým sú dosť široké na to, aby sa dali čítať.
+    """
+    cells = []
+    for left, right in rows:
+        cells.append(f"<div>{left}</div><div>{right}</div>")
+    return '<div class="cols">' + "".join(cells) + "</div>"
 
 
 def render_note(text):

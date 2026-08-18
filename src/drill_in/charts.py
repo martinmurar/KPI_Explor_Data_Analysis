@@ -317,3 +317,61 @@ def credit_memo_causes(causes):
             f" ({formatting.format_pct(row['refund_pct'])})",
         ]),
     )
+
+
+def top_skus_by_gmv(sku_totals, count, figure_id, group_note):
+    """Najsilnejšie SKU skupiny podľa GMV."""
+    top = sku_totals.sort_values("gmv", ascending=False).head(count)
+    return _sku_ranking_chart(
+        top, len(sku_totals), figure_id,
+        f"Top {len(top)} produktov podľa GMV",
+        f"Koľko peňazí skupina za daný produkt nechala — {group_note}.",
+        "gmv", "GMV", "eur", C.COLOR_BLUE,
+    )
+
+
+def top_skus_by_orders(sku_totals, count, figure_id, group_note):
+    """Najčastejšie SKU skupiny podľa počtu objednávok."""
+    top = sku_totals.sort_values("orders", ascending=False).head(count)
+    return _sku_ranking_chart(
+        top, len(sku_totals), figure_id,
+        f"Top {len(top)} produktov podľa počtu objednávok",
+        f"V koľkých objednávkach sa daný produkt objavil — {group_note}. Na rozdiel "
+        f"od rebríčka podľa GMV sem nevystúpi jedna veľká objednávka drahého tovaru.",
+        "orders", "Objednávok", "count", C.COLOR_TEAL,
+    )
+
+
+def _sku_ranking_chart(top, sku_count, figure_id, title, lead,
+                       column, series_label, value_format, color):
+    """Vodorovný rebríček SKU. Grafy sa líšia len veličinou, poradím a farbou."""
+    return base.figure(
+        figure_id,
+        title,
+        f"{lead} Popisok je skrátený názov produktu, ak je v mape kódov; inak jeho "
+        f"kód. Plný názov je v hover. "
+        f"Ide o konkrétne varianty, nie o produktové kategórie — tá istá tyčinka "
+        f"v dvoch príchutiach sú dva riadky. "
+        f"{base.population_note(sku_count, 'rôznymi produktmi')}",
+        "bar",
+        top["short_label"],
+        [base.series(series_label, top[column], color)],
+        height=520,
+        index_axis="y",
+        value_format=value_format,
+        hover_extras=base.kpi_hover(top, _sku_hover_lines),
+    )
+
+
+def _sku_hover_lines(row):
+    """Riadky hoveru jedného produktu. Plný názov je tu, na osi je skrátený."""
+    lines = []
+    if row["label"] != row.name:
+        lines.append(f"Produkt: {row['label']}")
+    lines.append(f"Kód: {row.name}")
+    lines.append(f"GMV: {formatting.format_eur(row['gmv'])}"
+                 f" ({formatting.format_pct(row['gmv_share_pct'])} skupiny)")
+    lines.append(f"Objednávok: {formatting.format_number(row['orders'])}"
+                 f" ({formatting.format_pct(row['orders_share_pct'])} skupiny)")
+    lines.append(f"Kusov: {formatting.format_number(row['qty'])}")
+    return lines

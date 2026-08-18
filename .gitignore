@@ -2,4 +2,7 @@
 .DS_Store
 .idea/
 src/__pycache__/
+src/drill_in/__pycache__/
+src/common/__pycache__/
+src/main_report/__pycache__/
 data/orders_sku.csv

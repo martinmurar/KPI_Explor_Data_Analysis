@@ -17,6 +17,8 @@ from src.common import data
 from src.common import metrics_account_growth
 from src.common import metrics_kpi_diagnostics
 from src.drill_in import metrics_credit_memos
+from src.drill_in import metrics_order_items
+from src.drill_in import order_item_groups
 from src.common import report
 from src.drill_in import sections_drill_in
 
@@ -51,6 +53,7 @@ def compute_metrics(df):
         **_single_order_metrics(df),
         **_zero_metrics(table, df),
         **_credit_memo_metrics(df),
+        **_item_metrics(),
         **_churned_metrics(table, df),
     }
 
@@ -90,6 +93,33 @@ def _credit_memo_metrics(df):
     return {
         "credit_memos": memos,
         "credit_memo_causes": metrics_credit_memos.causes(memos),
+    }
+
+
+def _item_metrics():
+    """Položky objednávok jednotlivých skupín z odložených cache.
+
+    Report zdrojový 4 GB súbor nečíta. Ak cache nie je, sekcia sa vykreslí ako
+    poznámka s návodom — generovanie reportu kvôli tomu nepadne.
+    """
+    metrics = {}
+    metrics.update(_group_item_metrics("single_items", order_item_groups.SINGLE))
+    metrics.update(_group_item_metrics("regular_items", order_item_groups.REGULAR))
+    return metrics
+
+
+def _group_item_metrics(prefix, group):
+    """Rezy nad položkami jednej skupiny."""
+    items = metrics_order_items.load_cached_items(order_item_groups.cache_path(group))
+    if items is None:
+        return {prefix: None}
+
+    sku_totals = metrics_order_items.by_sku(items)
+    return {
+        prefix: items,
+        f"{prefix}_by_sku": sku_totals,
+        f"{prefix}_profile": metrics_order_items.basket_profile(items),
+        f"{prefix}_concentration": metrics_order_items.concentration(sku_totals),
     }
 
 
