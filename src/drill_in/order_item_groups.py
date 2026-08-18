@@ -14,6 +14,7 @@ from src.common import metrics_kpi_diagnostics
 
 SINGLE = "single"
 REGULAR = "regular"
+ALL = "all"
 
 
 def single_order_numbers(df):
@@ -37,7 +38,21 @@ def regular_order_numbers(df):
     return window["increment_id"]
 
 
+def all_order_numbers(df):
+    """Všetky objednávky v očistenom datasete.
+
+    Najširšia skupina — z jej cache sa dajú odvodiť všetky ostatné rezy bez
+    ďalšieho prechodu 4 GB súborom. Používa ju report analýzy produktov.
+    """
+    return df["increment_id"]
+
+
 GROUPS = {
+    ALL: {
+        "cache": C.ALL_ORDER_ITEMS_CSV,
+        "numbers": all_order_numbers,
+        "note": "všetky B2B objednávky",
+    },
     SINGLE: {
         "cache": C.SINGLE_ORDER_ITEMS_CSV,
         "numbers": single_order_numbers,

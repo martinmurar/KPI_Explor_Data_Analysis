@@ -6,3 +6,7 @@ src/drill_in/__pycache__/
 src/common/__pycache__/
 src/main_report/__pycache__/
 data/orders_sku.csv
+
+data/b2b_order_items.csv
+data/regular_order_items.csv
+data/single_order_items.csv

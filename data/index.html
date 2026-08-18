@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="sk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B2B analýzy</title>
+<style>
+:root{--ink:#141413;--ink2:#52514e;--mut:#898781;--bd:#e1e0d9;--bg:#faf9f5;--card:#fff}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;
+ font:400 16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+.bar{display:flex;align-items:center;gap:4px;flex:none;padding:0 20px;
+ background:var(--card);border-bottom:1px solid var(--bd)}
+.bar .name{font-size:14px;font-weight:500;color:var(--mut);margin-right:18px;
+ white-space:nowrap}
+.bar button{font:inherit;font-size:14px;color:var(--ink2);background:none;border:0;
+ border-bottom:2px solid transparent;padding:14px 14px 11px;cursor:pointer;
+ white-space:nowrap}
+.bar button:hover{color:var(--ink)}
+.bar button[aria-selected="true"]{color:var(--ink);border-bottom-color:#eb6834}
+.bar a{margin-left:auto;font-size:13px;color:var(--mut);text-decoration:none;
+ padding:0 4px}
+.bar a:hover{color:var(--ink)}
+.panes{position:relative;flex:1;min-height:0}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg)}
+iframe[hidden]{display:none}
+.missing{position:absolute;inset:0;display:flex;align-items:center;
+ justify-content:center;padding:40px;text-align:center;color:var(--ink2)}
+.missing code{background:#f3f2ec;border-radius:5px;padding:2px 6px;font-size:13px}
+</style></head>
+<body>
+<nav class="bar" role="tablist">
+<span class="name">B2B analýzy</span>
+<button type="button" role="tab" aria-selected="true">Hlavný report</button><button type="button" role="tab" aria-selected="false">Account growth — drill-in</button><button type="button" role="tab" aria-selected="false">Čo zákazníci kupujú</button>
+<a id="open-tab" target="_blank" rel="noreferrer">Otvoriť samostatne ↗</a>
+</nav>
+<main class="panes">
+<iframe data-src="b2b_gmv_eda.html" title="b2b_gmv_eda.html"></iframe><iframe data-src="b2b_account_growth_drill_in.html" title="b2b_account_growth_drill_in.html" hidden></iframe><iframe data-src="b2b_products.html" title="b2b_products.html" hidden></iframe>
+</main>
+<script>
+const BUTTONS = [...document.querySelectorAll('.bar button')];
+const PANES = [...document.querySelectorAll('.panes > *')];
+
+function show(index) {
+  BUTTONS.forEach((button, position) => {
+    button.setAttribute('aria-selected', String(position === index));
+  });
+  PANES.forEach((pane, position) => {
+    pane.hidden = position !== index;
+  });
+
+  // Záložka sa načíta až keď ju niekto naozaj otvorí.
+  const pane = PANES[index];
+  if (pane.dataset.src && !pane.src) { pane.src = pane.dataset.src; }
+
+  const open = document.getElementById('open-tab');
+  open.href = PANES[index].dataset.src || '#';
+  location.hash = index ? 'tab' + (index + 1) : '';
+}
+
+BUTTONS.forEach((button, index) => button.addEventListener('click', () => show(index)));
+
+const FROM_HASH = parseInt(location.hash.replace('#tab', ''), 10) - 1;
+show(Number.isInteger(FROM_HASH) && FROM_HASH >= 0 && FROM_HASH < PANES.length
+     ? FROM_HASH : 0);
+</script>
+</body></html>

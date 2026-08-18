@@ -31,7 +31,10 @@ p{margin:0 0 14px}
 .small{font-size:13px;color:var(--mut)}
 table{border-collapse:collapse;width:100%;font-size:13.5px;margin:14px 0 22px}
 th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--bd)}
-th{font-weight:500;color:var(--ink2);background:#f3f2ec}
+/* Hlavička zostáva na vrchu aj po odrolovaní. Spodná hrana je box-shadow,
+   nie border — pri border-collapse sa okraj prilepenej bunky nevykresľuje. */
+th{font-weight:500;color:var(--ink2);background:#f3f2ec;
+ position:sticky;top:0;z-index:1;box-shadow:inset 0 -1px 0 var(--bd)}
 th:first-child,td:first-child{text-align:left}
 tr:hover td{background:#f7f6f1}
 .fig{background:var(--card);border:1px solid var(--bd);border-radius:12px;

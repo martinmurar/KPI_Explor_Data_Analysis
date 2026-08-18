@@ -36,6 +36,7 @@ ORDER_ITEMS_CHUNK_ROWS = 2_000_000
 # Odložené výsledky filtrovania pre jednotlivé skupiny zákazníkov.
 SINGLE_ORDER_ITEMS_CSV = str(DATA_DIR / "single_order_items.csv")
 REGULAR_ORDER_ITEMS_CSV = str(DATA_DIR / "regular_order_items.csv")
+ALL_ORDER_ITEMS_CSV = str(DATA_DIR / "b2b_order_items.csv")
 
 # Koľko najsilnejších SKU sa vypisuje v grafe a v tabuľke.
 SINGLE_ORDER_ITEMS_TOP = 15
@@ -58,6 +59,45 @@ SKU_LABEL_MAX_CHARS = 32
 # Časti názvu, ktoré v popisku nič nehovoria, lebo sú pri každom produkte
 # rovnaké. Vyhadzujú sa po častiach oddelených pomlčkou.
 SKU_LABEL_DROP = ("GymBeam",)
+
+# ── analýza produktov (tretí report) ──────────────────────────────────────────
+OUTPUT_HTML_PRODUCTS = str(DATA_DIR / "b2b_products.html")
+
+# ── rozcestník ────────────────────────────────────────────────────────────────
+# Jedna stránka so záložkami, ktorá tie tri reporty spája. Reporty zostávajú
+# samostatné súbory a dajú sa otvoriť aj priamo — rozcestník ich len vkladá.
+OUTPUT_HTML_PORTAL = str(DATA_DIR / "index.html")
+
+# Záložky v poradí, v akom sa zobrazujú: (názov, súbor reportu).
+PORTAL_TABS = [
+    ("Hlavný report", OUTPUT_HTML),
+    ("Account growth — drill-in", OUTPUT_HTML_DRILL_IN),
+    ("Čo zákazníci kupujú", OUTPUT_HTML_PRODUCTS),
+]
+
+# Produkt sa do rebríčka vstupných produktov dostane, len ak ho v prvej
+# objednávke malo aspoň toľko zákazníkov. Pri menšom počte je podiel návratov
+# šum — jeden zákazník hore-dole ním hýbe o desiatky percent.
+PRODUCT_MIN_CUSTOMERS = 25
+
+# Koľko produktov sa vypisuje v rebríčkoch tretieho reportu.
+PRODUCT_TOP = 15
+
+# Šírka prvého košíka: koše podľa počtu rôznych produktov v prvej objednávke.
+BASKET_WIDTH_EDGES = [1, 2, 3, 5, 10]
+BASKET_WIDTH_BUCKETS = ["1", "2", "3", "4–5", "6–10", "11+"]
+
+# Okná pred posledným nákupom, v ktorých sa meria šírka sortimentu.
+NARROWING_WINDOWS_MONTHS = (12, 9, 6, 3)
+
+# Účet, ktorého GMV z tejto časti tvorí jediný produkt, je krehký — výpadok
+# skladu alebo lacnejšia konkurencia zoberie celý účet, nie jednu položku.
+PRODUCT_DEPENDENCE_EDGES = [25, 50, 80]
+PRODUCT_DEPENDENCE_BUCKETS = ["< 25 %", "25–50 %", "50–80 %", "> 80 %"]
+
+# Účet sa do rezov podľa účtu počíta, len ak má aspoň toľko GMV — pri drobných
+# účtoch je podiel jedného produktu na GMV náhoda.
+PRODUCT_MIN_ACCOUNT_GMV = 500
 
 # ── objednávky s dobropisom ───────────────────────────────────────────────────
 # Dva súbory zámerne oddelene: prvý je export objednávok, ku ktorým bol
