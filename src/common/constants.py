@@ -23,6 +23,27 @@ OUTPUT_HTML_DRILL_IN = str(DATA_DIR / "b2b_account_growth_drill_in.html")
 # Do hlavičky reportu ide len názov súboru — absolútna cesta by tam zavadzala.
 INPUT_LABEL = pathlib.Path(INPUT_XLSX).name
 
+# ── objednávky s dobropisom ───────────────────────────────────────────────────
+# Dva súbory zámerne oddelene: prvý je export objednávok, ku ktorým bol
+# vystavený dobropis, druhý je ručná anotácia z Slacku (príčina a odkaz na
+# vlákno). Export sa dá kedykoľvek pregenerovať bez toho, aby sa stratili
+# anotácie, a spájajú sa cez order_number.
+CREDIT_MEMO_CSV = str(DATA_DIR / "single_orders_memos.csv")
+CREDIT_MEMO_NOTES_CSV = str(DATA_DIR / "credit_memo_slack_notes.csv")
+
+# Príčiny dobropisu v poradí, v akom sa zobrazujú. Posledné dve nie sú
+# príčiny — sú to objednávky, o ktorých Slack mlčí, a objednávky, ktoré do
+# analýzy strát nepatria.
+CREDIT_MEMO_NO_TRACE = "Bez zmienky v Slacku"
+CREDIT_MEMO_IRRELEVANT = "Nerelevantné"
+CREDIT_MEMO_CATEGORIES = [
+    "Chýbajúci alebo poškodený tovar",
+    "Oneskorenie a komunikácia",
+    "Administratíva a fakturácia",
+    CREDIT_MEMO_NO_TRACE,
+    CREDIT_MEMO_IRRELEVANT,
+]
+
 # Status zrušenej objednávky. Zrušené objednávky sa z datasetu vyhadzujú —
 # nie sú tržbou a v exporte `_3` tvoria tretinu GMV.
 CANCELED_STATUS = "canceled"
@@ -223,3 +244,14 @@ KPI_DIAG_COLOR_GOOD = COLOR_TEAL_DARK
 KPI_DIAG_COLOR_NEUTRAL = COLOR_BLUE
 KPI_DIAG_COLOR_BAD = COLOR_RED
 KPI_DIAG_COLOR_TARGET = COLOR_GREY
+
+# Farby príčin dobropisu. Prevádzková príčina je červená, administratívna
+# oranžová, skupiny bez výpovednej hodnoty sivé.
+CREDIT_MEMO_COLORS = {
+    CREDIT_MEMO_CATEGORIES[0]: COLOR_RED,
+    CREDIT_MEMO_CATEGORIES[1]: COLOR_ORANGE,
+    CREDIT_MEMO_CATEGORIES[2]: COLOR_YELLOW,
+    CREDIT_MEMO_NO_TRACE: COLOR_GREY,
+    CREDIT_MEMO_IRRELEVANT: COLOR_BLUE_LIGHT,
+}
+

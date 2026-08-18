@@ -1,0 +1,33 @@
+order_number,category,note,slack_link
+3008155879,Chýbajúci alebo poškodený tovar,"Urgentná objednávka sa v sklade rozpadla na 11 balíkov bez informovania zákazníka. V deň vystavenia dobropisu pribudla do #claim-documents ako reklamácia.",https://gymbeamteam.slack.com/archives/C010YPG8DCK/p1759431888076219
+3004130575,Bez zmienky v Slacku,,
+2009683923,Oneskorenie a komunikácia,"Opakovane urgoval nezodpovedané maily, objednávku si nakoniec spravil sám bez odpovede. Sklad k tej istej objednávke hlásil chybu v pickingu.",https://gymbeamteam.slack.com/archives/C0541TMEU7P/p1737380928273189
+25001221994,Oneskorenie a komunikácia,"V rannom logistickom reporte medzi zásielkami, ktoré neboli nachystané v deadline.",https://gymbeamteam.slack.com/archives/C03AF2BHA69/p1702535249612539
+2010504297,Oneskorenie a komunikácia,"Deň po objednávke sa sklad pýtal, prečo je stále v stave processing. K dobropisu nič.",https://gymbeamteam.slack.com/archives/C07KHRJFBU0/p1744091777085189
+2003419143,Bez zmienky v Slacku,,
+17001339438,Bez zmienky v Slacku,,
+2011126071,Administratíva a fakturácia,"Faktúra sa nedostala do ABRY kvôli nulovému grand_total. Zákazník mohol dostať faktúru oneskorene alebo nesprávne.",https://gymbeamteam.slack.com/archives/C08QYP22KGS/p1752137488871679
+1005172649,Nerelevantné,"Objednávka z internej adresy @gymbeam.com, celá dobropisovaná v ten istý deň. Testovacia alebo omylom vytvorená.",
+17004231903,Chýbajúci alebo poškodený tovar,"V sklade rozdelená na 5 samostatných balíkov (InPost). Rozdelená zásielka je typický zdroj chýbajúceho tovaru.",https://gymbeamteam.slack.com/archives/C082Y9CQWAG/p1741007127659459
+4007721716,Bez zmienky v Slacku,,
+4002631676,Bez zmienky v Slacku,,
+1700212131,Bez zmienky v Slacku,,
+1005446873,Administratíva a fakturácia,"K objednávke priamo nič. Neskôr sa riešil problém s prihlásením do B2B portálu — Odoo firmu stále prihlasovalo na starý subjekt.",https://gymbeamteam.slack.com/archives/C020XMWRDV0/p1711618004729709
+401951717,Bez zmienky v Slacku,,
+401545001,Bez zmienky v Slacku,,
+11001300267,Chýbajúci alebo poškodený tovar,"Dostal 5 zo 6 balíkov. Jeden sa v sklade SPS pomiešal na inú paletu, nemal tracking a nedal sa dohľadať ani znovu odoslať.",https://gymbeamteam.slack.com/archives/CCQ9BU8P4/p1720526436449399
+1006083704,Bez zmienky v Slacku,,
+1006544720,Administratíva a fakturácia,"Požiadavka na úpravu faktúry, na ktorú nadväzujú dva dobropisy. Ako platiteľ DPH nebol registrovaný ako B2B partner.",https://gymbeamteam.slack.com/archives/CJ10TGGM8/p1692623013517349
+40001150117,Chýbajúci alebo poškodený tovar,"Reklamoval nedoručené 3x Creatine Capsules. Sklad po kontrole kamier tvrdil, že ich pribalil. Spor plus takmer deň čakania na odpoveď.",https://gymbeamteam.slack.com/archives/CCQ9BU8P4/p1752491077960979
+103558643,Bez zmienky v Slacku,,
+1009473128,Administratíva a fakturácia,"Dvakrát sa opravovali fakturačné údaje — faktúra aj dobropis, doplnenie IČO a DIČ. Objednávala bez B2B registrácie.",https://gymbeamteam.slack.com/archives/CJ10TGGM8/p1730222261396639
+31000989155,Chýbajúci alebo poškodený tovar,"V #claim-documents medzi gréckymi zásielkami, ku ktorým sa dohľadávali reklamačné podklady od prepravcu Geniki — poškodenie alebo strata.",https://gymbeamteam.slack.com/archives/C010YPG8DCK/p1724334171991739
+11001161907,Chýbajúci alebo poškodený tovar,"Nedostal Kompresnú majicu (SKU 4637-3-S) — nebola na sklade, expedovalo sa bez nej a on to reklamoval.",https://gymbeamteam.slack.com/archives/C01Q0MSNRJ4/p1710333765942449
+19000456337,Chýbajúci alebo poškodený tovar,"Reklamácia a vrátenie tovaru. Sklad potvrdil, že v balíku nebol priložený žiadny reklamačný doklad.",https://gymbeamteam.slack.com/archives/C010YPG8DCK/p1721830378779719
+11001170718,Bez zmienky v Slacku,,
+103578575,Bez zmienky v Slacku,,
+1005767138,Bez zmienky v Slacku,,
+1011159437,Chýbajúci alebo poškodený tovar,"Uviazla v Payment Review. Časť položiek sa nedostala do faktúry — zaplatil 165 €, fakturovalo sa 128,34 €. Dobropis pokryl 30,71 €, zvyšných 36,65 € nebolo vrátené ani po roku.",https://gymbeamteam.slack.com/archives/CJ10TGGM8/p1781789901946239
+1700011926,Bez zmienky v Slacku,,
+1005733694,Nerelevantné,"Preklep v doméne (.cz namiesto .sk) a v Magente stornovaná objednávka. Nie je to odchod zákazníka — Alza nakupuje ďalej z iných adries.",
+31001625536,Administratíva a fakturácia,"Objednávka sa nedodala v pôvodnej podobe, platba sa presúvala na náhradnú objednávku a vznikol rozdiel v cene dopravy. Uzavreté zápočtom takmer mesiac po objednávke.",https://gymbeamteam.slack.com/archives/CJ10TGGM8/p1749537851824489

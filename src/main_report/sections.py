@@ -284,24 +284,24 @@ def _band_gmv_text(metrics):
 
 
 def _top_band_table(metrics):
-    """Tabuľka účtov v najvyššom pásme."""
-    growth = metrics["growth_by_band"]
+    """Zroloateľná tabuľka účtov v najvyššom pásme."""
+    detail = metrics["top_band_detail"]
+    band = metrics["growth_by_band"].index[-1]
     table = R.render_table(
-        metrics["top_band_detail"],
+        detail,
         [("previous", "GMV pred rokom", EUR),
          ("current", "GMV teraz", EUR),
          ("delta", "Netto zmena", SIGNED_EUR)],
         index_label="Účet",
     )
 
-    return f"""
-<h4 style="font-size:14px;font-weight:500;margin:24px 0 8px">Účty v pásme
-{R.escape(growth.index[-1])}</h4>
-{table}
+    note = """
 <p class="small">Zoradené podľa netto zmeny. Účet bez vyplneného
 <code>company_bill</code> je uvedený e-mailom. Tá istá firma sa môže objaviť
 viackrát, ak nakupuje z viacerých e-mailov.</p>
 """
+    title = f"Účty v pásme {band} ({NUM(len(detail))})"
+    return R.render_rollup(title, table + note)
 
 
 def _frequency_text(metrics):

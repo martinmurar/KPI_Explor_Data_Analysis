@@ -293,3 +293,27 @@ def churn_country_chart(country_df, figure_id, group_note, count):
             f"{formatting.format_number(row['assessed'])} posudzovaných účtov",
         ]),
     )
+
+
+def credit_memo_causes(causes):
+    """Objednávky s dobropisom podľa zistenej príčiny."""
+    colors = [C.CREDIT_MEMO_COLORS[label] for label in causes.index]
+    return base.figure(
+        "credit_memo_causes",
+        "Objednávky s dobropisom podľa príčiny",
+        f"Počet objednávok. Príčina je ručne priradená podľa toho, čo sa "
+        f"k objednávke našlo v Slacku — nie je to pole z Magenta. Posledné dve "
+        f"skupiny nie sú príčiny: šedá je hranica zistiteľnosti, svetlomodrá sú "
+        f"objednávky, ktoré do analýzy strát nepatria. V hover je GMV skupiny "
+        f"a výška dobropisu. {base.population_note(int(causes['orders'].sum()), 'objednávkami')}",
+        "bar",
+        causes.index,
+        [base.series("Objednávok", causes["orders"], C.COLOR_BLUE, point_colors=colors)],
+        height=320,
+        value_format="count",
+        hover_extras=base.kpi_hover(causes, lambda row: [
+            f"GMV objednávok: {formatting.format_eur(row['gmv'])}",
+            f"Z toho dobropisované: {formatting.format_eur(row['refund'])}"
+            f" ({formatting.format_pct(row['refund_pct'])})",
+        ]),
+    )

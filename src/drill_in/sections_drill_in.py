@@ -8,6 +8,7 @@ sedí a čo s ním spraví odfiltrovanie spodných extrémov.
 
 from src.common import constants as C
 from src.drill_in import charts
+from src.drill_in import metrics_credit_memos
 from src.common import metrics_kpi_diagnostics as MD
 from src.common import report as R
 
@@ -233,10 +234,10 @@ def _country_list(countries):
 
 
 def _dropped_table(detail):
-    """Zoznam vyradených účtov."""
+    """Zroloateľný zoznam vyradených účtov."""
     table = detail.copy()
     table.index = table["name"]
-    return R.render_table(
+    rendered = R.render_table(
         table,
         [("country", "Krajina", str),
          ("lifetime_gmv", "Lifetime GMV", EUR),
@@ -247,6 +248,7 @@ def _dropped_table(detail):
          ("growing", "Rastie", lambda value: "áno" if value else "nie")],
         index_label="Účet",
     )
+    return R.render_rollup(f"Zoznam všetkých {NUM(len(detail))} účtov", rendered)
 
 
 def single_order_section(metrics):
@@ -324,21 +326,23 @@ def _single_big_orders_table(single):
     big["label"] = big["company_bill"].fillna(big["customer_email"])
     big = big.set_index("label")
 
+    table = R.render_table(
+        big,
+        [("increment_id", "Objednávka", str),
+         ("customer_email", "E-mail", str),
+         ("gmv", "Hodnota", EUR),
+         ("country", "Krajina", str),
+         ("created_at", "Dátum", lambda value: f"{value:%-d. %-m. %Y}")],
+        index_label="Účet",
+    )
+
     return f"""
 <h3>Najväčšie stratené objednávky</h3>
 <p>{NUM(len(big))} zákazníkov urobilo jedinú objednávku nad
 {EUR(C.ORDER_VALUE_EDGES[-1])} a už sa nevrátili. Spolu je to
 {EUR(big["gmv"].sum())}, teda {PCT(big["gmv"].sum() / single["gmv"].sum() * 100)}
 GMV celej skupiny pri {PCT(len(big) / len(single) * 100)} zákazníkov.</p>
-{R.render_table(
-    big,
-    [("increment_id", "Objednávka", str),
-     ("customer_email", "E-mail", str),
-     ("gmv", "Hodnota", EUR),
-     ("country", "Krajina", str),
-     ("created_at", "Dátum", lambda value: f"{value:%-d. %-m. %Y}")],
-    index_label="Účet",
-)}
+{R.render_rollup(f"Zoznam všetkých {NUM(len(big))} objednávok", table)}
 """
 
 
@@ -347,7 +351,7 @@ def zero_accounts_section(metrics):
     return _account_group_section(
         metrics,
         prefix="zero",
-        heading="4. Účty, ktoré odišli do nuly",
+        heading="5. Účty, ktoré odišli do nuly",
         group_note="účty, ktoré odišli do nuly",
         intro=_zero_intro(metrics),
     )
@@ -359,7 +363,7 @@ def churned_accounts_section(metrics):
     return _churned_group_section(
         metrics,
         prefix="churned",
-        heading="5. Churnuté účty",
+        heading="6. Churnuté účty",
         group_note="churnuté účty",
         intro=_churned_intro(metrics),
     )
@@ -512,11 +516,143 @@ def _accounts_table(accounts):
     )
 
 
+def credit_memo_section(metrics):
+    """Objednávky s dobropisom a to, čo sa k nim našlo v Slacku."""
+    memos = metrics["credit_memos"]
+    causes = metrics["credit_memo_causes"]
+
+    figures = [charts.credit_memo_causes(causes)]
+
+    return f"""
+<h2>4. Objednávky s dobropisom</h2>
+{_credit_memo_intro(memos, metrics["single_orders"])}
+{_fig(figures, "credit_memo_causes")}
+{_credit_memo_causes_table(causes)}
+{_credit_memo_text(causes)}
+{R.render_rollup(f"Zoznam všetkých {NUM(len(memos))} objednávok",
+                 _credit_memo_table(memos))}
+""", figures
+
+
+def _credit_memo_intro(memos, single):
+    """Odkiaľ zoznam je a čo sa s ním dá a nedá robiť.
+
+    Za nájdené sa počíta objednávka s odkazom na vlákno, nie objednávka mimo
+    skupiny „bez zmienky“ — nerelevantné objednávky sú zaradené z dát, nie
+    z Slacku, a medzi nálezy nepatria.
+    """
+    found = int((memos["slack_link"] != "").sum())
+    outside = metrics_credit_memos.outside_single_orders(memos, single)
+
+    return f"""
+<p><b>Ako zoznam vznikol.</b> Východiskom je zoznam objednávok účtov, ktoré za
+celý život urobili práve jednu objednávku (skupina zo sekcie 3) — je ich
+{NUM(len(single))}. Tie sa preverili v Magente a <b>{NUM(len(memos))} z nich má
+vystavený dobropis</b> — tie sú v tejto sekcii. Ku každej z nich sa potom
+prehľadal Slack a z toho, čo sa našlo, je odvodený dôvod dobropisu.</p>
+<p class="small">Kontrola v Magente bežala nad zoznamom spred filtra na zrušené
+objednávky, takže {NUM(len(outside))} z {NUM(len(memos))} objednávok v dnešnej
+skupine {NUM(len(single))} už nie je — ich jediná objednávka je zrušená
+a zákazník tým z datasetu vypadol úplne.</p>
+<p>Spolu je to {EUR(memos["gmv"].sum())}, dobropisovaných z toho bolo
+{EUR(memos["total_refund"].sum())}, teda
+{PCT(memos["total_refund"].sum() / memos["gmv"].sum() * 100)}. Dobropis je
+najbližšia vec k priznanému problému, akú v dátach máme — a keďže ide zároveň
+o zákazníkov, ktorí sa už nikdy nevrátili, je to najlepšie miesto, kde hľadať
+dôvod odchodu.</p>
+<p>V Slacku sa hľadalo číslo objednávky, e-mail zákazníka aj názov firmy; niečo
+sa našlo k {NUM(found)} z nich. <b>Príčiny sú priradené ručne, nie sú to dáta
+z Magenta</b>, a mlčanie Slacku neznamená, že problém nebol — len že sa o ňom
+nepísalo.</p>
+{_credit_memo_coverage_note(memos, single, found)}
+"""
+
+
+def _credit_memo_coverage_note(memos, single, found):
+    """Aký zlomok stratených účtov táto sekcia vôbec vysvetľuje.
+
+    Najdôležitejšia veta celej sekcie. Bez nej sa rozdelenie príčin číta ako
+    obraz toho, prečo zákazníci odchádzajú — pritom je to obraz úzkeho výseku,
+    ktorý po sebe zanechal písomnú stopu.
+    """
+    memo_pct = len(memos) / len(single) * 100
+    found_pct = found / len(single) * 100
+    unknown = len(single) - found
+
+    return R.render_note(
+        f"<b>Toto je vysvetlenie {PCT(found_pct)} skupiny, nie jej obrazu.</b> "
+        f"Účtov s jedinou objednávkou za život je {NUM(len(single))}. Dobropis "
+        f"má z nich {NUM(len(memos))} ({PCT(memo_pct)}) a stopu v Slacku sme "
+        f"našli pri {NUM(found)} ({PCT(found_pct)}). "
+        f"<b>Pri zvyšných {NUM(unknown)} účtoch nevieme o dôvode nevrátenia sa "
+        f"vôbec nič</b> — nesťažovali sa, nereklamovali, nikto o nich nepísal. "
+        f"Odišli ticho.<br><br>"
+        f"Rozdelenie príčin nižšie preto neopisuje, prečo zákazníci odchádzajú. "
+        f"Opisuje, prečo odchádzali tí, ktorí po sebe nechali písomnú stopu — "
+        f"a to je zo svojej podstaty výber tých hlasnejších prípadov. "
+        f"Tichá väčšina môže odchádzať z úplne iných dôvodov (cena, konkurencia, "
+        f"sortiment, jednorazová potreba) a v dátach, ktoré máme, ich nezistíme. "
+        f"Zistiť sa dajú jedine tak, že sa tých zákazníkov niekto spýta."
+    )
+
+
+def _credit_memo_causes_table(causes):
+    """Súhrn skupín: počet, GMV a výška dobropisu."""
+    return R.render_table(
+        causes,
+        [("orders", "Objednávok", NUM),
+         ("gmv", "GMV objednávok", EUR),
+         ("refund", "Dobropisované", EUR),
+         ("refund_pct", "Podiel dobropisu", PCT)],
+        index_label="Príčina",
+    )
+
+
+def _credit_memo_text(causes):
+    """Čo z rozdelenia príčin plynie."""
+    explained = metrics_credit_memos.explained(causes)
+    top = explained["orders"].idxmax()
+    top_row = explained.loc[top]
+
+    return f"""
+<p><b>Medzi zistenými príčinami vedie „{top.lower()}“ — {NUM(top_row["orders"])} objednávok
+za {EUR(top_row["gmv"])}.</b> Nie je to len najpočetnejšia skupina, ale aj
+najdrahšia: sama tvorí {PCT(top_row["gmv"] / causes["gmv"].sum() * 100)} GMV
+celého zoznamu. Stratený balík, položka, ktorá nebola na sklade, alebo zásielka
+rozdelená na jedenásť kusov bez informovania zákazníka — to sú prevádzkové
+zlyhania, nie nedorozumenia.</p>
+<p>Zvyšné zistené príčiny sú miernejšie: nesprávne fakturačné údaje, faktúra,
+ktorá nedorazila do ABRY, nezodpovedaný mail. Samy o sebe zákazníka nestoja, ale
+kombinujú sa s tým prvým.</p>
+<p class="small">GMV skupín je silne ovplyvnené jednou objednávkou za
+{EUR(287030)} — bez nej by boli skupiny porovnateľné. Počty objednávok sú preto
+spoľahlivejším signálom než GMV.</p>
+"""
+
+
+def _credit_memo_table(memos):
+    """Zoznam objednávok s dobropisom, príčinou a odkazom do Slacku."""
+    table = memos.copy()
+    table.index = table["label"]
+    return R.render_table(
+        table,
+        [("order_number", "Objednávka", str),
+         ("order_date", "Dátum", lambda value: f"{value:%-d. %-m. %Y}"),
+         ("gmv", "GMV", EUR),
+         ("total_refund", "Dobropis", EUR),
+         ("category", "Príčina", str),
+         ("note", "Čo sa našlo v Slacku", str),
+         ("slack_link", "Vlákno", lambda url: R.render_link(url, "Slack"))],
+        index_label="Zákazník",
+    )
+
+
 SECTION_BUILDERS = [
     header,
     order_count_section,
     dropped_accounts_section,
     single_order_section,
+    credit_memo_section,
     zero_accounts_section,
     churned_accounts_section,
 ]

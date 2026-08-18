@@ -338,6 +338,23 @@ def escape(text):
     return html.escape(str(text))
 
 
+class Html(str):
+    """Text, ktorý je už hotové HTML a v tabuľke sa nemá escapovať.
+
+    render_table štandardne escapuje všetko, čo formátovacia funkcia vráti —
+    inak by názov firmy so znakom „&“ rozbil tabuľku. Odkaz je jediný prípad,
+    kde chceme, aby sa značka naozaj vykreslila.
+    """
+
+
+def render_link(url, text):
+    """Odkaz do bunky tabuľky. Prázdna URL vráti pomlčku."""
+    if not url:
+        return Html("—")
+    return Html(f'<a href="{escape(url)}" target="_blank" '
+                f'rel="noreferrer">{escape(text)}</a>')
+
+
 def _index_text(index):
     """Textová podoba indexu tabuľky."""
     return escape(index)
@@ -345,7 +362,11 @@ def _index_text(index):
 
 def _cell_html(value, formatter):
     """Obsah jednej celly, so zafarbením negatívnych čísiel."""
-    text = escape(formatter(value))
+    formatted = formatter(value)
+    if isinstance(formatted, Html):
+        text = formatted
+    else:
+        text = escape(formatted)
     is_number = isinstance(value, (int, float)) and not pd.isna(value)
     if is_number and value < 0:
         return f'<span class="neg">{text}</span>'

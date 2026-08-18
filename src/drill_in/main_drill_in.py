@@ -16,6 +16,7 @@ from src.common import constants as C
 from src.common import data
 from src.common import metrics_account_growth
 from src.common import metrics_kpi_diagnostics
+from src.drill_in import metrics_credit_memos
 from src.common import report
 from src.drill_in import sections_drill_in
 
@@ -49,6 +50,7 @@ def compute_metrics(df):
 
         **_single_order_metrics(df),
         **_zero_metrics(table, df),
+        **_credit_memo_metrics(),
         **_churned_metrics(table, df),
     }
 
@@ -78,6 +80,15 @@ def _account_group_metrics(prefix, accounts, df):
         f"{prefix}_monthly_orders":
             metrics_kpi_diagnostics.monthly_orders_by_account(df, accounts.index),
         f"{prefix}_cluster": metrics_kpi_diagnostics.last_order_cluster(accounts),
+    }
+
+
+def _credit_memo_metrics():
+    """Objednávky s dobropisom. Nezávisia od exportu objednávok, majú vlastné CSV."""
+    memos = metrics_credit_memos.load_credit_memos()
+    return {
+        "credit_memos": memos,
+        "credit_memo_causes": metrics_credit_memos.causes(memos),
     }
 
 
