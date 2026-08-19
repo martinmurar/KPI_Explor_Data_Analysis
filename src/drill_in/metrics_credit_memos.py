@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Objednávky, na ktoré bol vystavený dobropis, a príčiny z Slacku.
+"""Objednávky, na ktoré bol vystavený dobropis, a zistené príčiny.
 
 Jediná časť reportu, ktorá nestojí na exporte objednávok. Vstupom sú dva CSV
-súbory: zoznam objednávok s dobropisom a ručná anotácia z Slacku. Anotácia je
-manuálna práca — ak sa k objednávke v Slacku nič nenašlo, neznamená to, že
-problém nebol, len že sa o ňom nepísalo.
+súbory: zoznam objednávok s dobropisom a ručná anotácia. Príčina sa hľadá
+v Slacku a v LaDesku; anotácia je manuálna práca — ak sa k objednávke nič
+nenašlo, neznamená to, že problém nebol, len že po ňom nezostala stopa.
 """
 
 import pandas as pd
@@ -29,9 +29,21 @@ def load_credit_memos(df):
 
     memos["order_date"] = pd.to_datetime(memos["order_date"])
     memos["note"] = memos["note"].fillna("")
-    memos["slack_link"] = memos["slack_link"].fillna("")
+    memos["link"] = memos["link"].fillna("")
+    memos["source"] = [link_source(link) for link in memos["link"]]
     memos["label"] = memos["company_name"].fillna(memos["customer_name"])
     return memos.sort_values("gmv", ascending=False)
+
+
+def link_source(link):
+    """Z odkazu odvodí, odkiaľ zistenie je. Prázdny odkaz nemá zdroj.
+
+    Zdroj sa nezapisuje do CSV zvlášť — je v adrese a ručne vypĺňať dve polia,
+    ktoré si musia navzájom sedieť, je len príležitosť na preklep.
+    """
+    if not link:
+        return ""
+    return C.SLACK_SOURCE if C.SLACK_DOMAIN in link else C.LADESK_SOURCE
 
 
 def _check_annotations(memos):

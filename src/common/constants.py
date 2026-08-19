@@ -114,14 +114,23 @@ CREDIT_MEMO_CSV = str(DATA_DIR / "single_orders_memos.csv")
 CREDIT_MEMO_NOTES_CSV = str(DATA_DIR / "credit_memo_slack_notes.csv")
 
 # Príčiny dobropisu v poradí, v akom sa zobrazujú. Posledné dve nie sú
-# príčiny — sú to objednávky, o ktorých Slack mlčí, a objednávky, ktoré do
-# analýzy strát nepatria.
-CREDIT_MEMO_NO_TRACE = "Bez zmienky v Slacku"
+# príčiny — sú to objednávky, ku ktorým sa v Slacku ani v LaDesku nič
+# nenašlo, a objednávky, ktoré do analýzy strát nepatria.
+# Novú príčinu stačí dopísať do zoznamu a prideliť jej farbu nižšie
+# v CREDIT_MEMO_COLORS.
+# Zdroj zistenia sa odvodzuje z adresy v stĺpci link, nie z ďalšieho stĺpca —
+# dve ručne vypĺňané polia, ktoré si musia sedieť, sú len miesto na preklep.
+SLACK_DOMAIN = "slack.com"
+SLACK_SOURCE = "Slack"
+LADESK_SOURCE = "LaDesk"
+
+CREDIT_MEMO_NO_TRACE = "Bez zistenej príčiny"
 CREDIT_MEMO_IRRELEVANT = "Nerelevantné"
 CREDIT_MEMO_CATEGORIES = [
     "Chýbajúci alebo poškodený tovar",
     "Oneskorenie a komunikácia",
     "Administratíva a fakturácia",
+    "Vrátenie tovaru zákazníkom",
     CREDIT_MEMO_NO_TRACE,
     CREDIT_MEMO_IRRELEVANT,
 ]
@@ -146,9 +155,14 @@ HIDDEN_CHARTS = set()
 # preráta všetky časové grafy a tabuľky v reporte naraz.
 DISPLAY_START_YEAR = 2024
 
-# Od ktorého roku sa berú objednávky bežných zákazníkov v analýze položiek.
-# Sortiment sa mení, porovnávať dnešný nákup s tým spred piatich rokov by
-# nedávalo zmysel. Definované až tu, lebo vychádza z DISPLAY_START_YEAR.
+# Od ktorého roku sa berú objednávky do sekcie „Čo kto nakupuje“ — pre obe
+# porovnávané skupiny naraz. Sortiment sa mení, porovnávať dnešný nákup s tým
+# spred piatich rokov by nedávalo zmysel. Definované až tu, lebo vychádza
+# z DISPLAY_START_YEAR.
+#
+# Späť na celú históriu: ORDER_ITEMS_START_YEAR = None. Report aj popisy sa
+# prispôsobia samy, len treba prestavať cache:
+#   python3 -m src.drill_in.build_order_items --rebuild
 ORDER_ITEMS_START_YEAR = DISPLAY_START_YEAR
 
 # Posledný deň dát. Používa sa ako "dnešný dátum" pre churn a rolling okná.
@@ -348,6 +362,7 @@ CREDIT_MEMO_COLORS = {
     CREDIT_MEMO_CATEGORIES[0]: COLOR_RED,
     CREDIT_MEMO_CATEGORIES[1]: COLOR_ORANGE,
     CREDIT_MEMO_CATEGORIES[2]: COLOR_YELLOW,
+    CREDIT_MEMO_CATEGORIES[3]: COLOR_TEAL,
     CREDIT_MEMO_NO_TRACE: COLOR_GREY,
     CREDIT_MEMO_IRRELEVANT: COLOR_BLUE_LIGHT,
 }

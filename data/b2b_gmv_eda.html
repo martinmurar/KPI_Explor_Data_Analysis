@@ -15,12 +15,15 @@ h3{font-size:16px;font-weight:500;margin:32px 0 10px}
 p{margin:0 0 14px}
 .lead{color:var(--ink2);font-size:15px;margin-bottom:28px}
 .small{font-size:13px;color:var(--mut)}
-table{border-collapse:collapse;width:100%;font-size:13.5px;margin:14px 0 22px}
+/* border-collapse:separate, nie collapse — Safari pri collapse position:sticky
+   na hlavičke ignoruje. Čiary medzi riadkami kreslí border-bottom buniek,
+   takže vzhľad je rovnaký. */
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px;
+ margin:14px 0 22px}
 th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--bd)}
-/* Hlavička zostáva na vrchu aj po odrolovaní. Spodná hrana je box-shadow,
-   nie border — pri border-collapse sa okraj prilepenej bunky nevykresľuje. */
+/* Hlavička zostáva na vrchu aj po odrolovaní. */
 th{font-weight:500;color:var(--ink2);background:#f3f2ec;
- position:sticky;top:0;z-index:1;box-shadow:inset 0 -1px 0 var(--bd)}
+ position:sticky;top:0;z-index:1}
 th:first-child,td:first-child{text-align:left}
 tr:hover td{background:#f7f6f1}
 .fig{background:var(--card);border:1px solid var(--bd);border-radius:12px;
@@ -66,8 +69,12 @@ li{margin-bottom:7px}
  border-bottom:4px solid transparent;transition:transform .15s}
 .roll[open]>summary::before{transform:rotate(90deg)}
 .sel{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:12.5px;color:var(--ink2)}
-.sel select{font:inherit;font-size:12.5px;color:var(--ink);background:var(--card);
- border:1px solid var(--bd);border-radius:7px;padding:5px 10px;max-width:100%}
+.sel select,.sel input{font:inherit;font-size:12.5px;color:var(--ink);
+ background:var(--card);border:1px solid var(--bd);border-radius:7px;
+ padding:5px 10px;max-width:100%}
+.sel input{width:180px}
+.sel input::placeholder{color:var(--mut)}
+.sel .hit{color:var(--mut);font-size:12px}
 .fold{display:flex;gap:8px;margin:26px 0 0}
 .fold button{font:inherit;font-size:13px;color:var(--ink2);background:var(--card);
  border:1px solid var(--bd);border-radius:7px;padding:5px 12px;cursor:pointer}
@@ -532,7 +539,49 @@ function wireSelector(spec, chart) {
   };
 
   select.addEventListener('change', apply);
+  wireSelectorSearch(spec, select, apply);
   apply();
+}
+
+// Hľadanie v prepínači. Zoznam sa neskrýva cez CSS, ale prestavuje — skrývanie
+// jednotlivých <option> prehliadače nerobia rovnako. Keď hľadanie nenájde nič,
+// zostáva celý zoznam, aby graf nikdy neostal bez dát.
+function wireSelectorSearch(spec, select, apply) {
+  const search = document.getElementById('q-' + spec.id);
+  const hits = document.getElementById('hit-' + spec.id);
+  if (!search) { return; }
+
+  const all = spec.selector.options;
+  search.addEventListener('input', () => {
+    const needle = plainText(search.value);
+    const matching = all.filter(option => plainText(option.label).includes(needle));
+    const shown = matching.length ? matching : all;
+
+    fillOptions(select, shown);
+    if (hits) {
+      hits.textContent = needle && matching.length ? shown.length + ' nájdených'
+                       : needle ? 'nič nenájdené' : '';
+    }
+    apply();
+  });
+}
+
+// Porovnáva sa bez diakritiky a bez veľkých písmen, aby „decathlon" našiel
+// aj účet písaný s diakritikou alebo veľkými písmenami.
+function plainText(text) {
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function fillOptions(select, options) {
+  const chosen = select.value;
+  select.innerHTML = '';
+  for (const option of options) {
+    const element = document.createElement('option');
+    element.value = option.value;
+    element.textContent = option.label;
+    select.appendChild(element);
+  }
+  if (options.some(option => option.value === chosen)) { select.value = chosen; }
 }
 
 SPECS.forEach(buildChart);

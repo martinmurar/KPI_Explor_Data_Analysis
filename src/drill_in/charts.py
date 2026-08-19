@@ -301,7 +301,7 @@ def credit_memo_causes(causes):
         "credit_memo_causes",
         "Objednávky s dobropisom podľa príčiny",
         f"Počet objednávok. Príčina je ručne priradená podľa toho, čo sa "
-        f"k objednávke našlo v Slacku — nie je to pole z Magenta. Sivá skupina "
+        f"k objednávke našlo v Slacku alebo v LaDesku — nie je to pole z Magenta. Sivá skupina "
         f"„{C.CREDIT_MEMO_NO_TRACE}“ nie je príčina, ale hranica zistiteľnosti. "
         f"V hover je GMV skupiny a výška dobropisu. "
         f"{base.population_note(int(causes['orders'].sum()), 'objednávkami')}",

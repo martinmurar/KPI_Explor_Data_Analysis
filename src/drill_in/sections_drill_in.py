@@ -12,6 +12,7 @@ from src.common import constants as C
 from src.drill_in import charts
 from src.drill_in import metrics_credit_memos
 from src.drill_in import metrics_order_items as MOI
+from src.drill_in import order_item_groups as GROUPS
 from src.common import metrics_kpi_diagnostics as MD
 from src.common import report as R
 
@@ -633,21 +634,21 @@ def _credit_memo_intro(memos, single):
     skupiny „bez zmienky“ — nerelevantné objednávky sú zaradené z dát, nie
     z Slacku, a medzi nálezy nepatria.
     """
-    found = int((memos["slack_link"] != "").sum())
+    found = int((memos["link"] != "").sum())
 
     return f"""
 <p>Východiskom je zoznam objednávok účtov, ktoré za
 celý život urobili práve jednu objednávku — je ich
 {NUM(len(single))}. Tie sa preverili v Magente a <b>{NUM(len(memos))} z nich má
 vystavený dobropis</b>. Ku každej z nich sa potom
-prehľadal Slack a z toho, čo sa našlo, je odvodený dôvod dobropisu.</p>
+prehľadal Slack a LaDesk a z toho, čo sa našlo, je odvodený dôvod dobropisu.</p>
 <p>Spolu je to {EUR(memos["gmv"].sum())}, dobropisovaných z toho bolo
 {EUR(memos["total_refund"].sum())}, teda
 {PCT(memos["total_refund"].sum() / memos["gmv"].sum() * 100)}.</p>
-<p>V Slacku sa hľadalo číslo objednávky, e-mail zákazníka aj názov firmy; niečo
-sa našlo k {NUM(found)} z nich. <b>Príčiny sú priradené ručne, nie sú to dáta
-z Magenta</b>, a mlčanie Slacku neznamená, že problém nebol — len že sa o ňom
-nepísalo.</p>
+<p>Hľadalo sa číslo objednávky, e-mail zákazníka aj názov firmy; niečo sa našlo
+k {NUM(found)} z nich. <b>Príčiny sú priradené ručne, nie sú to dáta
+z Magenta</b>, a ticho v oboch nástrojoch neznamená, že problém nebol — len že
+po ňom nezostala stopa.</p>
 {_credit_memo_coverage_note(memos, single, found)}
 """
 
@@ -666,7 +667,7 @@ def _credit_memo_coverage_note(memos, single, found):
     return R.render_note(
         f"<b>Toto je vysvetlenie {PCT(found_pct)} skupiny.</b> "
         f"Účtov s jedinou objednávkou za život je {NUM(len(single))}. Dobropis "
-        f"má z nich {NUM(len(memos))} ({PCT(memo_pct)}) a stopu v Slacku sme "
+        f"má z nich {NUM(len(memos))} ({PCT(memo_pct)}) a písomnú stopu sme "
         f"našli pri {NUM(found)} ({PCT(found_pct)}). "
         f"<b>Pri zvyšných {NUM(unknown)} účtoch nevieme o dôvode nevrátenia sa "
         f"vôbec nič</b> — nesťažovali sa, nereklamovali.<br><br>"
@@ -675,6 +676,11 @@ def _credit_memo_coverage_note(memos, single, found):
         f"Tichá väčšina môže odchádzať z úplne iných dôvodov (cena, konkurencia, "
         f"sortiment, jednorazová potreba). "
     )
+
+
+def _memo_link(url):
+    """Odkaz do vlákna, popísaný podľa toho, odkiaľ vedie."""
+    return R.render_link(url, metrics_credit_memos.link_source(url))
 
 
 def _credit_memo_causes_table(causes):
@@ -718,7 +724,7 @@ def _credit_memo_table(memos):
          ("total_refund", "Dobropis", EUR),
          ("category", "Príčina", str),
          ("note", "Čo sa našlo v Slacku", str),
-         ("slack_link", "Vlákno", lambda url: R.render_link(url, "Slack"))],
+         ("link", "Vlákno", _memo_link)],
         index_label="Zákazník",
     )
 
@@ -739,15 +745,16 @@ def order_items_section(metrics):
     left, left_figures = _order_items_column(
         metrics, SINGLE_ITEMS,
         heading="Jednorazoví zákazníci",
-        group_note="zákazníci s jedinou objednávkou za život",
-        lead="Položky objednávok zo skupiny zo sekcie 3, rozpadnuté na produkty.",
+        group_note=GROUPS.GROUPS[GROUPS.SINGLE]["note"],
+        lead=(f"Položky objednávok zo skupiny zo sekcie 3, rozpadnuté na produkty; "
+              f"{GROUPS.period_note()}."),
     )
     right, right_figures = _order_items_column(
         metrics, REGULAR_ITEMS,
         heading="Bežní zákazníci",
-        group_note=f"zákazníci s viac než jednou objednávkou, od {C.ORDER_ITEMS_START_YEAR}",
-        lead=(f"Zákazníci, ktorí za život nakúpili viac než raz; ich objednávky "
-              f"od roku {C.ORDER_ITEMS_START_YEAR}."),
+        group_note=GROUPS.GROUPS[GROUPS.REGULAR]["note"],
+        lead=(f"Zákazníci, ktorí za život nakúpili viac než raz; "
+              f"{GROUPS.period_note()}."),
     )
 
     return f"""

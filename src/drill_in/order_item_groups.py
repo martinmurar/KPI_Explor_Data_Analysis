@@ -17,13 +17,41 @@ REGULAR = "regular"
 ALL = "all"
 
 
+def items_start():
+    """Prvý deň obdobia sekcie „Čo kto nakupuje“. None znamená celú históriu."""
+    if C.ORDER_ITEMS_START_YEAR is None:
+        return None
+    return pd.Timestamp(year=C.ORDER_ITEMS_START_YEAR, month=1, day=1)
+
+
+def period_note():
+    """Obdobie sekcie do popisu grafu alebo textu."""
+    if C.ORDER_ITEMS_START_YEAR is None:
+        return "celá história objednávok"
+    return f"objednávky od roku {C.ORDER_ITEMS_START_YEAR}"
+
+
+def _in_period(df):
+    """Objednávky, ktoré spadajú do obdobia sekcie."""
+    start = items_start()
+    if start is None:
+        return df
+    return df.loc[df["created_at"] >= start]
+
+
 def single_order_numbers(df):
-    """Objednávky zákazníkov, ktorí za celý život objednali práve raz."""
-    return metrics_kpi_diagnostics.single_order_accounts(df)["increment_id"]
+    """Objednávky zákazníkov, ktorí za celý život objednali práve raz.
+
+    Podmienka „práve raz“ platí nad celou históriou; obdobie sekcie len
+    rozhoduje, ktoré z tých objednávok sa do rozboru dostanú. Účet, ktorý svoju
+    jedinú objednávku urobil skôr, teda zo skupiny vypadne celý.
+    """
+    single = metrics_kpi_diagnostics.single_order_accounts(df)
+    return _in_period(single)["increment_id"]
 
 
 def regular_order_numbers(df):
-    """Objednávky bežných zákazníkov od C.ORDER_ITEMS_START_YEAR.
+    """Objednávky bežných zákazníkov v období sekcie.
 
     Bežný zákazník je tu ten, ktorý za život objednal viac než raz — teda
     priamy protipól jednorazovej skupiny. Obmedzenie na posledné roky nie je
@@ -32,10 +60,7 @@ def regular_order_numbers(df):
     """
     orders_per_customer = df.groupby("cust").size()
     repeat = orders_per_customer.index[orders_per_customer > 1]
-
-    start = pd.Timestamp(year=C.ORDER_ITEMS_START_YEAR, month=1, day=1)
-    window = df.loc[(df["created_at"] >= start) & df["cust"].isin(repeat)]
-    return window["increment_id"]
+    return _in_period(df.loc[df["cust"].isin(repeat)])["increment_id"]
 
 
 def all_order_numbers(df):
@@ -56,13 +81,14 @@ GROUPS = {
     SINGLE: {
         "cache": C.SINGLE_ORDER_ITEMS_CSV,
         "numbers": single_order_numbers,
-        "note": "zákazníci s jedinou objednávkou za život",
+        "note": (f"zákazníci s jedinou objednávkou za život, "
+                 f"{period_note()}"),
     },
     REGULAR: {
         "cache": C.REGULAR_ORDER_ITEMS_CSV,
         "numbers": regular_order_numbers,
         "note": (f"zákazníci s viac než jednou objednávkou, "
-                 f"objednávky od {C.ORDER_ITEMS_START_YEAR}"),
+                 f"{period_note()}"),
     },
 }
 
