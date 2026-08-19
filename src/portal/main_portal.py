@@ -211,5 +211,6 @@ def main():
     return 0
 
 
+# python3 -m src.portal.main_portal --build --rebuild-items
 if __name__ == "__main__":
     sys.exit(main())

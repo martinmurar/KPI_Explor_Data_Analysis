@@ -1,0 +1,76 @@
+skupina: všetky B2B objednávky
+objednávok od 1. 1. 2024: 29 987 z 59 453
+z toho s darčekom alebo vzorkou: 6
+rozpoznaných darčekových produktov: 2
+
+── 1. objednávka 15001435132 (order_id 34271911) — 311,31 € v položkách ──
+   zákazník: Екзакта ЕООД  <exacta_adv1@abv.bg>, BG, 16. 4. 2024, GMV objednávky 312,16 €
+   8 riadkov, 53 kusov
+     kód                      názov                                            kusov          GMV
+     30209-1-orange           30209-1-orange                                      25     187,01 €
+     67948-3-L                67948-3-L                                            1      29,49 €
+     36676-1-60ml-forest-fruit Collagen Beauty Shot - BeastPink 60 ml - lesné      20      22,48 €
+     47737-1-120caps          47737-1-120caps                                      1      21,46 €
+     35764-1-120caps          35764-1-120caps                                      1      19,54 €
+     79444-3-L                79444-3-L                                            1      19,07 €
+     42373-1-340g             42373-1-340g                                         1      12,26 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         3       0,00 €
+
+── 2. objednávka 3007408318-1 (order_id 47422228) — 294,47 € v položkách ──
+   zákazník: erika_bende@hotmail.com <erika_bende@hotmail.com>, HU, 20. 2. 2025, GMV objednávky 294,46 €
+   3 riadkov, 3 kusov
+     kód                      názov                                            kusov          GMV
+     79123-1-single_variant   79123-1-single_variant                               1     294,47 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+
+── 3. objednávka 1012354451 (order_id 59706928) — 119,75 € v položkách ──
+   zákazník: director@hoteldiplomat.sk <director@hoteldiplomat.sk>, SK, 20. 11. 2025, GMV objednávky 120,75 €
+   7 riadkov, 7 kusov
+     kód                      názov                                            kusov          GMV
+     76129-3-L                76129-3-L                                            1      29,95 €
+     67720-4-XL               67720-4-XL                                           1      23,95 €
+     67762-3-L                67762-3-L                                            1      22,95 €
+     76693-2-M                76693-2-M                                            1      22,95 €
+     79558-3-L                79558-3-L                                            1      19,95 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+     6421-1                   6421-1                                               1       0,00 €
+
+── 4. objednávka 1012527485 (order_id 60966730) — 119,25 € v položkách ──
+   zákazník: antallukas10@gmail.com <antallukas10@gmail.com>, SK, 16. 12. 2025, GMV objednávky 119,25 €
+   10 riadkov, 11 kusov
+     kód                      názov                                            kusov          GMV
+     82462-1-90caps           82462-1-90caps                                       2      39,90 €
+     5075-25-1000g-chocolate  True Whey - GymBeam 1000 g - čokoláda - 00           1      19,95 €
+     29401-2-180caps          Magnézium chelát (bisglycinát) - GymBeam + dar       1      14,50 €
+     35419-1-120caps          Vitamín D3+K1+K2 Forte - GymBeam 120 kaps.           1      13,95 €
+     3885-1-500g              100% Mikronizovaný kreatín monohydrát 500 g -        1      12,95 €
+     31256-1                  Zinok chelát (bisglycinát) - GymBeam 90 kaps.        1       7,95 €
+     5250-2-90tab-bez-prichute Vitamín C 1000 mg - GymBeam 90 tab.                  1       5,95 €
+     66439-1-60caps           66439-1-60caps                                       1       4,10 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+── 5. objednávka 1012572383 (order_id 61227736) — 95,25 € v položkách ──
+   zákazník: adka7757@gmail.com <adka7757@gmail.com>, SK, 26. 12. 2025, GMV objednávky 96,25 €
+   7 riadkov, 7 kusov
+     kód                      názov                                            kusov          GMV
+     43723-1-60caps           43723-1-60caps                                       1      20,95 €
+     105376-1-90caps          105376-1-90caps                                      1      19,95 €
+     65914-1-60caps           65914-1-60caps                                       1      19,95 €
+     108475-1-90caps          108475-1-90caps                                      1      14,95 €
+     67336-1-90caps           67336-1-90caps                                       1      10,50 €
+     67396-1-90caps           Omega 3 Forte - GymBeam 90 kaps. - 00                1       8,95 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+── 6. objednávka 15001780144 (order_id 43876147) — 33,36 € v položkách ──
+   zákazník: Шугър Импекс Трейдинг ЕООД <krasidimitrova16000@abv.bg>, BG, 11. 12. 2024, GMV objednávky 36,77 €
+   5 riadkov, 7 kusov
+     kód                      názov                                            kusov          GMV
+     38920-1-100g             Lyofilizované maliny - GymBeam 100 g                 2      12,26 €
+     5951-1-1000g-kremove     Arašidové maslo - GymBeam 1000 g - jemný             2       9,53 €
+     80242-1-100g             80242-1-100g                                         1       5,79 €
+     82117-1-100g             82117-1-100g                                         1       5,79 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+* = darček alebo vzorka

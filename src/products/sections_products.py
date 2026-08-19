@@ -34,7 +34,6 @@ def header(metrics):
 
     cards = [
         ("Objednávok", NUM(profile["orders"])),
-        ("Riadkov", NUM(profile["lines"])),
         ("Rôznych produktov", NUM(profile["skus"])),
         ("Priemer návratov", PCT(metrics["overall_return_pct"])),
     ]

@@ -70,11 +70,11 @@ def print_summary(name, items, top):
     sku_totals = MOI.by_sku(items)
 
     print(f"\n── {name} ──")
-    print(f"objednávok: {profile['orders']:,}   riadkov: {profile['lines']:,}   "
-          f"unikátnych SKU: {profile['skus']:,}")
-    print(f"medián objednávky: {profile['median_lines']:.0f} riadkov, "
+    print(f"objednávok: {profile['orders']:,}   "
+          f"rôznych produktov: {profile['skus']:,}")
+    print(f"medián objednávky: {profile['median_products']:.0f} produktov, "
           f"{profile['median_units']:.0f} kusov, {profile['median_gmv']:.2f} €")
-    print(f"objednávok s jediným riadkom: {profile['single_line_pct']:.1f} %")
+    print(f"objednávok s jediným produktom: {profile['single_product_pct']:.1f} %")
 
     print("\nkoncentrácia GMV:")
     print(MOI.concentration(sku_totals).round(1).to_string())

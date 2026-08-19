@@ -10,15 +10,24 @@ import pandas as pd
 # vstupné body sú v dvoch rôznych podpriečinkoch a rovnaká relatívna cesta by
 # v každom z nich ukazovala inam.
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[2]
+
+# Vstupy a odložené medzivýsledky (xlsx, csv) sú oddelené od toho, čo reporty
+# vyrobia (html, txt) — výstupný priečinok sa dá kedykoľvek zmazať a znova
+# vygenerovať, dátový nie.
 DATA_DIR = PROJECT_ROOT / "data"
+OUTPUT_DIR = PROJECT_ROOT / "output"
+
+# Priečinok sa vytvorí pri importe, nie pri každom zápise — inak by ho musel
+# riešiť každý vstupný bod zvlášť a na jeden by sa zabudlo.
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # INPUT_XLSX = str(DATA_DIR / "b2b_orders_cleaned.xlsx")
 INPUT_XLSX = str(DATA_DIR / "b2b_orders_cleaned_w_company_name_3.xlsx")
-OUTPUT_HTML = str(DATA_DIR / "b2b_gmv_eda.html")
+OUTPUT_HTML = str(OUTPUT_DIR / "b2b_gmv_eda.html")
 
 # Druhý, samostatný report — drill-in do KPI account growth. Má vlastný vstupný
 # bod (main_drill_in.py) a hlavného reportu sa nedotýka.
-OUTPUT_HTML_DRILL_IN = str(DATA_DIR / "b2b_account_growth_drill_in.html")
+OUTPUT_HTML_DRILL_IN = str(OUTPUT_DIR / "b2b_account_growth_drill_in.html")
 
 # Do hlavičky reportu ide len názov súboru — absolútna cesta by tam zavadzala.
 INPUT_LABEL = pathlib.Path(INPUT_XLSX).name
@@ -67,12 +76,12 @@ SKU_LABEL_DROP = ("GymBeam",)
 GIFT_SAMPLE_SKUS = ("31571", "31577")
 
 # ── analýza produktov (tretí report) ──────────────────────────────────────────
-OUTPUT_HTML_PRODUCTS = str(DATA_DIR / "b2b_products.html")
+OUTPUT_HTML_PRODUCTS = str(OUTPUT_DIR / "b2b_products.html")
 
 # ── rozcestník ────────────────────────────────────────────────────────────────
 # Jedna stránka so záložkami, ktorá tie tri reporty spája. Reporty zostávajú
 # samostatné súbory a dajú sa otvoriť aj priamo — rozcestník ich len vkladá.
-OUTPUT_HTML_PORTAL = str(DATA_DIR / "index.html")
+OUTPUT_HTML_PORTAL = str(OUTPUT_DIR / "index.html")
 
 # Záložky v poradí, v akom sa zobrazujú: (názov, súbor reportu).
 PORTAL_TABS = [
@@ -134,6 +143,23 @@ CREDIT_MEMO_CATEGORIES = [
     CREDIT_MEMO_NO_TRACE,
     CREDIT_MEMO_IRRELEVANT,
 ]
+
+# Jednoveta ku každej príčine — sám názov koša nepovie, čo v ňom je. Ide do
+# reportu pod graf príčin, preto je krátka a bez bodky na konci.
+CREDIT_MEMO_DESCRIPTIONS = {
+    CREDIT_MEMO_CATEGORIES[0]:
+        "chýbajúci, rozbitý alebo nefunkčný kus v zásielke, aj krátka expirácia",
+    CREDIT_MEMO_CATEGORIES[1]:
+        "zásielka mimo termínu alebo nezodpovedaná komunikácia",
+    CREDIT_MEMO_CATEGORIES[2]:
+        "chyba okolo faktúry, platby či účtu — s tovarom bolo všetko v poriadku",
+    CREDIT_MEMO_CATEGORIES[3]:
+        "tovar bol v poriadku, zákazník ho vrátil — zlá veľkosť, nesplnené očakávanie",
+    CREDIT_MEMO_NO_TRACE:
+        "dobropis existuje, ale v Slacku ani v LaDesku k nemu nič nie je",
+    CREDIT_MEMO_IRRELEVANT:
+        "objednávka, ktorá do analýzy stratených zákazníkov nepatrí",
+}
 
 # Status zrušenej objednávky. Zrušené objednávky sa z datasetu vyhadzujú —
 # nie sú tržbou a v exporte `_3` tvoria tretinu GMV.

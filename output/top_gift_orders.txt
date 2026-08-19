@@ -1,0 +1,1192 @@
+skupina: všetky B2B objednávky
+objednávok od začiatku dát: 59 453
+z toho s darčekom alebo vzorkou: 5 086
+rozpoznaných darčekových produktov: 2
+
+── 1. objednávka 202721292 (order_id 10348159) — 14 360,83 € v položkách ──
+   zákazník: purchasing@aktin.cz <purchasing@aktin.cz>, CZ, 8. 11. 2021, GMV objednávky 15 041,83 €
+   93 riadkov, 2 706 kusov
+     kód                      názov                                            kusov          GMV
+     5075-27-1000g-vanilla    True Whey - GymBeam 1000 g - vanilka - 00           72     870,24 €
+     5951-1-1000g-kremove     Arašidové maslo - GymBeam 1000 g - jemný           180     794,92 €
+     36262-1-1000g-unflavored Tekuté vaječné bielka - GymBeam 1000 g             198     644,46 €
+     53725-1-312g-crystalblue ENJOY Pre-Workout - GymBeam 312 g - crystal bl      40     571,62 €
+     28186-1-watermelon       Thor Fuel + Vitargo - GymBeam vodný melón           48     527,26 €
+     4248-14-2270g-cokolada-arasidove-maslo 4248-14-2270g-cokolada-arasidove-maslo              10     445,93 €
+     5075-26-1000g-chocolate-coconut True Whey - GymBeam 1000 g - čokoláda kokos -       36     435,12 €
+     5075-31-1000g-banana     True Whey - GymBeam 1000 g - banán - 00             36     435,12 €
+     5075-29-1000g-white-chocolate True Whey - GymBeam 1000 g - biela čokoláda -       36     435,12 €
+     5075-40-1000g-vanilla-stevia True Whey - GymBeam 1000 g - vanilka stévia -       36     435,12 €
+     5075-24-1000g-white-chocolate-raspberry True Whey - GymBeam 1000 g - biela čokoláda ma      36     374,69 €
+     7185-2-210g-watermelon   Thor - GymBeam 210 g - vodný melón                  40     362,26 €
+     1638-1643-čokoláda       1638-1643-čokoláda                                  10     352,95 €
+     5951-2-1000g-crunchy     Arašidové maslo - GymBeam 1000 g - chrumkavé        72     334,70 €
+     41614-44-2000g-vanillacream 41614-44-2000g-vanillacream                         10     272,38 €
+     7185-3-210g-strawberry-kiwi Thor - GymBeam 210 g - jahoda kiwi                  30     271,70 €
+     28186-3-strawberry-kiwi  Thor Fuel + Vitargo - GymBeam jahoda kiwi           24     263,63 €
+     29663-1                  ZERO SIRUP slaný karamel - GymBeam 350 ml          102     249,38 €
+     28792-1-120kaps-unflavored Beast burn - BeastPink 120 kaps.                    20     236,22 €
+     3738-1-500ml-pomaranc-220000 L-karnitín - GymBeam 500 ml - pomaranč              25     226,41 €
+     28646-1                  ZERO SIRUP čokoláda a lieskový oriešok - GymBe      90     220,04 €
+     34207-1-orange-lemon-cherry-60caps Multivitamínové Yummies - GymBeam pomaranč cit      50     218,65 €
+     41614-31-2000g-bananasmooth 41614-31-2000g-bananasmooth                          8     217,90 €
+     5075-41-1000g-chocolate-hazelnut True Whey - GymBeam 1000 g - čokoláda lieskový      18     217,56 €
+     1638-1645-jahoda         1638-1645-jahoda                                     6     211,77 €
+     1562-1586-90 tab         Synefrín - GymBeam 90 tab.                          48     183,47 €
+     7675-1-bbq               ZERO OMÁČKA barbecue 320 ml - GymBeam 320 ml        72     176,03 €
+     5585-3-240cap            Omega 3 - GymBeam 240 kaps. - 00                    20     164,60 €
+     41614-34-2000g-cheekychoccoconut 41614-34-2000g-cheekychoccoconut                     6     163,43 €
+     41614-33-2000g-caramelmacchiato 41614-33-2000g-caramelmacchiato                      6     163,43 €
+     404-154-vanilka-1000 g   Micelárny kazeín - GymBeam 1000 g - vanilka         13     153,54 €
+     404-2-cokolada-1000g     Micelárny kazeín - GymBeam 1000 g - čokoláda        13     153,54 €
+     28621-5-cocoa            28621-5-cocoa                                       24     151,24 €
+     28876-7-500g-orange      28876-7-500g-orange                                 10     142,90 €
+     29945-1-20tabs           Magnézium chelát + B6 šumivý - GymBeam pomaran      84     124,37 €
+     28794-1-120kaps-unflavored AlphaMale TestoBooster - GymBeam 120 kaps.          10     109,85 €
+     28101-1-coconut          Kokosový olej v spreji - GymBeam 200 ml             25      95,55 €
+     3885-4-500g-green-apple  100% Mikronizovaný kreatín monohydrát 500 g -       10      93,32 €
+     6268-2-340g-smoothie     Mandľové maslo - GymBeam 340 g                      20      92,97 €
+     7185-1-210g-lemon-lime   Thor - GymBeam 210 g - citrón limetka               10      90,57 €
+     28324-1-chocolate-milkshake Just Whey Grass-Fed Protein – GymBeam 1000 g -       5      89,36 €
+     28324-3-1000g-white-chocolate-coconut Just Whey Grass-Fed Protein – GymBeam 1000 g -       5      89,36 €
+     28816-1-350ml-white-chocolate ZERO SIRUP biela čokoláda - GymBeam 350 ml          36      88,02 €
+     6860-1-agave             BIO Agáve sirup - GymBeam 250 ml                    40      86,77 €
+     8344-1                   Valec na cvičenie Fitness Roller Black - GymBe      10      86,07 €
+     30248-1-60g-cookies-cream MoiMüv Protein Bar - GymBeam 60 g - cookies &       72      84,31 €
+     5586-2-120caps           Omega 3 - GymBeam 120 kaps.                         15      82,13 €
+     29307-1-60ml-lemon-lime  Thor Shot - GymBeam citrón limetka - 60 ml         100      79,20 €
+     36073-1-red              36073-1-red                                          5      77,07 €
+     9061-4-60g-cookies-cream Proteínová tyčinka PureBar - GymBeam 60 g - co      72      76,87 €
+     6454-1-250g-bez-prichute Citrulín Malát - GymBeam 250 g - bez príchute       10      76,79 €
+     28621-4-1000g-banana     28621-4-1000g-banana                                12      75,62 €
+     7858-1-250ml             Tekutá krieda Liquid Chalk - GymBeam 250 ml         20      72,66 €
+     8234-1-caesar            ZERO DRESING caesar – GymBeam 320 ml                30      70,90 €
+     29118-1                  Adaptér na kliky Push Up Bar - GymBeam single_      10      70,37 €
+     30162-1-340g             Mandľové maslo s kokosom a bielou čokoládou  -      15      69,73 €
+     48031-2-2500g-vanilla    48031-2-2500g-vanilla                                5      68,70 €
+     30209-3-pink             30209-3-pink                                        10      65,13 €
+     34501-1-242ml-chocolate  25g Protein Milkshake - GymBeam 250 ml - čokol      60      64,06 €
+     9061-2-60g-double-chocolate-chunk Proteínová tyčinka PureBar - GymBeam 60 g - dv      60      64,06 €
+     29307-2-60ml-watermelon  Thor Shot - GymBeam vodný melón - 60 ml             80      63,36 €
+     29628-1                  Šejker čierny 700 ml - GymBeam 700 ml               30      61,86 €
+     28092-1-unflavoured      Proteínová Pizza - GymBeam 500 g - bez príchut      10      60,26 €
+     6937-1-bez-prichute      Erytritol 1000 g - GymBeam bez príchute             10      60,26 €
+     28092-2-cheese           Proteínová Pizza - GymBeam 500 g - syr              10      60,26 €
+     7677-1-chocolate         ZERO SIRUP čokoláda - GymBeam 320 ml                24      58,68 €
+     28928-1-201g-olive-oil   Extra panenský olivový olej v spreji - GymBeam      12      55,78 €
+     5951-4-340g-crunchy      Arašidové maslo - GymBeam 340 g - chrumkavé         24      52,06 €
+     28778-1-120tab-unflavored Chitosan - GymBeam 120 tab.                         10      51,99 €
+     41614-18-1000g-caramelmacchiato 41614-18-1000g-caramelmacchiato                      8      49,48 €
+     29120-4-blue             29120-4-blue                                        10      47,13 €
+     29120-2-grey             Fitlopta FitBall 65 cm - GymBeam sivá               10      47,13 €
+     258-369-90 tab           Kofeín - GymBeam 90 tab.                            12      45,87 €
+     37864-1-385g             BIO Zero Noodles 385 g – GymBeam 385 g              30      43,56 €
+     1593-1617-120 tab        Tribulus Terrestris - GymBeam 120 tab.              12      39,26 €
+     6672-1-250g-bez-prichute Beta Alanín - GymBeam 250 g - bez príchute          10      38,22 €
+     28324-2-vanilla-ice-cream Just Whey Grass-Fed Protein – GymBeam 1000 g -       2      35,74 €
+     28876-2-500g-unflavored  Kreatín monohydrát 100 % Creapure® - GymBeam 5       3      34,61 €
+     29691-1-90-tab           Vitamín B12 (kobalamín) - GymBeam 90 tab.           10      29,96 €
+     28648-1                  ZERO OMÁČKA boloňská – GymBeam 350 ml               12      29,34 €
+     8232-1-strawberry        ZERO SIRUP jahoda - GymBeam 320 ml                  12      29,34 €
+     30539-3-white-chocolate-strawberry 30539-3-white-chocolate-strawberry                  12      26,03 €
+     30539-2-white-chocolate-coconut 30539-2-white-chocolate-coconut                     12      26,03 €
+     5951-3-340g-smooth       Arašidové maslo - GymBeam 340 g - jemný             12      26,03 €
+     28496-1-pink             Fľaša Sport Bottle Pink 1000 ml - GymBeam sing       5      20,78 €
+     55609-1-60ml-lemonlime   Energy shot - GymBeam 60 ml - citrón limetka        20      15,15 €
+     48487-1-blackberry-75g   ReCharge Gél - GymBeam 75 g - ostružina             16      12,12 €
+     48487-2-greenapple-75g   ReCharge Gél - GymBeam 75 g - zelené jablko         16      12,12 €
+     29681-1-red              Švihadlo Red - GymBeam single_variant                2       7,27 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+     5075-25-1000g-chocolate  True Whey - GymBeam 1000 g - čokoláda - 00          36       0,00 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+     30248-2-60g-crunchy-caramel MoiMüv Protein Bar - GymBeam 60 g - chrumkavý       36       0,00 €
+
+── 2. objednávka 202706862 (order_id 10271284) — 12 153,41 € v položkách ──
+   zákazník: Selltime s.r.o. <purchasing@aktin.cz>, CZ, 1. 11. 2021, GMV objednávky 12 505,41 €
+   58 riadkov, 1 631 kusov
+     kód                      názov                                            kusov          GMV
+     4248-8-2270g-mliecna-cokolada 4248-8-2270g-mliecna-cokolada                       20     880,60 €
+     5075-27-1000g-vanilla    True Whey - GymBeam 1000 g - vanilka - 00           72     859,26 €
+     5075-29-1000g-white-chocolate True Whey - GymBeam 1000 g - biela čokoláda -       72     835,39 €
+     5075-31-1000g-banana     True Whey - GymBeam 1000 g - banán - 00             54     644,44 €
+     5951-1-1000g-kremove     Arašidové maslo - GymBeam 1000 g - jemný           120     550,79 €
+     5951-2-1000g-crunchy     Arašidové maslo - GymBeam 1000 g - chrumkavé       120     550,79 €
+     28186-4-mango-maracuja   Thor Fuel + Vitargo - GymBeam mango marakuja        48     520,61 €
+     28186-2-lemon-lime       Thor Fuel + Vitargo - GymBeam citrón limetka        48     520,61 €
+     28186-1-watermelon       Thor Fuel + Vitargo - GymBeam vodný melón           48     520,61 €
+     5075-24-1000g-white-chocolate-raspberry True Whey - GymBeam 1000 g - biela čokoláda ma      36     429,63 €
+     5075-26-1000g-chocolate-coconut True Whey - GymBeam 1000 g - čokoláda kokos -       36     429,63 €
+     36262-1-1000g-unflavored Tekuté vaječné bielka - GymBeam 1000 g             132     426,37 €
+     7185-3-210g-strawberry-kiwi Thor - GymBeam 210 g - jahoda kiwi                  40     357,69 €
+     4248-9-2270g-vanilkova-zmrzlina 4248-9-2270g-vanilkova-zmrzlina                      8     352,24 €
+     1638-1643-čokoláda       1638-1643-čokoláda                                  10     348,50 €
+     1638-8-vanilla-cheesecake 1638-8-vanilla-cheesecake                           10     348,50 €
+     4248-20-2270g-banan      4248-20-2270g-banan                                  6     264,18 €
+     28186-3-strawberry-kiwi  Thor Fuel + Vitargo - GymBeam jahoda kiwi           24     260,30 €
+     34207-1-orange-lemon-cherry-60caps Multivitamínové Yummies - GymBeam pomaranč cit      60     259,07 €
+     5075-41-1000g-chocolate-hazelnut True Whey - GymBeam 1000 g - čokoláda lieskový      18     214,81 €
+     5075-40-1000g-vanilla-stevia True Whey - GymBeam 1000 g - vanilka stévia -       18     214,81 €
+     7185-1-210g-lemon-lime   Thor - GymBeam 210 g - citrón limetka               20     178,84 €
+     7185-2-210g-watermelon   Thor - GymBeam 210 g - vodný melón                  20     178,84 €
+     6454-1-250g-bez-prichute Citrulín Malát - GymBeam 250 g - bez príchute       20     151,64 €
+     404-154-vanilka-1000 g   Micelárny kazeín - GymBeam 1000 g - vanilka         13     151,61 €
+     28621-2-1000g-vanilla    28621-2-1000g-vanilla                               24     149,33 €
+     8344-1                   Valec na cvičenie Fitness Roller Black - GymBe      15     127,48 €
+     5585-3-240cap            Omega 3 - GymBeam 240 kaps. - 00                    15     121,89 €
+     3810-2-500g              L-Glutamín - GymBeam 500 g - bez príchute - 00      15     113,73 €
+     1562-1586-90 tab         Synefrín - GymBeam 90 tab.                          24      90,57 €
+     7858-1-250ml             Tekutá krieda Liquid Chalk - GymBeam 250 ml         25      89,68 €
+     30129-3-strawberry       30129-3-strawberry                                  40      76,17 €
+     29663-1                  ZERO SIRUP slaný karamel - GymBeam 350 ml           30      72,42 €
+     7675-1-bbq               ZERO OMÁČKA barbecue 320 ml - GymBeam 320 ml        30      72,42 €
+     29118-1                  Adaptér na kliky Push Up Bar - GymBeam single_      10      69,48 €
+     28621-4-1000g-banana     28621-4-1000g-banana                                12      68,44 €
+     28876-1-250g-unflavored  Kreatín monohydrát 100 % Creapure® - GymBeam 2      10      67,66 €
+     36058-1-black            36058-1-black                                        5      64,47 €
+     4248-40-908g-white-chocolate-raspberry 4248-40-908g-white-chocolate-raspberry               2      53,65 €
+     4231-3-435g-vodny-melon  4231-3-435g-vodny-melon                              4      52,50 €
+     29307-1-60ml-lemon-lime  Thor Shot - GymBeam citrón limetka - 60 ml          60      46,92 €
+     6268-2-340g-smoothie     Mandľové maslo - GymBeam 340 g                      10      45,90 €
+     3738-1-500ml-pomaranc-220000 L-karnitín - GymBeam 500 ml - pomaranč               5      44,71 €
+     9061-4-60g-cookies-cream Proteínová tyčinka PureBar - GymBeam 60 g - co      36      37,95 €
+     6672-1-250g-bez-prichute Beta Alanín - GymBeam 250 g - bez príchute          10      37,74 €
+     30248-1-60g-cookies-cream MoiMüv Protein Bar - GymBeam 60 g - cookies &       36      34,69 €
+     28648-1                  ZERO OMÁČKA boloňská – GymBeam 350 ml               12      28,97 €
+     28330-1-yellow           Posilňovacia guma Cross Band Level 1 - GymBeam       5      24,40 €
+     29120-2-grey             Fitlopta FitBall 65 cm - GymBeam sivá                5      23,27 €
+     3810-1-250g              L-Glutamín - GymBeam 250 g - bez príchute - 00       5      22,27 €
+     29628-1                  Šejker čierny 700 ml - GymBeam 700 ml               10      20,36 €
+     34501-1-242ml-chocolate  25g Protein Milkshake - GymBeam 250 ml - čokol      12      12,65 €
+     48487-1-blackberry-75g   ReCharge Gél - GymBeam 75 g - ostružina             16      11,97 €
+     3885-2-1000g             100% Mikronizovaný kreatín monohydrát 1000 g -      25      11,39 €
+     33457-2-mango-maracuja-330 ml MOXY power+ Energy Drink 330 ml - GymBeam mang      12      10,61 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+     30248-2-60g-crunchy-caramel MoiMüv Protein Bar - GymBeam 60 g - chrumkavý       36       0,00 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+
+── 3. objednávka 401544245 (order_id 8989066) — 10 010,77 € v položkách ──
+   zákazník: alexandru.druta@elefant.ro <alexandru.druta@elefant.ro>, RO, 23. 7. 2021, GMV objednávky 1 782,08 €
+   69 riadkov, 1 034 kusov
+     kód                      názov                                            kusov          GMV
+     5075-20-2500g-white-chocolate-raspberry True Whey - GymBeam 2500 g - biela čokoláda ma      45     468,86 €
+     5075-2-2500g-vanilka     True Whey - GymBeam 2500 g - vanilka - 00           45     468,86 €
+     5075-34-2500g-pistachio  True Whey - GymBeam 2500 g - pistácie - 00          45     468,86 €
+     5075-8-2500g-biela-cokolada True Whey - GymBeam 2500 g - biela čokoláda -       45     468,86 €
+     5075-15-2500g-cokolada-oriesok True Whey - GymBeam 2500 g - čokoláda lieskový      45     468,86 €
+     5075-41-1000g-chocolate-hazelnut True Whey - GymBeam 1000 g - čokoláda lieskový      45     468,86 €
+     5075-3-2500g-jahoda      True Whey - GymBeam 2500 g - jahoda - 00            45     468,86 €
+     5075-1-2500g-cokolada    True Whey - GymBeam 2500 g - čokoláda - 00          45     468,86 €
+     5075-36-2500g-strawberry-stevia True Whey - GymBeam 2500 g - jahoda stévia - 0      45     468,86 €
+     5075-26-1000g-chocolate-coconut True Whey - GymBeam 1000 g - čokoláda kokos -       45     468,86 €
+     5075-32-1000g-bez-prichute True Whey - GymBeam 1000 g - bez príchute - 00      45     468,86 €
+     5075-38-2500g-chocolate-stevia True Whey - GymBeam 2500 g - čokoláda stévia -      45     468,86 €
+     28324-8-2000g-white-chocolate-coconut Just Whey Grass-Fed Protein – GymBeam 2000 g -      28     446,19 €
+     28324-3-1000g-white-chocolate-coconut Just Whey Grass-Fed Protein – GymBeam 1000 g -      28     446,19 €
+     28324-7-2000g-vanilla-ice-cream Just Whey Grass-Fed Protein – GymBeam 2000 g -      28     446,19 €
+     28324-5-2000g-chocolate-milkshake Just Whey Grass-Fed Protein – GymBeam 2000 g -      28     446,19 €
+     28324-6-2000g-unflavored Just Whey Grass-Fed Protein – GymBeam 2000 g -      28     446,19 €
+     3734-22-500g-mango-maracuja Bcaa 4:1:1 Instant - GymBeam 500 g - mango mar      13     162,59 €
+     3734-16-500g-blackcurrant Bcaa 4:1:1 Instant - GymBeam 500 g - čierne rí      13     162,59 €
+     3734-18-500g-strawberry-lime Bcaa 4:1:1 Instant - GymBeam 500 g - jahoda li      13     162,59 €
+     28186-4-mango-maracuja   Thor Fuel + Vitargo - GymBeam mango marakuja        10      99,72 €
+     28186-1-watermelon       Thor Fuel + Vitargo - GymBeam vodný melón           10      99,72 €
+     28186-2-lemon-lime       Thor Fuel + Vitargo - GymBeam citrón limetka        10      99,72 €
+     28186-3-strawberry-kiwi  Thor Fuel + Vitargo - GymBeam jahoda kiwi           10      99,72 €
+     30713-4-250g-green-apple 30713-4-250g-green-apple                            10      71,41 €
+     30713-8-500g-lemon-lime  30713-8-500g-lemon-lime                             10      71,41 €
+     30713-10-500g-orange     EAA – GymBeam 500 g - pomaranč                      10      71,41 €
+     30713-6-500g-blackcurrant 30713-6-500g-blackcurrant                           10      71,41 €
+     30713-2-250g-mango-maracuja 30713-2-250g-mango-maracuja                         10      71,41 €
+     3810-2-500g              L-Glutamín - GymBeam 500 g - bez príchute - 00       9      64,27 €
+     3810-1-250g              L-Glutamín - GymBeam 250 g - bez príchute - 00       9      64,27 €
+     3810-3-1000g             L-Glutamín - GymBeam 1000 g - bez príchute - 0       9      64,27 €
+     6503-3-240kaps           Vitamín D3 2000 IU - GymBeam 240 kaps.               8      53,54 €
+     5586-2-120caps           Omega 3 - GymBeam 120 kaps.                         10      50,53 €
+     5585-3-240cap            Omega 3 - GymBeam 240 kaps. - 00                    10      50,53 €
+     7076-1-bez-prichute      BIO Spirulina - GymBeam 500 tab. - bez príchut      10      47,55 €
+     8059-1-500g-bez-prichute Hydrolyzovaný kolagén RunCollg® s vitamínom C        4      39,30 €
+     8059-4-500g-strawberry-kiwi Hydrolyzovaný kolagén RunCollg® s vitamínom C        4      39,30 €
+     8059-3-500g-orange       Hydrolyzovaný kolagén RunCollg® s vitamínom C        4      39,30 €
+     9061-4-60g-cookies-cream Proteínová tyčinka PureBar - GymBeam 60 g - co      30      30,83 €
+     29715-1-240g-strawberry-lemonade Colla Pink - BeastPink + darček jahodová limon       4      30,35 €
+     9081-1-orange            Articular Drink - GymBeam pomaranč                   4      29,75 €
+     9081-3-raspberry         Articular Drink - GymBeam malina                     4      29,75 €
+     28765-3-240kaps-unflavored Omega 3-6-9 - GymBeam 240 kaps.                      2      24,71 €
+     28765-2-120kaps-unflavored Omega 3-6-9 - GymBeam 120 kaps.                      2      24,71 €
+     7677-1-chocolate         ZERO SIRUP čokoláda - GymBeam 320 ml                10      22,22 €
+     30947-1-340g             Pistáciové maslo - GymBeam 340 g                     3      21,87 €
+     28101-1-coconut          Kokosový olej v spreji - GymBeam 200 ml              5      17,81 €
+     28689-3-1000g-unflavored 28689-3-1000g-unflavored                             1      13,27 €
+     5951-4-340g-crunchy      Arašidové maslo - GymBeam 340 g - chrumkavé          4      13,06 €
+     5951-3-340g-smooth       Arašidové maslo - GymBeam 340 g - jemný              4      13,06 €
+     5951-1-1000g-kremove     Arašidové maslo - GymBeam 1000 g - jemný             4      13,06 €
+     5951-2-1000g-crunchy     Arašidové maslo - GymBeam 1000 g - chrumkavé         4      13,06 €
+     6322-1-60tab             Vitality komplex - GymBeam 60 tab.                   2      11,63 €
+     28621-4-1000g-banana     28621-4-1000g-banana                                 2      11,60 €
+     28621-5-cocoa            28621-5-cocoa                                        2      11,60 €
+     28554-1-90-kaps-unflavored Ashwagandha 500 mg - GymBeam + darček 90 kaps.       2      10,40 €
+     8789-1-pineapple         L-karnitín 3000 Liquid Shot - GymBeam ananás -      20       8,94 €
+     8789-3-grapefruit        L-karnitín 3000 Liquid Shot - GymBeam grapefru      20       8,94 €
+     3807-2-500g              Arginín A.K.G. - GymBeam 500 g - bez príchute        1       8,63 €
+     36262-1-1000g-unflavored Tekuté vaječné bielka - GymBeam 1000 g               2       6,83 €
+     30248-2-60g-crunchy-caramel MoiMüv Protein Bar - GymBeam 60 g - chrumkavý        4       4,71 €
+     30248-1-60g-cookies-cream MoiMüv Protein Bar - GymBeam 60 g - cookies &        4       4,71 €
+     6860-1-agave             BIO Agáve sirup - GymBeam 250 ml                     2       4,29 €
+     36436-1-400g             36436-1-400g                                         2       2,95 €
+     32899-3-1000g-unflavored 32899-3-1000g-unflavored                             1       2,37 €
+     5383-2-500g              Chia semienka - GymBeam 400 g                        1       1,92 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+── 4. objednávka 202548015 (order_id 9530062) — 8 293,28 € v položkách ──
+   zákazník: CALBUCO s.r.o. - Grizly.cz <viktor@grizly.cz>, CZ, 8. 9. 2021, GMV objednávky 8 293,28 €
+   50 riadkov, 653 kusov
+     kód                      názov                                            kusov          GMV
+     5075-37-2500g-vanilla-stevia True Whey - GymBeam 2500 g - vanilka stévia -       56   1 272,03 €
+     5075-2-2500g-vanilka     True Whey - GymBeam 2500 g - vanilka - 00           40     908,60 €
+     5075-1-2500g-cokolada    True Whey - GymBeam 2500 g - čokoláda - 00          36     817,74 €
+     5075-6-2500g-bez-prichute True Whey - GymBeam 2500 g - bez príchute - 00      30     681,45 €
+     5075-10-2500g-banan      True Whey - GymBeam 2500 g - banán - 00             30     681,45 €
+     5075-8-2500g-biela-cokolada True Whey - GymBeam 2500 g - biela čokoláda -       26     590,59 €
+     5075-9-2500g-coklada-kokos True Whey - GymBeam 2500 g - čokoláda kokos -       20     454,30 €
+     5075-3-2500g-jahoda      True Whey - GymBeam 2500 g - jahoda - 00            16     363,44 €
+     5075-38-2500g-chocolate-stevia True Whey - GymBeam 2500 g - čokoláda stévia -      12     272,58 €
+     5075-15-2500g-cokolada-oriesok True Whey - GymBeam 2500 g - čokoláda lieskový      12     272,58 €
+     5075-41-1000g-chocolate-hazelnut True Whey - GymBeam 1000 g - čokoláda lieskový      20     191,18 €
+     31295-1-20tabs           L-karnitín 1000 mg šumivý - GymBeam 20 tab. -       60     156,24 €
+     5075-29-1000g-white-chocolate True Whey - GymBeam 1000 g - biela čokoláda -       16     152,94 €
+     5075-25-1000g-chocolate  True Whey - GymBeam 1000 g - čokoláda - 00          12     114,71 €
+     5075-35-1000g-chocolate-stevia True Whey - GymBeam 1000 g - čokoláda stévia -      12     114,71 €
+     28683-1-2500g-chocolate  Anabolic Whey - GymBeam + darček 2500 g - čoko       6     113,27 €
+     28683-2-2500g-vanilla    Anabolic Whey - GymBeam + darček 2500 g - vani       6     113,27 €
+     5075-61-1000g-caramel    True Whey - GymBeam 1000 g - karamel - 00           10      95,59 €
+     5075-28-1000g-strawberry True Whey - GymBeam 1000 g - jahoda - 00            10      95,59 €
+     28101-1-coconut          Kokosový olej v spreji - GymBeam 200 ml             26      91,76 €
+     9037-8-vanilla           Flavour Drops - GymBeam 30 ml - vanilka             25      74,52 €
+     6086-2-500g-vanilla      Proteínové palacinky Pancake & Waffle Mix 500       10      48,99 €
+     3734-16-500g-blackcurrant Bcaa 4:1:1 Instant - GymBeam 500 g - čierne rí       4      43,72 €
+     28186-3-strawberry-kiwi  Thor Fuel + Vitargo - GymBeam jahoda kiwi            4      41,52 €
+     5075-27-1000g-vanilla    True Whey - GymBeam 1000 g - vanilka - 00            4      38,24 €
+     5075-33-1000g-pistachio  True Whey - GymBeam 1000 g - pistácie - 00           4      38,24 €
+     5075-26-1000g-chocolate-coconut True Whey - GymBeam 1000 g - čokoláda kokos -        4      38,24 €
+     28928-1-201g-olive-oil   Extra panenský olivový olej v spreji - GymBeam       8      32,62 €
+     30941-1-750              Šejker Steel 750 ml - GymBeam single_variant        10      30,93 €
+     51145-1-90tab            51145-1-90tab                                        8      30,42 €
+     29089-1-120caps          Vita Pink - BeastPink + darček 120 kaps.             4      25,08 €
+     51118-1-90tab            51118-1-90tab                                        6      24,46 €
+     28092-1-unflavoured      Proteínová Pizza - GymBeam 500 g - bez príchut       4      23,98 €
+     28092-2-cheese           Proteínová Pizza - GymBeam 500 g - syr               4      23,98 €
+     48406-1-blueberryandwhitechocolate-75g MoiMüv Protein Cookie - GymBeam čučoriedka bie      20      23,30 €
+     5598-2-1000g-vanilla     Hovädzí (Beef) Proteín Hydrobeef™ - GymBeam 10       2      22,95 €
+     3734-11-500g-citron-limetka Bcaa 4:1:1 Instant - GymBeam 500 g - citrón li       2      21,86 €
+     33457-2-mango-maracuja-330 ml MOXY power+ Energy Drink 330 ml - GymBeam mang      24      21,38 €
+     5075-58-1000g-peanut-butter True Whey - GymBeam 1000 g - arašidové maslo -       2      19,12 €
+     9037-3-caramel           9037-3-caramel                                       6      17,88 €
+     9037-1-banana            9037-1-banana                                        6      17,88 €
+     9037-6-chocolate         Flavour Drops - GymBeam 30 ml - čokoláda             6      17,88 €
+     28496-1-pink             Fľaša Sport Bottle Pink 1000 ml - GymBeam sing       4      16,54 €
+     34501-1-242ml-chocolate  25g Protein Milkshake - GymBeam 250 ml - čokol      12      12,75 €
+     3734-27-250g-orange      Bcaa 4:1:1 Instant - GymBeam 250 g - pomaranč        2      12,54 €
+     7585-čierno-biela        7585-čierno-biela                                    6      10,74 €
+     9037-7-strawberry        9037-7-strawberry                                    2       5,96 €
+     6408-1                   Šejker Sway Black 400 ml - GymBeam single_vari       2       3,58 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+
+── 5. objednávka 202438602 (order_id 8972854) — 7 369,37 € v položkách ──
+   zákazník: CALBUCO s.r.o. - Grizly.cz <viktor@grizly.cz>, CZ, 21. 7. 2021, GMV objednávky 7 487,76 €
+   71 riadkov, 1 151 kusov
+     kód                      názov                                            kusov          GMV
+     5075-37-2500g-vanilla-stevia True Whey - GymBeam 2500 g - vanilka stévia -       25     486,25 €
+     5075-2-2500g-vanilka     True Whey - GymBeam 2500 g - vanilka - 00           25     486,25 €
+     5075-1-2500g-cokolada    True Whey - GymBeam 2500 g - čokoláda - 00          20     389,00 €
+     5075-6-2500g-bez-prichute True Whey - GymBeam 2500 g - bez príchute - 00      20     389,00 €
+     5075-9-2500g-coklada-kokos True Whey - GymBeam 2500 g - čokoláda kokos -       15     291,75 €
+     5075-10-2500g-banan      True Whey - GymBeam 2500 g - banán - 00             15     291,75 €
+     5075-8-2500g-biela-cokolada True Whey - GymBeam 2500 g - biela čokoláda -       15     291,75 €
+     5075-25-1000g-chocolate  True Whey - GymBeam 1000 g - čokoláda - 00          30     283,13 €
+     3738-1-500ml-pomaranc-220000 L-karnitín - GymBeam 500 ml - pomaranč              30     266,89 €
+     5075-32-1000g-bez-prichute True Whey - GymBeam 1000 g - bez príchute - 00      25     235,94 €
+     5075-40-1000g-vanilla-stevia True Whey - GymBeam 1000 g - vanilka stévia -       25     235,94 €
+     5075-3-2500g-jahoda      True Whey - GymBeam 2500 g - jahoda - 00            10     194,50 €
+     5075-38-2500g-chocolate-stevia True Whey - GymBeam 2500 g - čokoláda stévia -      10     194,50 €
+     5075-15-2500g-cokolada-oriesok True Whey - GymBeam 2500 g - čokoláda lieskový      10     194,50 €
+     28186-2-lemon-lime       Thor Fuel + Vitargo - GymBeam citrón limetka        15     153,74 €
+     3810-3-1000g             L-Glutamín - GymBeam 1000 g - bez príchute - 0      12     142,48 €
+     5075-33-1000g-pistachio  True Whey - GymBeam 1000 g - pistácie - 00          15     141,56 €
+     5075-26-1000g-chocolate-coconut True Whey - GymBeam 1000 g - čokoláda kokos -       15     141,56 €
+     5075-28-1000g-strawberry True Whey - GymBeam 1000 g - jahoda - 00            15     141,56 €
+     5075-61-1000g-caramel    True Whey - GymBeam 1000 g - karamel - 00           15     141,56 €
+     5075-41-1000g-chocolate-hazelnut True Whey - GymBeam 1000 g - čokoláda lieskový      15     141,56 €
+     7074-1-250g-bez-prichute MSM - GymBeam 250 g - bez príchute                  50     106,55 €
+     5075-35-1000g-chocolate-stevia True Whey - GymBeam 1000 g - čokoláda stévia -      10      94,38 €
+     5075-58-1000g-peanut-butter True Whey - GymBeam 1000 g - arašidové maslo -      10      94,38 €
+     31295-1-20tabs           L-karnitín 1000 mg šumivý - GymBeam 20 tab. -       35      89,98 €
+     8350-1-bez-prichute      Nero - GymBeam bez príchute - 120 kaps.             10      82,87 €
+     28683-2-2500g-vanilla    Anabolic Whey - GymBeam + darček 2500 g - vani       5      81,01 €
+     28683-1-2500g-chocolate  Anabolic Whey - GymBeam + darček 2500 g - čoko       5      81,01 €
+     28189-1-205 ml           28189-1-205 ml                                      12      80,78 €
+     29945-1-20tabs           Magnézium chelát + B6 šumivý - GymBeam pomaran      50      72,72 €
+     30941-1-750              Šejker Steel 750 ml - GymBeam single_variant        15      61,24 €
+     6086-4-500g-blueberries  Proteínové palacinky Pancake & Waffle Mix 500       10      59,19 €
+     9037-8-vanilla           Flavour Drops - GymBeam 30 ml - vanilka             20      58,86 €
+     3734-25-500g-orange      Bcaa 4:1:1 Instant - GymBeam 500 g - pomaranč        5      53,95 €
+     3734-12-500g-vodny-melon Bcaa 4:1:1 Instant - GymBeam 500 g - vodný mel       5      53,95 €
+     3734-18-500g-strawberry-lime Bcaa 4:1:1 Instant - GymBeam 500 g - jahoda li       5      53,95 €
+     34207-1-orange-lemon-cherry-60caps Multivitamínové Yummies - GymBeam pomaranč cit      15      52,26 €
+     37996-1-seasalt          Proteínové čipsy - GymBeam 40 g - morská soľ        49      51,39 €
+     37996-2-paprika          Proteínové čipsy - GymBeam 40 g - paprika           49      51,39 €
+     28186-1-watermelon       Thor Fuel + Vitargo - GymBeam vodný melón            5      51,25 €
+     28186-4-mango-maracuja   Thor Fuel + Vitargo - GymBeam mango marakuja         5      51,25 €
+     28496-1-pink             Fľaša Sport Bottle Pink 1000 ml - GymBeam sing      10      40,83 €
+     51493-1-300g             Proteínová granola s čokoládou - GymBeam 300 g      15      40,09 €
+     48406-3-doublechocolate-75g MoiMüv Protein Cookie - GymBeam dvojitá čokolá      30      39,57 €
+     34501-1-242ml-chocolate  25g Protein Milkshake - GymBeam 250 ml - čokol      36      37,75 €
+     51145-1-90tab            51145-1-90tab                                       10      37,55 €
+     32140-1-500ml-coral      Šejker koralový 500 ml - GymBeam single_varian      20      37,29 €
+     28106-1-green            28106-1-green                                       15      36,65 €
+     29080-1-lemon-lime       Energetický nápoj MOXY bcaa+ 330 ml - GymBeam       48      34,10 €
+     3734-14-250g-blackcurrant Bcaa 4:1:1 Instant - GymBeam 250 g - čierne rí       5      33,66 €
+     3734-27-250g-orange      Bcaa 4:1:1 Instant - GymBeam 250 g - pomaranč        5      33,66 €
+     3734-20-250g-mango-maracuja Bcaa 4:1:1 Instant - GymBeam 250 g - mango mar       5      33,66 €
+     3734-28-250g-green-apple Bcaa 4:1:1 Instant - GymBeam 250 g - zelené ja       5      33,66 €
+     3734-17-250g-strawberry-lime 3734-17-250g-strawberry-lime                         5      33,66 €
+     34501-2-242ml-vanilla    25g Protein Milkshake - GymBeam 250 ml - vanil      30      31,46 €
+     28186-3-strawberry-kiwi  Thor Fuel + Vitargo - GymBeam jahoda kiwi            3      30,75 €
+     9037-3-caramel           9037-3-caramel                                      10      29,43 €
+     7585-čierno-biela        7585-čierno-biela                                   10      24,43 €
+     33457-2-mango-maracuja-330 ml MOXY power+ Energy Drink 330 ml - GymBeam mang      24      21,11 €
+     33457-1-wild-berry-330ml MOXY power+ Energy Drink 330 ml - GymBeam lesn      24      21,11 €
+     50620-1-90tab            50620-1-90tab                                        5      18,77 €
+     9037-5-hazelnut          9037-5-hazelnut                                      6      17,66 €
+     48487-2-greenapple-75g   ReCharge Gél - GymBeam 75 g - zelené jablko         16      16,78 €
+     48487-1-blackberry-75g   ReCharge Gél - GymBeam 75 g - ostružina             16      16,78 €
+     9037-2-blueberry         9037-2-blueberry                                     5      14,71 €
+     9037-6-chocolate         Flavour Drops - GymBeam 30 ml - čokoláda             5      14,71 €
+     48406-1-blueberryandwhitechocolate-75g MoiMüv Protein Cookie - GymBeam čučoriedka bie      10      13,19 €
+     30346-1-50ml             Zázvorový shot s kurkumou - GymBeam 50 ml            9       8,83 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+     6086-3-500g-unflavored   Proteínové palacinky Pancake & Waffle Mix 500       20       0,00 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+── 6. objednávka 1500433654 (order_id 10035064) — 7 331,15 € v položkách ──
+   zákazník: Супплемент ЕООД <supplementltd@abv.bg>, BG, 11. 10. 2021, GMV objednávky 7 331,15 €
+   166 riadkov, 1 102 kusov
+     kód                      názov                                            kusov          GMV
+     3885-2-1000g             100% Mikronizovaný kreatín monohydrát 1000 g -      24     256,78 €
+     6939-4-2500g-chocolate-hazelnut Pure IsoWhey - GymBeam 2500 g - čokoláda liesk       7     218,52 €
+     28794-1-120kaps-unflavored AlphaMale TestoBooster - GymBeam 120 kaps.          16     175,51 €
+     50500-1-3243g-blueberrycobbler 50500-1-3243g-blueberrycobbler                       5     169,81 €
+     5075-57-2500g-peanut-butter True Whey - GymBeam 2500 g - arašidové maslo -       6     145,73 €
+     5075-20-2500g-white-chocolate-raspberry True Whey - GymBeam 2500 g - biela čokoláda ma       6     145,73 €
+     5075-37-2500g-vanilla-stevia True Whey - GymBeam 2500 g - vanilka stévia -        6     145,73 €
+     5075-7-2500g-karamel     True Whey - GymBeam 2500 g - karamel - 00            6     145,73 €
+     5075-38-2500g-chocolate-stevia True Whey - GymBeam 2500 g - čokoláda stévia -       6     145,73 €
+     5075-1-2500g-cokolada    True Whey - GymBeam 2500 g - čokoláda - 00           6     145,73 €
+     5075-9-2500g-coklada-kokos True Whey - GymBeam 2500 g - čokoláda kokos -        6     145,73 €
+     5075-15-2500g-cokolada-oriesok True Whey - GymBeam 2500 g - čokoláda lieskový       6     145,73 €
+     5075-3-2500g-jahoda      True Whey - GymBeam 2500 g - jahoda - 00             6     145,73 €
+     5075-36-2500g-strawberry-stevia True Whey - GymBeam 2500 g - jahoda stévia - 0       6     145,72 €
+     5585-3-240cap            Omega 3 - GymBeam 240 kaps. - 00                    18     143,71 €
+     50500-3-3243g-oatmealchocolatechip 50500-3-3243g-oatmealchocolatechip                   4     135,85 €
+     7970-1-bez-prichute      Koenzým Q10 - GymBeam + darčeky 60 kaps.            24     129,62 €
+     28876-3-1000g-unflavored 28876-3-1000g-unflavored                             6     124,12 €
+     3807-2-500g              Arginín A.K.G. - GymBeam 500 g - bez príchute       13     114,58 €
+     8789-1-pineapple         L-karnitín 3000 Liquid Shot - GymBeam ananás -     240     113,72 €
+     50368-1-90caps           50368-1-90caps                                       6     113,11 €
+     8059-4-500g-strawberry-kiwi Hydrolyzovaný kolagén RunCollg® s vitamínom C       11     111,70 €
+     5075-59-2500g-chocolate-cherry True Whey - GymBeam 2500 g - čokoláda čerešňa        4      97,15 €
+     1593-1617-120 tab        Tribulus Terrestris - GymBeam 120 tab.              17      89,47 €
+     29748-1-120kaps          29748-1-120kaps                                     12      89,26 €
+     1747-1744-500 tab        Beef&Egg - GymBeam 500 tab.                          9      84,05 €
+     4248-8-2270g-mliecna-cokolada 4248-8-2270g-mliecna-cokolada                        2      79,66 €
+     4248-10-2270g-cookies-krem 4248-10-2270g-cookies-krem                           2      79,66 €
+     4248-45-2240g-chocolate-hazelnut 4248-45-2240g-chocolate-hazelnut                     2      79,66 €
+     4248-23-2270g-francuzsko-vanilkovy-krem 4248-23-2270g-francuzsko-vanilkovy-krem              2      79,65 €
+     4248-14-2270g-cokolada-arasidove-maslo 4248-14-2270g-cokolada-arasidove-maslo               2      79,65 €
+     4248-22-2270g-dvojita-cokolada 100% Whey Gold Standard - Optimum Nutrition 22       2      79,65 €
+     4248-9-2270g-vanilkova-zmrzlina 4248-9-2270g-vanilkova-zmrzlina                      2      79,65 €
+     4248-24-2270g-jahoda     4248-24-2270g-jahoda                                 2      79,65 €
+     5075-25-1000g-chocolate  True Whey - GymBeam 1000 g - čokoláda - 00           6      77,34 €
+     36235-1-90caps           36235-1-90caps                                      12      69,27 €
+     5356-1-cierna            5356-1-cierna                                       24      69,21 €
+     36322-1-mix              Set odporových gúm DuoBand - GymBeam single_va       4      67,81 €
+     8065-1-bez-prichute      L-karnitín - GymBeam 250 g - bez príchute            9      65,71 €
+     28281-1-250g-bez-prichute Magnézium citrát - GymBeam 250 g - bez príchut      15      65,19 €
+     28765-3-240kaps-unflavored Omega 3-6-9 - GymBeam 240 kaps.                      5      62,67 €
+     28324-8-2000g-white-chocolate-coconut Just Whey Grass-Fed Protein – GymBeam 2000 g -       2      62,47 €
+     28876-7-500g-orange      28876-7-500g-orange                                  6      62,15 €
+     28876-6-500g-lemon-lime  Kreatín monohydrát 100 % Creapure® - GymBeam 5       6      62,15 €
+     28554-1-90-kaps-unflavored Ashwagandha 500 mg - GymBeam + darček 90 kaps.      11      61,65 €
+     1562-1586-90 tab         Synefrín - GymBeam 90 tab.                          15      58,62 €
+     28683-2-2500g-vanilla    Anabolic Whey - GymBeam + darček 2500 g - vani       3      56,56 €
+     6454-1-250g-bez-prichute Citrulín Malát - GymBeam 250 g - bez príchute        7      52,18 €
+     50374-3-200g-pineapplejuice 50374-3-200g-pineapplejuice                          3      50,95 €
+     50374-4-200g-mangostrawberry 50374-4-200g-mangostrawberry                         3      50,94 €
+     404-2-cokolada-1000g     Micelárny kazeín - GymBeam 1000 g - čokoláda         5      50,77 €
+     3885-3-500g-lemon-lime   100% Mikronizovaný kreatín monohydrát 500 g -        6      50,75 €
+     6672-2-500g-bez-prichute Beta Alanín - GymBeam 500 g - bez príchute           7      45,04 €
+     42481-1-300g-strawberrylemonade 42481-1-300g-strawberrylemonade                      4      43,88 €
+     42481-2-300g-sourwatermelon 42481-2-300g-sourwatermelon                          4      43,88 €
+     9081-3-raspberry         Articular Drink - GymBeam malina                     6      43,81 €
+     7074-1-250g-bez-prichute MSM - GymBeam 250 g - bez príchute                  17      40,11 €
+     29667-3-300-g-green-apple Kreatín Crea7in - GymBeam 300 g - zelené jablk       4      39,13 €
+     29667-2-300-g-watermelon Kreatín Crea7in - GymBeam 300 g - vodný melón        4      39,13 €
+     5075-61-1000g-caramel    True Whey - GymBeam 1000 g - karamel - 00            3      38,67 €
+     5075-26-1000g-chocolate-coconut True Whey - GymBeam 1000 g - čokoláda kokos -        3      38,67 €
+     5075-39-1000g-strawberry-stevia True Whey - GymBeam 1000 g - jahoda stévia - 0       3      38,67 €
+     51541-1-90caps           Acetyl L-karnitín - GymBeam 90 kaps.                 6      38,52 €
+     46456-1-60caps           Ekdysterón - GymBeam 60 kaps.                        3      35,61 €
+     3738-1-500ml-pomaranc-220000 L-karnitín - GymBeam 500 ml - pomaranč               4      35,25 €
+     28928-1-201g-olive-oil   Extra panenský olivový olej v spreji - GymBeam       8      35,18 €
+     48496-2-500g-chocolate   48496-2-500g-chocolate                               3      35,16 €
+     7974-1-bez-prichute      Zinok - GymBeam 00 - 90 tab.                        12      34,67 €
+     37915-1-90caps           Ginkgo Biloba + Horčík – GymBeam 90 kaps.            6      34,54 €
+     50500-2-3243g-strawberryshortcake 50500-2-3243g-strawberryshortcake                    1      33,96 €
+     7076-1-bez-prichute      BIO Spirulina - GymBeam 500 tab. - bez príchut       5      33,88 €
+     28693-2-1000g-chocolate  28693-2-1000g-chocolate                              2      32,54 €
+     5951-1-1000g-kremove     Arašidové maslo - GymBeam 1000 g - jemný             7      30,89 €
+     28778-1-120tab-unflavored Chitosan - GymBeam 120 tab.                          6      30,48 €
+     404-154-vanilka-1000 g   Micelárny kazeín - GymBeam 1000 g - vanilka          3      30,47 €
+     28085-60kaps-bez-prichute DigeZyme - GymBeam 60 kaps. - 00                     5      28,79 €
+     7070-1-250g-bez-prichute DAA - GymBeam 250 g                                  5      28,79 €
+     6410-2-500g-bez-prichute Vitamín C prášok - GymBeam 500 g - bez príchut       5      28,53 €
+     8789-3-grapefruit        L-karnitín 3000 Liquid Shot - GymBeam grapefru      60      28,43 €
+     28101-1-coconut          Kokosový olej v spreji - GymBeam 200 ml              7      27,46 €
+     43753-1-90caps           Vitamín K2 (menachinón) - GymBeam 90 kaps.           4      26,49 €
+     58327-1-120tab           Men‘s Essentials - GymBeam 120 tab.                  3      26,39 €
+     34207-1-orange-lemon-cherry-60caps Multivitamínové Yummies - GymBeam pomaranč cit       6      26,29 €
+     2813-2-2500g             Maltodextrín - GymBeam 2500 g - bez príchute -       6      26,29 €
+     40864-1-90tab            Kyselina listová (vitamín B9) - GymBeam 90 tab      12      26,05 €
+     8665-2-vanilla           8665-2-vanilla                                       2      25,78 €
+     5075-24-1000g-white-chocolate-raspberry True Whey - GymBeam 1000 g - biela čokoláda ma       2      25,78 €
+     5075-41-1000g-chocolate-hazelnut True Whey - GymBeam 1000 g - čokoláda lieskový       2      25,78 €
+     5075-58-1000g-peanut-butter True Whey - GymBeam 1000 g - arašidové maslo -       2      25,78 €
+     29059-2-120tabs          Chróm Pikolinát - GymBeam 120 tab.                   5      25,40 €
+     3807-1-250g              Arginín A.K.G. - GymBeam 250 g - bez príchute        5      25,39 €
+     30342-2-120-caps         Vitamín D3 1000 IU - GymBeam 120 kaps. - 00          5      24,63 €
+     48592-1-500ml            48592-1-500ml                                        6      22,22 €
+     36316-1-metal grey - orange 36316-1-metal grey - orange                          3      21,90 €
+     29118-1                  Adaptér na kliky Push Up Bar - GymBeam single_       3      21,90 €
+     7968-1-bez-prichute      Ca-Zn-Mg - GymBeam 60 tab.                           7      20,22 €
+     28765-1-60kaps-unflavored Omega 3-6-9 - GymBeam 60 kaps.                       4      17,53 €
+     35998-1-90tab            Vitamín C + D3 1000 IU - GymBeam 90 kaps.            4      16,97 €
+     29667-7-600-g-watermelon Kreatín Crea7in - GymBeam 600 g - vodný melón        1      16,95 €
+     29667-6-600-g-green-apple Kreatín Crea7in - GymBeam 600 g - zelené jablk       1      16,95 €
+     5012-1-cokolada          Sójový izolát - GymBeam 1000 g - čokoláda            2      15,56 €
+     6086-1-500g-chocolate    Proteínové palacinky Pancake & Waffle Mix 500        3      15,18 €
+     55846-1-90caps           55846-1-90caps                                       3      15,18 €
+     29917-1-200g             29917-1-200g                                         3      15,18 €
+     28813-2-120kaps-unflavored Vitamín D3+K1+K2 - GymBeam 120 kaps.                 2      14,88 €
+     5951-2-1000g-crunchy     Arašidové maslo - GymBeam 1000 g - chrumkavé         3      13,24 €
+     30713-9-500g-mango-maracuja 30713-9-500g-mango-maracuja                          1      13,08 €
+     30713-10-500g-orange     EAA – GymBeam 500 g - pomaranč                       1      13,08 €
+     30713-7-500g-green-apple EAA – GymBeam 500 g - zelené jablko                  1      13,08 €
+     6454-2-500g-bez-prichute Citrulín Malát - GymBeam 500 g - bez príchute        1      12,55 €
+     6406-1                   Šejker Sway Green 400 ml - GymBeam single_vari       6      11,01 €
+     6408-1                   Šejker Sway Black 400 ml - GymBeam single_vari       6      11,01 €
+     28991-1                  Šejker Sway Blue 400 ml - GymBeam single_varia       6      11,00 €
+     28087-120kaps-bez-prichute Pestrec mariánsky - GymBeam 120 kaps.                2      10,80 €
+     5586-2-120caps           Omega 3 - GymBeam 120 kaps.                          2      10,53 €
+     8059-3-500g-orange       Hydrolyzovaný kolagén RunCollg® s vitamínom C        1      10,15 €
+     66241-340g-smooth        Kešu maslo - GymBeam 340 g - jemný                   2      10,12 €
+     6086-2-500g-vanilla      Proteínové palacinky Pancake & Waffle Mix 500        2      10,12 €
+     36253-1-90caps           Selén - GymBeam 90 kaps.                             3      10,04 €
+     6410-1-250g-bez-prichute Vitamín C prášok - GymBeam 250 g - bez príchut       3       8,97 €
+     28763-1-60kaps-unflavored Draslík - GymBeam 90 kaps.                           4       8,83 €
+     48406-3-doublechocolate-75g MoiMüv Protein Cookie - GymBeam dvojitá čokolá       6       8,13 €
+     29394-1                  29394-1                                              2       8,12 €
+     6421-1                   6421-1                                               2       8,12 €
+     5803-1                   5803-1                                               2       8,12 €
+     28765-2-120kaps-unflavored Omega 3-6-9 - GymBeam 120 kaps.                      1       8,11 €
+     29059-1-60tabs           Chróm Pikolinát - GymBeam 60 tab.                    3       8,10 €
+     47851-1-350g             47851-1-350g                                         2       8,08 €
+     28384-2-340g-coconut     Arašidové maslo s kokosom - GymBeam 340 g            3       8,06 €
+     5012-2-vanilla           Sójový izolát - GymBeam 1000 g - vanilka             1       7,78 €
+     30713-4-250g-green-apple 30713-4-250g-green-apple                             1       7,64 €
+     30713-1-250g-orange      30713-1-250g-orange                                  1       7,64 €
+     30713-5-250g-blackcurrant 30713-5-250g-blackcurrant                            1       7,64 €
+     30248-1-60g-cookies-cream MoiMüv Protein Bar - GymBeam 60 g - cookies &        6       7,31 €
+     6935-1-bez-prichute      6935-1-bez-prichute                                  1       7,30 €
+     28082-120kaps-bez-prichute GABA - GymBeam 120 kaps.                             1       7,30 €
+     5951-3-340g-smooth       Arašidové maslo - GymBeam 340 g - jemný              3       6,82 €
+     5951-4-340g-crunchy      Arašidové maslo - GymBeam 340 g - chrumkavé          3       6,82 €
+     54652-1-120g             54652-1-120g                                         6       6,33 €
+     28621-5-cocoa            28621-5-cocoa                                        1       6,28 €
+     28621-2-1000g-vanilla    28621-2-1000g-vanilla                                1       6,28 €
+     28621-3-1000g-strawberry 28621-3-1000g-strawberry                             1       6,28 €
+     28621-4-1000g-banana     28621-4-1000g-banana                                 1       6,28 €
+     7748-1-solid-tuna-in-olive-oil 7748-1-solid-tuna-in-olive-oil                       6       6,21 €
+     50515-2-67g-blueberrycobbler 50515-2-67g-blueberrycobbler                         4       5,85 €
+     50515-3-67g-crunchypeanutbuttercup 50515-3-67g-crunchypeanutbuttercup                   4       5,85 €
+     50515-6-67g-oatmealchocolatechip 50515-6-67g-oatmealchocolatechip                     4       5,85 €
+     50515-7-67g-snickerdoodle 50515-7-67g-snickerdoodle                            4       5,85 €
+     50515-4-67g-germanchocolatecake 50515-4-67g-germanchocolatecake                      4       5,85 €
+     50515-8-67g-chocolatechipcookiedough 50515-8-67g-chocolatechipcookiedough                 4       5,85 €
+     6415-1-250g-bez-prichute 6415-1-250g-bez-prichute                             1       5,76 €
+     7746-1-solid-tuna-in-water 7746-1-solid-tuna-in-water                           6       5,50 €
+     54646-1-120g             54646-1-120g                                         6       5,29 €
+     8805-1-bez-prichute      Valeriána lekárska - GymBeam 60 kaps.                1       5,08 €
+     36685-1-orange-60ml      Magnesium Shot - GymBeam pomaranč - 60 ml            6       4,50 €
+     36685-2-lemon-60ml       Magnesium Shot - GymBeam citrón - 60 ml              6       4,49 €
+     29080-1-lemon-lime       Energetický nápoj MOXY bcaa+ 330 ml - GymBeam        6       4,06 €
+     6672-1-250g-bez-prichute Beta Alanín - GymBeam 250 g - bez príchute           1       4,06 €
+     35812-1-apple-dried-tomato-piri-piri 35812-1-apple-dried-tomato-piri-piri                 2       3,49 €
+     36262-1-1000g-unflavored Tekuté vaječné bielka - GymBeam 1000 g               1       3,39 €
+     35812-1-mexican-salad    35812-1-mexican-salad                                2       3,35 €
+     46174-1-200tab           46174-1-200tab                                       2       3,26 €
+     54673-1-125g             54673-1-125g                                         3       2,64 €
+     6860-1-agave             BIO Agáve sirup - GymBeam 250 ml                     1       2,20 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+── 7. objednávka 1500411712 (order_id 9515002) — 6 096,81 € v položkách ──
+   zákazník: Супплемент ЕООД <supplementltd@abv.bg>, BG, 7. 9. 2021, GMV objednávky 6 096,81 €
+   135 riadkov, 906 kusov
+     kód                      názov                                            kusov          GMV
+     28683-3-2500g-strawberry 28683-3-2500g-strawberry                            12     225,85 €
+     28683-1-2500g-chocolate  Anabolic Whey - GymBeam + darček 2500 g - čoko      12     225,84 €
+     46456-1-60caps           Ekdysterón - GymBeam 60 kaps.                       18     213,33 €
+     1593-1617-120 tab        Tribulus Terrestris - GymBeam 120 tab.              36     189,16 €
+     3807-2-500g              Arginín A.K.G. - GymBeam 500 g - bez príchute       18     158,39 €
+     3885-1-500g              100% Mikronizovaný kreatín monohydrát 500 g -       24     154,18 €
+     5075-15-2500g-cokolada-oriesok True Whey - GymBeam 2500 g - čokoláda lieskový       6     145,49 €
+     5075-1-2500g-cokolada    True Whey - GymBeam 2500 g - čokoláda - 00           6     145,49 €
+     3810-3-1000g             L-Glutamín - GymBeam 1000 g - bez príchute - 0      12     142,22 €
+     28794-1-120kaps-unflavored AlphaMale TestoBooster - GymBeam 120 kaps.          12     131,41 €
+     8031-1-bez-prichute      Maca - GymBeam 120 kaps.                            18     131,21 €
+     8059-4-500g-strawberry-kiwi Hydrolyzovaný kolagén RunCollg® s vitamínom C       12     121,65 €
+     28683-5-1000g-vanilla    Anabolic Whey - GymBeam + darček 1000 g - vani      12     107,86 €
+     28683-4-1000g-chocolate  Anabolic Whey - GymBeam + darček 1000 g - čoko      12     107,86 €
+     28683-6-1000g-strawberry Anabolic Whey - GymBeam + darček 1000 g - jaho      12     107,85 €
+     3738-2-1000ml-pomaranc-220000 L-karnitín - GymBeam 1000 ml - pomaranč              6      96,66 €
+     6939-2-2500g-vanilla-ice-cream Pure IsoWhey - GymBeam 2500 g - vanilka - 00         3      93,50 €
+     6939-1-2500g-strawberry-cream Pure IsoWhey - GymBeam 2500 g - jahoda - 00          3      93,49 €
+     6939-4-2500g-chocolate-hazelnut Pure IsoWhey - GymBeam 2500 g - čokoláda liesk       3      93,49 €
+     3807-1-250g              Arginín A.K.G. - GymBeam 250 g - bez príchute       18      91,29 €
+     1731-1731-100 tab        Karnitín TABS - GymBeam 90 tab.                     12      89,30 €
+     8065-1-bez-prichute      L-karnitín - GymBeam 250 g - bez príchute           12      87,47 €
+     6454-2-500g-bez-prichute Citrulín Malát - GymBeam 500 g - bez príchute        6      75,17 €
+     7076-1-bez-prichute      BIO Spirulina - GymBeam 500 tab. - bez príchut      11      74,41 €
+     5075-20-2500g-white-chocolate-raspberry True Whey - GymBeam 2500 g - biela čokoláda ma       3      72,74 €
+     28085-60kaps-bez-prichute DigeZyme - GymBeam 60 kaps. - 00                    12      68,97 €
+     7070-1-250g-bez-prichute DAA - GymBeam 250 g                                 12      68,97 €
+     3425-1                   BCAA 1500 + Lysine - GymBeam 300 tab.                6      65,86 €
+     29401-1-90-caps          Magnézium chelát (bisglycinát) - GymBeam + dar       9      65,60 €
+     28087-120kaps-bez-prichute Pestrec mariánsky - GymBeam 120 kaps.               12      64,70 €
+     5586-2-120caps           Omega 3 - GymBeam 120 kaps.                         12      63,05 €
+     29748-1-120kaps          29748-1-120kaps                                      8      59,41 €
+     28134-7-2500g-chocolate  28134-7-2500g-chocolate                              2      58,26 €
+     6177-2-120caps-bez-prichute ZMB6 - GymBeam 120 kaps.                            10      55,95 €
+     5951-1-1000g-kremove     Arašidové maslo - GymBeam 1000 g - jemný            12      52,86 €
+     5951-2-1000g-crunchy     Arašidové maslo - GymBeam 1000 g - chrumkavé        12      52,86 €
+     3738-1-500ml-pomaranc-220000 L-karnitín - GymBeam 500 ml - pomaranč               6      52,80 €
+     3810-1-250g              L-Glutamín - GymBeam 250 g - bez príchute - 00      12      52,67 €
+     28281-1-250g-bez-prichute Magnézium citrát - GymBeam 250 g - bez príchut      12      52,07 €
+     8067-1-250g-bez-prichute 8067-1-250g-bez-prichute                             8      51,39 €
+     35998-1-90tab            Vitamín C + D3 1000 IU - GymBeam 90 kaps.           12      50,84 €
+     404-2-cokolada-1000g     Micelárny kazeín - GymBeam 1000 g - čokoláda         5      50,69 €
+     8059-3-500g-orange       Hydrolyzovaný kolagén RunCollg® s vitamínom C        5      50,68 €
+     6454-1-250g-bez-prichute Citrulín Malát - GymBeam 250 g - bez príchute        6      44,65 €
+     9081-1-orange            Articular Drink - GymBeam pomaranč                   6      43,74 €
+     29089-1-120caps          Vita Pink - BeastPink + darček 120 kaps.             6      43,74 €
+     29378-1-60caps           ProbioTen - GymBeam + darčeky 60 kaps. - 00          6      43,73 €
+     28778-1-120tab-unflavored Chitosan - GymBeam 120 tab.                          8      40,57 €
+     28792-1-120kaps-unflavored Beast burn - BeastPink 120 kaps.                     4      40,55 €
+     28689-2-1000g-banana     Vegan Blend - GymBeam 1000 g - banán - 00            3      39,17 €
+     5075-25-1000g-chocolate  True Whey - GymBeam 1000 g - čokoláda - 00           3      38,60 €
+     6672-2-500g-bez-prichute Beta Alanín - GymBeam 500 g - bez príchute           6      38,54 €
+     29117-1                  Posilňovacie koliesko Ab Wheel - GymBeam singl       6      37,75 €
+     28765-3-240kaps-unflavored Omega 3-6-9 - GymBeam 240 kaps.                      3      37,54 €
+     4477-1                   Trhačky X-Grip - GymBeam single_variant             12      35,34 €
+     5213-1-cierny            5213-1-cierny                                        8      35,12 €
+     36235-1-90caps           36235-1-90caps                                       6      34,58 €
+     6626-1-120 tab           Arginín A.K.G. - GymBeam 120 tab.                    6      34,49 €
+     6939-7-1000g-chocolate-hazelnut Pure IsoWhey - GymBeam 1000 g - čokoláda liesk       2      34,25 €
+     31256-1                  Zinok chelát (bisglycinát) - GymBeam 90 kaps.        6      31,53 €
+     28101-1-coconut          Kokosový olej v spreji - GymBeam 200 ml              8      31,33 €
+     31295-1-20tabs           L-karnitín 1000 mg šumivý - GymBeam 20 tab. -       12      30,52 €
+     28106-1-green            28106-1-green                                       12      30,34 €
+     29917-1-200g             29917-1-200g                                         6      30,30 €
+     44248-1-120caps          Appetite Control - BeastPink + darček 120 kaps       3      28,47 €
+     3816-1-150tab            HMB - GymBeam 180 tab.                               3      28,46 €
+     8067-2-500g-bez-prichute 8067-2-500g-bez-prichute                             3      28,43 €
+     8789-3-grapefruit        L-karnitín 3000 Liquid Shot - GymBeam grapefru      60      28,38 €
+     6503-3-240kaps           Vitamín D3 2000 IU - GymBeam 240 kaps.               4      27,00 €
+     7970-1-bez-prichute      Koenzým Q10 - GymBeam + darčeky 60 kaps.             5      26,96 €
+     3734-26-500g-green-apple Bcaa 4:1:1 Instant - GymBeam 500 g - zelené ja       2      26,42 €
+     3734-25-500g-orange      Bcaa 4:1:1 Instant - GymBeam 500 g - pomaranč        2      26,42 €
+     6322-2-120tab            Vitality komplex - GymBeam 120 tab.                  3      26,40 €
+     6418-2-500g-bez-prichute Taurín - GymBeam 500 g                               6      26,34 €
+     30941-1-750              Šejker Steel 750 ml - GymBeam single_variant         6      26,34 €
+     28396-1-120kaps-unflavored Vitamín B-Complex - GymBeam 120 tab.                 8      25,76 €
+     5075-31-1000g-banana     True Whey - GymBeam 1000 g - banán - 00              2      25,74 €
+     28765-2-120kaps-unflavored Omega 3-6-9 - GymBeam 120 kaps.                      3      24,30 €
+     29691-1-90-tab           Vitamín B12 (kobalamín) - GymBeam 90 tab.            8      23,56 €
+     6418-1-250g-bez-prichute 6418-1-250g-bez-prichute                             8      23,56 €
+     6177-1-60caps-bez-príchute ZMB6 - GymBeam 60 kaps.                              6      23,41 €
+     35272-1-750 ml           Šejker Steel White 750 ml - GymBeam single_var       5      21,95 €
+     6219-1-bez-prichute      Arthro Complex - GymBeam 120 kaps.                   3      21,86 €
+     28352-1-unflavored       Vitamín E (tokoferyl) - GymBeam 60 kaps.             6      21,36 €
+     8350-1-bez-prichute      Nero - GymBeam bez príchute - 120 kaps.              2      20,28 €
+     404-154-vanilka-1000 g   Micelárny kazeín - GymBeam 1000 g - vanilka          2      20,28 €
+     43753-1-90caps           Vitamín K2 (menachinón) - GymBeam 90 kaps.           3      19,84 €
+     7185-4-210g-mango-maracuja Thor - GymBeam 210 g - mango marakuja                2      18,95 €
+     7185-2-210g-watermelon   Thor - GymBeam 210 g - vodný melón                   2      18,95 €
+     28784-4-390g-green-apple ProAMINO - GymBeam 390 g - zelené jablko             2      18,92 €
+     28784-2-390g-mango-maracuja ProAMINO - GymBeam 390 g - mango marakuja            2      18,92 €
+     7067-2-120kaps-bez-prichute Zelený čaj - GymBeam 120 kaps.                       4      18,92 €
+     28784-3-390g-lemon-lime  ProAMINO - GymBeam 390 g - citrón limetka            2      18,92 €
+     5206-1-bez-prichute      Dextróza - GymBeam 1000 g                            8      17,62 €
+     29945-1-20tabs           Magnézium chelát + B6 šumivý - GymBeam pomaran      12      17,52 €
+     28693-3-1000g-unflavored 28693-3-1000g-unflavored                             1      16,24 €
+     48406-3-doublechocolate-75g MoiMüv Protein Cookie - GymBeam dvojitá čokolá      12      16,24 €
+     46435-1-90caps           Garcinia cambogia - GymBeam 90 kaps.                 3      16,22 €
+     5585-3-240cap            Omega 3 - GymBeam 240 kaps. - 00                     2      15,95 €
+     3734-28-250g-green-apple Bcaa 4:1:1 Instant - GymBeam 250 g - zelené ja       2      14,89 €
+     3734-27-250g-orange      Bcaa 4:1:1 Instant - GymBeam 250 g - pomaranč        2      14,88 €
+     3734-31-250g-grapefruit  3734-31-250g-grapefruit                              2      14,88 €
+     3734-9-250g-vodny-melon  Bcaa 4:1:1 Instant - GymBeam 250 g - vodný mel       2      14,88 €
+     29950-1-200g             29950-1-200g                                         2      14,58 €
+     28082-120kaps-bez-prichute GABA - GymBeam 120 kaps.                             2      14,58 €
+     7074-1-250g-bez-prichute MSM - GymBeam 250 g - bez príchute                   6      14,13 €
+     53761-1-90caps           53761-1-90caps                                       3      13,08 €
+     5075-40-1000g-vanilla-stevia True Whey - GymBeam 1000 g - vanilka stévia -        1      12,87 €
+     51541-1-90caps           Acetyl L-karnitín - GymBeam 90 kaps.                 2      12,82 €
+     28760-1-60kaps-unflavored 28760-1-60kaps-unflavored                            4      11,56 €
+     7968-1-bez-prichute      Ca-Zn-Mg - GymBeam 60 tab.                           4      11,54 €
+     7065-2-500g-bez-prichute 7065-2-500g-bez-prichute                             3      11,14 €
+     50620-1-90tab            50620-1-90tab                                        3      11,09 €
+     29059-1-60tabs           Chróm Pikolinát - GymBeam 60 tab.                    4      10,78 €
+     29059-2-120tabs          Chróm Pikolinát - GymBeam 120 tab.                   2      10,15 €
+     5431-1-90kaps            CLA - GymBeam 90 kaps.                               2       9,29 €
+     6410-1-250g-bez-prichute Vitamín C prášok - GymBeam 250 g - bez príchut       3       8,96 €
+     6672-1-250g-bez-prichute Beta Alanín - GymBeam 250 g - bez príchute           2       8,11 €
+     30248-1-60g-cookies-cream MoiMüv Protein Bar - GymBeam 60 g - cookies &        6       7,29 €
+     7065-1-250g-bez-prichute 7065-1-250g-bez-prichute                             3       7,06 €
+     49777-1-420g-whitechocolate&fruit 49777-1-420g-whitechocolate&fruit                    2       6,72 €
+     49777-3-420g-fruit&seeds 49777-3-420g-fruit&seeds                             2       6,71 €
+     50515-6-67g-oatmealchocolatechip 50515-6-67g-oatmealchocolatechip                     4       5,84 €
+     50515-7-67g-snickerdoodle 50515-7-67g-snickerdoodle                            4       5,84 €
+     50515-4-67g-germanchocolatecake 50515-4-67g-germanchocolatecake                      4       5,84 €
+     50515-2-67g-blueberrycobbler 50515-2-67g-blueberrycobbler                         4       5,84 €
+     50515-5-67g-sprinkleddonut 50515-5-67g-sprinkleddonut                           4       5,84 €
+     50515-1-67g-banananutbread 50515-1-67g-banananutbread                           4       5,84 €
+     37915-1-90caps           Ginkgo Biloba + Horčík – GymBeam 90 kaps.            1       5,75 €
+     35542-8-50g-barbecue     Sušené mäso Beef Jerky - GymBeam 50 g - barbec       2       5,32 €
+     35542-6-50g-teriyaki     35542-6-50g-teriyaki                                 2       5,32 €
+     35542-1-50g              Sušené mäso Beef Jerky - GymBeam 50 g - origin       2       5,32 €
+     29943-1-20tabs           Vitamín C 1000 mg šumivý - GymBeam pomaranč -        3       3,86 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+── 8. objednávka 1100283576-1 (order_id 8821738) — 5 630,85 € v položkách ──
+   zákazník: Galleria Internazionale d.o.o. <isabela@proteone.hr>, HR, 8. 7. 2021, GMV objednávky 5 630,85 €
+   38 riadkov, 363 kusov
+     kód                      názov                                            kusov          GMV
+     4248-9-2270g-vanilkova-zmrzlina 4248-9-2270g-vanilkova-zmrzlina                     20     757,37 €
+     4248-22-2270g-dvojita-cokolada 100% Whey Gold Standard - Optimum Nutrition 22      20     757,37 €
+     4248-8-2270g-mliecna-cokolada 4248-8-2270g-mliecna-cokolada                       20     757,37 €
+     4248-23-2270g-francuzsko-vanilkovy-krem 4248-23-2270g-francuzsko-vanilkovy-krem             16     605,90 €
+     4248-10-2270g-cookies-krem 4248-10-2270g-cookies-krem                          12     454,42 €
+     4248-28-908g-dvojita-holandska-cokolada 100% Whey Gold Standard - Optimum Nutrition 89      12     226,67 €
+     4248-37-908g-french-vanilla 4248-37-908g-french-vanilla                         12     226,67 €
+     4812-5-5450g-vanilka     4812-5-5450g-vanilka                                 5     191,73 €
+     4812-6-5450g-cokolada    4812-6-5450g-cokolada                                5     190,98 €
+     8686-1-330g-green-apple  8686-1-330g-green-apple                             12     171,75 €
+     4792-2-634g-bez-prichute 4792-2-634g-bez-prichute                            15     161,66 €
+     4248-18-908g-cookies-cream 4248-18-908g-cookies-cream                           8     151,11 €
+     4793-1-317g-bez-prichute 4793-1-317g-bez-prichute                            25     150,32 €
+     7128-6-908-chocolate     7128-6-908-chocolate                                 4     108,70 €
+     4248-2-450g-jahoda       4248-2-450g-jahoda                                   6      66,78 €
+     7471-4-salted-caramel    Proteínové arašidové maslo - GymBeam slaný kar      10      60,11 €
+     51190-2-8kg              Kettlebell black - GymBeam 8 kg                      5      58,10 €
+     29215-5-strawberry-kiwi  29215-5-strawberry-kiwi                              3      50,32 €
+     7681-1-pancake           ZERO SIRUP na palacinky - GymBeam 320 ml            24      46,16 €
+     4198-10-270g-pineapple   4198-10-270g-pineapple                               3      38,36 €
+     4248-54-908g-white-chocolate 4248-54-908g-white-chocolate                         2      37,78 €
+     4248-40-908g-white-chocolate-raspberry 4248-40-908g-white-chocolate-raspberry               2      37,78 €
+     29411-5-miami-strawberry 29411-5-miami-strawberry                            24      35,24 €
+     29411-7-limon-del-sol    29411-7-limon-del-sol                               24      35,24 €
+     8234-1-caesar            ZERO DRESING caesar – GymBeam 320 ml                18      34,62 €
+     29215-2-cola             29215-2-cola                                         2      34,18 €
+     28134-6-1000g-vanilla    28134-6-1000g-vanilla                                2      29,97 €
+     36262-1-1000g-unflavored Tekuté vaječné bielka - GymBeam 1000 g               8      25,00 €
+     35683-1-black            35683-1-black                                        2      19,65 €
+     44941-1-black            Balančná podložka - GymBeam single_variant           3      18,75 €
+     6627-1-double-chocolate-chunk Proteínový puding - GymBeam 500 g - dvojnásobn       3      18,03 €
+     6627-2-vanilla-blueberries 6627-2-vanilla-blueberries                           3      18,03 €
+     29302-5                  Proteínová tyčinka - Barebells 55 g - biela čo      12      17,62 €
+     29302-6                  Proteínová tyčinka - Barebells 55 g - lieskový      12      17,62 €
+     8232-1-strawberry        ZERO SIRUP jahoda - GymBeam 320 ml                   6      11,54 €
+     8347-1                   Valec na cvičenie Fitness Roller Orange - GymB       1       7,93 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+── 9. objednávka 103524764 (order_id 9304882) — 5 156,24 € v položkách ──
+   zákazník: Dr.Max 100 s.r.o. <daniel.franko@drmax.sk>, SK, 18. 8. 2021, GMV objednávky 5 156,24 €
+   32 riadkov, 325 kusov
+     kód                      názov                                            kusov          GMV
+     649-1668-44 sáčkov       Animal Flex - Universal Nutrition + darček 44      100   2 835,00 €
+     1731-1731-100 tab        Karnitín TABS - GymBeam 90 tab.                     35     278,60 €
+     5075-10-2500g-banan      True Whey - GymBeam 2500 g - banán - 00              9     208,44 €
+     1562-1586-90 tab         Synefrín - GymBeam 90 tab.                          50     198,00 €
+     5075-1-2500g-cokolada    True Whey - GymBeam 2500 g - čokoláda - 00           8     185,28 €
+     44254-1-120caps          Night Burn - BeastPink + darček 120 kaps.           13     145,08 €
+     5075-2-2500g-vanilka     True Whey - GymBeam 2500 g - vanilka - 00            5     115,80 €
+     6939-4-2500g-chocolate-hazelnut Pure IsoWhey - GymBeam 2500 g - čokoláda liesk       4     115,04 €
+     3425-1                   BCAA 1500 + Lysine - GymBeam 300 tab.                8     108,48 €
+     5075-27-1000g-vanilla    True Whey - GymBeam 1000 g - vanilka - 00            9     107,64 €
+     5075-25-1000g-chocolate  True Whey - GymBeam 1000 g - čokoláda - 00           9     107,64 €
+     5075-9-2500g-coklada-kokos True Whey - GymBeam 2500 g - čokoláda kokos -        4      92,64 €
+     5075-31-1000g-banana     True Whey - GymBeam 1000 g - banán - 00              7      83,72 €
+     28784-2-390g-mango-maracuja ProAMINO - GymBeam 390 g - mango marakuja            6      62,16 €
+     28683-5-1000g-vanilla    Anabolic Whey - GymBeam + darček 1000 g - vani       6      55,44 €
+     6626-1-120 tab           Arginín A.K.G. - GymBeam 120 tab.                    8      50,88 €
+     5598-2-1000g-vanilla     Hovädzí (Beef) Proteín Hydrobeef™ - GymBeam 10       4      47,84 €
+     3885-3-500g-lemon-lime   100% Mikronizovaný kreatín monohydrát 500 g -        6      47,76 €
+     3734-16-500g-blackcurrant Bcaa 4:1:1 Instant - GymBeam 500 g - čierne rí       3      40,68 €
+     28324-1-chocolate-milkshake Just Whey Grass-Fed Protein – GymBeam 1000 g -       2      35,12 €
+     3885-4-500g-green-apple  100% Mikronizovaný kreatín monohydrát 500 g -        4      31,84 €
+     3807-2-500g              Arginín A.K.G. - GymBeam 500 g - bez príchute        3      31,32 €
+     28784-1-390g-orange      ProAMINO - GymBeam 390 g - pomaranč                  3      31,08 €
+     8224-1-bez-prichute      L-Glutamín TABS - GymBeam 300 tab.                   3      31,08 €
+     29667-3-300-g-green-apple Kreatín Crea7in - GymBeam 300 g - zelené jablk       3      23,88 €
+     28784-4-390g-green-apple ProAMINO - GymBeam 390 g - zelené jablko             2      20,72 €
+     3816-1-150tab            HMB - GymBeam 180 tab.                               2      18,96 €
+     29667-1-300-g-lemon-lime Kreatín Crea7in - GymBeam 300 g - citrón limet       2      15,92 €
+     29667-2-300-g-watermelon Kreatín Crea7in - GymBeam 300 g - vodný melón        2      15,92 €
+     3810-1-250g              L-Glutamín - GymBeam 250 g - bez príchute - 00       3      14,28 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+── 10. objednávka 1100299137 (order_id 9228676) — 5 073,65 € v položkách ──
+   zákazník: Galleria Internazionale d.o.o.  <marko@proteone.hr>, HR, 12. 8. 2021, GMV objednávky 5 073,65 €
+   19 riadkov, 176 kusov
+     kód                      názov                                            kusov          GMV
+     4248-22-2270g-dvojita-cokolada 100% Whey Gold Standard - Optimum Nutrition 22      25     946,01 €
+     4248-9-2270g-vanilkova-zmrzlina 4248-9-2270g-vanilkova-zmrzlina                     20     756,80 €
+     4248-8-2270g-mliecna-cokolada 4248-8-2270g-mliecna-cokolada                       20     756,80 €
+     4248-23-2270g-francuzsko-vanilkovy-krem 4248-23-2270g-francuzsko-vanilkovy-krem             16     605,44 €
+     4248-28-908g-dvojita-holandska-cokolada 100% Whey Gold Standard - Optimum Nutrition 89      20     377,50 €
+     4248-37-908g-french-vanilla 4248-37-908g-french-vanilla                         20     377,50 €
+     4248-6-908g-mliecna-cokolada 4248-6-908g-mliecna-cokolada                        18     339,75 €
+     4248-24-2270g-jahoda     4248-24-2270g-jahoda                                 6     227,04 €
+     4248-41-2270g-white-chocolate-raspberry 4248-41-2270g-white-chocolate-raspberry              3     113,52 €
+     4248-5-908g-vanilková zmrzlina 4248-5-908g-vanilková zmrzlina                       6     113,19 €
+     4812-1-2727g-cokolada    4812-1-2727g-cokolada                                4      85,86 €
+     4812-5-5450g-vanilka     4812-5-5450g-vanilka                                 2      76,63 €
+     4812-8-5450g-jahoda      4812-8-5450g-jahoda                                  2      76,63 €
+     4812-6-5450g-cokolada    4812-6-5450g-cokolada                                2      76,33 €
+     4248-2-450g-jahoda       4248-2-450g-jahoda                                   5      55,61 €
+     29215-2-cola             29215-2-cola                                         3      46,10 €
+     4812-3-2727g-vanilka     4812-3-2727g-vanilka                                 2      42,93 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+── 11. objednávka 202092552 (order_id 7309933) — 5 030,35 € v položkách ──
+   zákazník: CALBUCO s.r.o. - Grizly.cz <viktor@grizly.cz>, CZ, 15. 3. 2021, GMV objednávky 5 030,98 €
+   58 riadkov, 1 162 kusov
+     kód                      názov                                            kusov          GMV
+     5075-1-2500g-cokolada    True Whey - GymBeam 2500 g - čokoláda - 00          20     344,79 €
+     5075-2-2500g-vanilka     True Whey - GymBeam 2500 g - vanilka - 00           20     344,79 €
+     5075-27-1000g-vanilla    True Whey - GymBeam 1000 g - vanilka - 00           40     338,82 €
+     28101-1-coconut          Kokosový olej v spreji - GymBeam 200 ml             60     221,22 €
+     28792-1-120kaps-unflavored Beast burn - BeastPink 120 kaps.                    20     211,93 €
+     29851-1-50ml             Zázvorový shot - GymBeam 50 ml                     180     209,24 €
+     5075-15-2500g-cokolada-oriesok True Whey - GymBeam 2500 g - čokoláda lieskový      10     172,40 €
+     5075-9-2500g-coklada-kokos True Whey - GymBeam 2500 g - čokoláda kokos -       10     172,40 €
+     5075-3-2500g-jahoda      True Whey - GymBeam 2500 g - jahoda - 00            10     172,40 €
+     5075-29-1000g-white-chocolate True Whey - GymBeam 1000 g - biela čokoláda -       20     169,41 €
+     5075-32-1000g-bez-prichute True Whey - GymBeam 1000 g - bez príchute - 00      20     169,41 €
+     30346-1-50ml             Zázvorový shot s kurkumou - GymBeam 50 ml           90     128,55 €
+     30941-1-750              Šejker Steel 750 ml - GymBeam single_variant        30     120,28 €
+     41077-1-120caps          Marine Beauty - BeastPink 120 kaps.                 15     119,09 €
+     3810-3-1000g             L-Glutamín - GymBeam 1000 g - bez príchute - 0      10     116,59 €
+     8350-1-bez-prichute      Nero - GymBeam bez príchute - 120 kaps.             10     105,96 €
+     29715-1-240g-strawberry-lemonade Colla Pink - BeastPink + darček jahodová limon      10      92,68 €
+     9037-8-vanilla           Flavour Drops - GymBeam 30 ml - vanilka             30      86,69 €
+     3734-25-500g-orange      Bcaa 4:1:1 Instant - GymBeam 500 g - pomaranč        8      84,77 €
+     5075-40-1000g-vanilla-stevia True Whey - GymBeam 1000 g - vanilka stévia -       10      84,70 €
+     5075-28-1000g-strawberry True Whey - GymBeam 1000 g - jahoda - 00            10      84,70 €
+     5075-25-1000g-chocolate  True Whey - GymBeam 1000 g - čokoláda - 00          10      84,70 €
+     5075-26-1000g-chocolate-coconut True Whey - GymBeam 1000 g - čokoláda kokos -       10      84,70 €
+     5075-41-1000g-chocolate-hazelnut True Whey - GymBeam 1000 g - čokoláda lieskový      10      84,70 €
+     34207-1-orange-lemon-cherry-60caps Multivitamínové Yummies - GymBeam pomaranč cit      20      84,37 €
+     41284-1-120tab           Melatonín - GymBeam 120 tab.                        20      84,37 €
+     37996-2-paprika          Proteínové čipsy - GymBeam 40 g - paprika           80      82,39 €
+     37996-1-seasalt          Proteínové čipsy - GymBeam 40 g - morská soľ        80      82,39 €
+     28683-2-2500g-vanilla    Anabolic Whey - GymBeam + darček 2500 g - vani       5      71,58 €
+     7074-1-250g-bez-prichute MSM - GymBeam 250 g - bez príchute                  30      70,75 €
+     28928-1-201g-olive-oil   Extra panenský olivový olej v spreji - GymBeam      15      67,26 €
+     9037-3-caramel           9037-3-caramel                                      20      57,80 €
+     9037-6-chocolate         Flavour Drops - GymBeam 30 ml - čokoláda            20      57,80 €
+     29089-1-120caps          Vita Pink - BeastPink + darček 120 kaps.             6      50,82 €
+     29715-2-240g-mango-orange Colla Pink - BeastPink + darček mango pomaranč       4      37,07 €
+     29712-1-270g-green-apple Amino Beast - BeastPink zelené jablko                4      34,95 €
+     29080-1-lemon-lime       Energetický nápoj MOXY bcaa+ 330 ml - GymBeam       48      33,48 €
+     48406-1-blueberryandwhitechocolate-75g MoiMüv Protein Cookie - GymBeam čučoriedka bie      24      31,09 €
+     28186-2-lemon-lime       Thor Fuel + Vitargo - GymBeam citrón limetka         3      30,19 €
+     28186-1-watermelon       Thor Fuel + Vitargo - GymBeam vodný melón            3      30,19 €
+     28186-4-mango-maracuja   Thor Fuel + Vitargo - GymBeam mango marakuja         3      30,19 €
+     28186-3-strawberry-kiwi  Thor Fuel + Vitargo - GymBeam jahoda kiwi            3      30,19 €
+     9037-7-strawberry        9037-7-strawberry                                   10      28,90 €
+     28936-2-1000g-white-chocolate-coconut Proteín Yum Yum Whey - BeastPink 1000 g - biel       2      28,63 €
+     9037-1-banana            9037-1-banana                                        8      23,12 €
+     33457-1-wild-berry-330ml MOXY power+ Energy Drink 330 ml - GymBeam lesn      24      20,73 €
+     28106-1-green            28106-1-green                                       10      19,89 €
+     6408-1                   Šejker Sway Black 400 ml - GymBeam single_vari      10      17,36 €
+     29628-1                  Šejker čierny 700 ml - GymBeam 700 ml               10      17,36 €
+     8229-1                   Šejker Sway Pink 400 ml - GymBeam single_varia      10      17,36 €
+     32140-1-500ml-coral      Šejker koralový 500 ml - GymBeam single_varian      10      17,36 €
+     5075-60-1000g-chocolate-cherry True Whey - GymBeam 1000 g - čokoláda čerešňa        2      16,94 €
+     9037-5-hazelnut          9037-5-hazelnut                                      5      14,45 €
+     9037-4-coconut           9037-4-coconut                                       5      14,45 €
+     3734-27-250g-orange      Bcaa 4:1:1 Instant - GymBeam 250 g - pomaranč        2      13,22 €
+     29712-2-270g-mango-maracuja Amino Beast - BeastPink mango marakuja               1       8,74 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+── 12. objednávka 302286370 (order_id 10104856) — 5 000,78 € v položkách ──
+   zákazník: nyomdaiotletek@t-online.hu <nyomdaiotletek@t-online.hu>, HU, 17. 10. 2021, GMV objednávky 5 000,78 €
+   6 riadkov, 221 kusov
+     kód                      názov                                            kusov          GMV
+     51208-4-20kg             Kotúč IRON 51 mm - GymBeam 20 kg                    49   1 900,27 €
+     51208-3-15kg             Kotúč IRON 51 mm - GymBeam 15 kg                    50   1 454,02 €
+     51208-2-10kg             Kotúč IRON 51 mm - GymBeam 10 kg                    50     968,98 €
+     51208-1-5kg              Kotúč IRON 51 mm - GymBeam 5 kg                     70     677,51 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+
+── 13. objednávka 103760003 (order_id 10159285) — 4 795,32 € v položkách ──
+   zákazník: Dr.Max 100 s.r.o. <daniel.franko@drmax.sk>, SK, 22. 10. 2021, GMV objednávky 4 795,32 €
+   28 riadkov, 231 kusov
+     kód                      názov                                            kusov          GMV
+     649-1668-44 sáčkov       Animal Flex - Universal Nutrition + darček 44      120   3 474,00 €
+     5075-1-2500g-cokolada    True Whey - GymBeam 2500 g - čokoláda - 00           7     186,20 €
+     5075-9-2500g-coklada-kokos True Whey - GymBeam 2500 g - čokoláda kokos -        7     186,20 €
+     1562-1586-90 tab         Synefrín - GymBeam 90 tab.                          30     118,80 €
+     3425-1                   BCAA 1500 + Lysine - GymBeam 300 tab.                8     108,48 €
+     5075-26-1000g-chocolate-coconut True Whey - GymBeam 1000 g - čokoláda kokos -        5      69,00 €
+     404-2-cokolada-1000g     Micelárny kazeín - GymBeam 1000 g - čokoláda         5      67,80 €
+     28324-1-chocolate-milkshake Just Whey Grass-Fed Protein – GymBeam 1000 g -       3      61,32 €
+     28792-1-120kaps-unflavored Beast burn - BeastPink 120 kaps.                     5      59,80 €
+     6939-6-1000g-vanilla-ice-cream Pure IsoWhey - GymBeam 1000 g - vanilka - 00         3      55,08 €
+     6939-9-1000g-strawberry-cream Pure IsoWhey - GymBeam 1000 g - jahoda - 00          3      55,08 €
+     404-154-vanilka-1000 g   Micelárny kazeín - GymBeam 1000 g - vanilka          4      54,24 €
+     5075-57-2500g-peanut-butter True Whey - GymBeam 2500 g - arašidové maslo -       2      53,20 €
+     30271-1-banana-strawberry 30271-1-banana-strawberry                            2      31,92 €
+     29667-3-300-g-green-apple Kreatín Crea7in - GymBeam 300 g - zelené jablk       3      31,08 €
+     28683-5-1000g-vanilla    Anabolic Whey - GymBeam + darček 1000 g - vani       3      27,72 €
+     3734-22-500g-mango-maracuja Bcaa 4:1:1 Instant - GymBeam 500 g - mango mar       2      27,12 €
+     5012-2-vanilla           Sójový izolát - GymBeam 1000 g - vanilka             3      23,88 €
+     8224-1-bez-prichute      L-Glutamín TABS - GymBeam 300 tab.                   2      20,72 €
+     28784-1-390g-orange      ProAMINO - GymBeam 390 g - pomaranč                  2      20,72 €
+     28936-3-1000g-vanilla-ice-cream Proteín Yum Yum Whey - BeastPink 1000 g - vani       1      17,56 €
+     6454-1-250g-bez-prichute Citrulín Malát - GymBeam 250 g - bez príchute        2      16,08 €
+     3807-2-500g              Arginín A.K.G. - GymBeam 500 g - bez príchute        1       9,56 €
+     3810-1-250g              L-Glutamín - GymBeam 250 g - bez príchute - 00       2       9,52 €
+     5206-1-bez-prichute      Dextróza - GymBeam 1000 g                            3       7,08 €
+     3813-1-1000g             Maltodextrín - GymBeam 1000 g - bez príchute -       1       3,16 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+
+── 14. objednávka 102922136 (order_id 7311427) — 4 668,23 € v položkách ──
+   zákazník: MAJER POD LESOM s.r.o. <info@majerpodlesom.sk>, SK, 15. 3. 2021, GMV objednávky 4 889,39 €
+   259 riadkov, 953 kusov
+     kód                      názov                                            kusov          GMV
+     35419-1-120caps          Vitamín D3+K1+K2 Forte - GymBeam 120 kaps.          14     150,64 €
+     6503-2-120kaps           Vitamín D3 2000 IU - GymBeam 120 kaps.              30     118,80 €
+     29089-1-120caps          Vita Pink - BeastPink + darček 120 kaps.            10      86,00 €
+     5075-1-2500g-cokolada    True Whey - GymBeam 2500 g - čokoláda - 00           4      83,04 €
+     28792-1-120kaps-unflavored Beast burn - BeastPink 120 kaps.                     6      71,76 €
+     28813-1-60kaps-unflavored 28813-1-60kaps-unflavored                           20      63,20 €
+     41077-1-120caps          Marine Beauty - BeastPink 120 kaps.                  7      61,32 €
+     6939-4-2500g-chocolate-hazelnut Pure IsoWhey - GymBeam 2500 g - čokoláda liesk       2      57,52 €
+     5586-2-120caps           Omega 3 - GymBeam 120 kaps.                         10      55,60 €
+     3810-3-1000g             L-Glutamín - GymBeam 1000 g - bez príchute - 0       4      51,04 €
+     8031-1-bez-prichute      Maca - GymBeam 120 kaps.                             7      50,40 €
+     28936-1-1000g-chocolate-hazelnut Proteín Yum Yum Whey - BeastPink 1000 g - čoko       3      47,88 €
+     30271-1-banana-strawberry 30271-1-banana-strawberry                            3      47,88 €
+     28936-3-1000g-vanilla-ice-cream Proteín Yum Yum Whey - BeastPink 1000 g - vani       3      47,88 €
+     29748-1-120kaps          29748-1-120kaps                                      6      47,76 €
+     28876-2-500g-unflavored  Kreatín monohydrát 100 % Creapure® - GymBeam 5       6      47,76 €
+     42352-1-120tab           Vitamín C + zinok - GymBeam 120 tab.                10      47,60 €
+     36262-1-1000g-unflavored Tekuté vaječné bielka - GymBeam 1000 g              12      47,52 €
+     51652-3-2500g-chocolate  51652-3-2500g-chocolate                              3      44,73 €
+     6322-1-60tab             Vitality komplex - GymBeam 60 tab.                   7      44,52 €
+     L-Tryptophan-GymBeam-1-90caps L-tryptofán - GymBeam 90 kaps.                       8      44,48 €
+     1562-1586-90 tab         Synefrín - GymBeam 90 tab.                          11      43,56 €
+     29715-1-240g-strawberry-lemonade Colla Pink - BeastPink + darček jahodová limon       4      41,44 €
+     44248-1-120caps          Appetite Control - BeastPink + darček 120 kaps       4      41,44 €
+     48031-2-2500g-vanilla    48031-2-2500g-vanilla                                3      40,68 €
+     5250-1-30tab-bez-prichute Vitamín C 1000 mg - GymBeam 30 tab.                 20      39,20 €
+     6322-2-120tab            Vitality komplex - GymBeam 120 tab.                  4      38,24 €
+     28085-60kaps-bez-prichute DigeZyme - GymBeam 60 kaps. - 00                     6      38,16 €
+     29080-1-lemon-lime       Energetický nápoj MOXY bcaa+ 330 ml - GymBeam       48      37,92 €
+     28765-2-120kaps-unflavored Omega 3-6-9 - GymBeam 120 kaps.                      4      35,04 €
+     404-154-vanilka-1000 g   Micelárny kazeín - GymBeam 1000 g - vanilka          3      33,48 €
+     1593-1617-120 tab        Tribulus Terrestris - GymBeam 120 tab.               6      33,36 €
+     28928-1-201g-olive-oil   Extra panenský olivový olej v spreji - GymBeam       7      33,32 €
+     41284-1-120tab           Melatonín - GymBeam 120 tab.                         7      33,32 €
+     28134-8-2500g-vanilla    28134-8-2500g-vanilla                                1      31,96 €
+     28134-7-2500g-chocolate  28134-7-2500g-chocolate                              1      31,96 €
+     28936-2-1000g-white-chocolate-coconut Proteín Yum Yum Whey - BeastPink 1000 g - biel       2      31,92 €
+     5012-2-vanilla           Sójový izolát - GymBeam 1000 g - vanilka             4      31,84 €
+     6454-1-250g-bez-prichute Citrulín Malát - GymBeam 250 g - bez príchute        4      31,84 €
+     28352-1-unflavored       Vitamín E (tokoferyl) - GymBeam 60 kaps.             8      31,68 €
+     8789-3-grapefruit        L-karnitín 3000 Liquid Shot - GymBeam grapefru      60      31,20 €
+     8224-1-bez-prichute      L-Glutamín TABS - GymBeam 300 tab.                   3      31,08 €
+     28702-1-1000g-unflavored 28702-1-1000g-unflavored                             3      31,08 €
+     28784-4-390g-green-apple ProAMINO - GymBeam 390 g - zelené jablko             3      31,08 €
+     28784-2-390g-mango-maracuja ProAMINO - GymBeam 390 g - mango marakuja            3      31,08 €
+     42874-1-390g-mangomaracuja 42874-1-390g-mangomaracuja                           3      31,08 €
+     36685-1-orange-60ml      Magnesium Shot - GymBeam pomaranč - 60 ml           40      30,40 €
+     28876-3-1000g-unflavored 28876-3-1000g-unflavored                             2      30,32 €
+     6939-2-2500g-vanilla-ice-cream Pure IsoWhey - GymBeam 2500 g - vanilka - 00         1      28,76 €
+     6939-10-2500g-salted-caramel 6939-10-2500g-salted-caramel                         1      28,76 €
+     1747-1744-500 tab        Beef&Egg - GymBeam 500 tab.                          3      28,68 €
+     28876-7-500g-orange      28876-7-500g-orange                                  3      28,68 €
+     8059-1-500g-bez-prichute Hydrolyzovaný kolagén RunCollg® s vitamínom C        3      28,68 €
+     29712-2-270g-mango-maracuja Amino Beast - BeastPink mango marakuja               3      28,68 €
+     8075-1-bez-prichute      BIO Chlorella - GymBeam 500 tab.                     4      28,08 €
+     46435-1-90caps           Garcinia cambogia - GymBeam 90 kaps.                 5      27,80 €
+     30713-9-500g-mango-maracuja 30713-9-500g-mango-maracuja                          2      27,12 €
+     3734-25-500g-orange      Bcaa 4:1:1 Instant - GymBeam 500 g - pomaranč        2      27,12 €
+     28324-8-2000g-white-chocolate-coconut Just Whey Grass-Fed Protein – GymBeam 2000 g -       1      26,36 €
+     49771-1-90caps           49771-1-90caps                                       5      26,20 €
+     37915-1-90caps           Ginkgo Biloba + Horčík – GymBeam 90 kaps.            4      25,44 €
+     37054-2-400g-dreamy-hazelnut MoiMüv Protein Spread - GymBeam 400 g - liesko       4      25,44 €
+     29307-2-60ml-watermelon  Thor Shot - GymBeam vodný melón - 60 ml             40      24,00 €
+     42481-1-300g-strawberrylemonade 42481-1-300g-strawberrylemonade                      2      23,92 €
+     49282-1-60caps           49282-1-60caps                                       2      23,92 €
+     8350-1-bez-prichute      Nero - GymBeam bez príchute - 120 kaps.              2      23,92 €
+     5012-1-cokolada          Sójový izolát - GymBeam 1000 g - čokoláda            3      23,88 €
+     1731-1731-100 tab        Karnitín TABS - GymBeam 90 tab.                      3      23,88 €
+     2301-1697-100 kaps       Žraločia chrupavka - GymBeam 100 kaps.               3      23,88 €
+     28554-1-90-kaps-unflavored Ashwagandha 500 mg - GymBeam + darček 90 kaps.       4      22,88 €
+     51652-1-2500g-vanilla    51652-1-2500g-vanilla                                1      22,36 €
+     404-2-cokolada-1000g     Micelárny kazeín - GymBeam 1000 g - čokoláda         2      22,32 €
+     28080-120kaps-bez-prichute Kreatín HCl - GymBeam 120 kaps.                      4      22,24 €
+     8805-1-bez-prichute      Valeriána lekárska - GymBeam 60 kaps.                4      22,24 €
+     28813-2-120kaps-unflavored Vitamín D3+K1+K2 - GymBeam 120 kaps.                 5      22,24 €
+     28186-1-watermelon       Thor Fuel + Vitargo - GymBeam vodný melón            2      21,52 €
+     3885-2-1000g             100% Mikronizovaný kreatín monohydrát 1000 g -       3      21,48 €
+     48598-1-90caps           Podpora pečene - GymBeam 90 kaps.                    3      21,48 €
+     5250-2-90tab-bez-prichute Vitamín C 1000 mg - GymBeam 90 tab.                  5      21,40 €
+     5075-10-2500g-banan      True Whey - GymBeam 2500 g - banán - 00              1      20,76 €
+     5075-8-2500g-biela-cokolada True Whey - GymBeam 2500 g - biela čokoláda -        1      20,76 €
+     5075-15-2500g-cokolada-oriesok True Whey - GymBeam 2500 g - čokoláda lieskový       1      20,76 €
+     5075-25-1000g-chocolate  True Whey - GymBeam 1000 g - čokoláda - 00           2      20,72 €
+     42874-3-390g-greenapple  42874-3-390g-greenapple                              2      20,72 €
+     5075-24-1000g-white-chocolate-raspberry True Whey - GymBeam 1000 g - biela čokoláda ma       2      20,72 €
+     29715-2-240g-mango-orange Colla Pink - BeastPink + darček mango pomaranč       2      20,72 €
+     30162-1-340g             Mandľové maslo s kokosom a bielou čokoládou  -       4      20,16 €
+     35320-1-1000g            Vitargo Energy - GymBeam 1000 g                      2      19,12 €
+     29712-1-270g-green-apple Amino Beast - BeastPink zelené jablko                3      19,12 €
+     28087-120kaps-bez-prichute Pestrec mariánsky - GymBeam 120 kaps.                3      19,08 €
+     6219-1-bez-prichute      Arthro Complex - GymBeam 120 kaps.                   2      19,04 €
+     51112-1-120caps          51112-1-120caps                                      4      19,04 €
+     35542-1-50g              Sušené mäso Beef Jerky - GymBeam 50 g - origin       6      18,96 €
+     7185-2-210g-watermelon   Thor - GymBeam 210 g - vodný melón                   2      18,72 €
+     7185-3-210g-strawberry-kiwi Thor - GymBeam 210 g - jahoda kiwi                   2      18,72 €
+     48406-1-blueberryandwhitechocolate-75g MoiMüv Protein Cookie - GymBeam čučoriedka bie      12      18,72 €
+     28693-1-1000g-banana     28693-1-1000g-banana                                 1      17,56 €
+     8220-1-bez-prichute      Beta alanín - GymBeam 120 tab.                       4      17,28 €
+     6410-2-500g-bez-prichute Vitamín C prášok - GymBeam 500 g - bez príchut       2      17,20 €
+     3807-2-500g              Arginín A.K.G. - GymBeam 500 g - bez príchute        2      17,12 €
+     29001-1                  Šejker BeastPink biely 700 ml - BeastPink sing       6      16,80 €
+     42313-1-120caps          42313-1-120caps                                      3      16,68 €
+     28324-3-1000g-white-chocolate-coconut Just Whey Grass-Fed Protein – GymBeam 1000 g -       1      15,96 €
+     28683-1-2500g-chocolate  Anabolic Whey - GymBeam + darček 2500 g - čoko       2      15,96 €
+     28324-2-vanilla-ice-cream Just Whey Grass-Fed Protein – GymBeam 1000 g -       1      15,96 €
+     28324-1-chocolate-milkshake Just Whey Grass-Fed Protein – GymBeam 1000 g -       1      15,96 €
+     6939-5-1000g-bez-prichute 6939-5-1000g-bez-prichute                            1      15,96 €
+     30271-2-choco-berries    30271-2-choco-berries                                1      15,96 €
+     43723-1-60caps           43723-1-60caps                                       1      15,96 €
+     29401-1-90-caps          Magnézium chelát (bisglycinát) - GymBeam + dar       2      15,92 €
+     28189-1-205 ml           28189-1-205 ml                                       2      15,92 €
+     5585-1-60caps            Omega 3 - GymBeam 60 kaps.                           4      15,84 €
+     35542-6-50g-teriyaki     35542-6-50g-teriyaki                                 5      15,80 €
+     36004-1-90tab            Vitamín C + Zinok + extrakt zo zázvoru tablety       3      15,48 €
+     6268-2-340g-smoothie     Mandľové maslo - GymBeam 340 g                       3      15,36 €
+     3807-1-250g              Arginín A.K.G. - GymBeam 250 g - bez príchute        3      15,12 €
+     29667-5-600-g-peach-ice-tea Kreatín Crea7in - GymBeam 600 g - broskyňa ľad       1      14,36 €
+     29667-6-600-g-green-apple Kreatín Crea7in - GymBeam 600 g - zelené jablk       1      14,36 €
+     28683-5-1000g-vanilla    Anabolic Whey - GymBeam + darček 1000 g - vani       2      14,32 €
+     28095-5-mojito           28095-5-mojito                                       2      14,32 €
+     28281-1-250g-bez-prichute Magnézium citrát - GymBeam 250 g - bez príchut       3      14,28 €
+     34207-1-orange-lemon-cherry-60caps Multivitamínové Yummies - GymBeam pomaranč cit       3      14,28 €
+     7970-1-bez-prichute      Koenzým Q10 - GymBeam + darčeky 60 kaps.             3      14,28 €
+     28689-2-1000g-banana     Vegan Blend - GymBeam 1000 g - banán - 00            1      13,56 €
+     30713-6-500g-blackcurrant 30713-6-500g-blackcurrant                            1      13,56 €
+     3734-12-500g-vodny-melon Bcaa 4:1:1 Instant - GymBeam 500 g - vodný mel       1      13,56 €
+     30713-10-500g-orange     EAA – GymBeam 500 g - pomaranč                       1      13,56 €
+     3425-1                   BCAA 1500 + Lysine - GymBeam 300 tab.                1      13,56 €
+     28689-1-1000g-chocolate  Vegan Blend - GymBeam 1000 g - čokoláda - 00         1      13,56 €
+     46456-1-60caps           Ekdysterón - GymBeam 60 kaps.                        1      12,76 €
+     6937-1-bez-prichute      Erytritol 1000 g - GymBeam bez príchute              2      12,72 €
+     30947-1-340g             Pistáciové maslo - GymBeam 340 g                     2      12,72 €
+     6086-1-500g-chocolate    Proteínové palacinky Pancake & Waffle Mix 500        2      12,72 €
+     35542-8-50g-barbecue     Sušené mäso Beef Jerky - GymBeam 50 g - barbec       4      12,64 €
+     28393-1-120kaps-unflavored Železo - GymBeam 120 kaps.                           4      12,64 €
+     28186-3-strawberry-kiwi  Thor Fuel + Vitargo - GymBeam jahoda kiwi            1      11,96 €
+     42481-2-300g-sourwatermelon 42481-2-300g-sourwatermelon                          1      11,96 €
+     28794-1-120kaps-unflavored AlphaMale TestoBooster - GymBeam 120 kaps.           1      11,96 €
+     28101-1-coconut          Kokosový olej v spreji - GymBeam 200 ml              3      11,88 €
+     46072-1-90caps           Biotín (vitamín B7) - GymBeam 90 kaps.               3      11,88 €
+     7070-1-250g-bez-prichute DAA - GymBeam 250 g                                  2      11,44 €
+     29917-1-200g             29917-1-200g                                         2      11,12 €
+     28778-1-120tab-unflavored Chitosan - GymBeam 120 tab.                          2      11,12 €
+     66241-340g-smooth        Kešu maslo - GymBeam 340 g - jemný                   2      11,12 €
+     43771-1-120caps          43771-1-120caps                                      3      11,11 €
+     5951-3-340g-smooth       Arašidové maslo - GymBeam 340 g - jemný              5      10,40 €
+     5075-26-1000g-chocolate-coconut True Whey - GymBeam 1000 g - čokoláda kokos -        1      10,36 €
+     5075-31-1000g-banana     True Whey - GymBeam 1000 g - banán - 00              1      10,36 €
+     5075-28-1000g-strawberry True Whey - GymBeam 1000 g - jahoda - 00             1      10,36 €
+     5075-58-1000g-peanut-butter True Whey - GymBeam 1000 g - arašidové maslo -       1      10,36 €
+     8059-4-500g-strawberry-kiwi Hydrolyzovaný kolagén RunCollg® s vitamínom C        1      10,36 €
+     5075-29-1000g-white-chocolate True Whey - GymBeam 1000 g - biela čokoláda -        1      10,36 €
+     44242-1-60caps           Krilový olej - GymBeam 60 kaps. - 00                 1       9,56 €
+     6415-2-500g-bez-prichute 6415-2-500g-bez-prichute                             1       9,56 €
+     28876-1-250g-unflavored  Kreatín monohydrát 100 % Creapure® - GymBeam 2       2       9,52 €
+     42889-1-90caps           42889-1-90caps                                       2       9,52 €
+     49996-1-90caps           49996-1-90caps                                       2       9,52 €
+     7677-1-chocolate         ZERO SIRUP čokoláda - GymBeam 320 ml                 4       9,44 €
+     7185-1-210g-lemon-lime   Thor - GymBeam 210 g - citrón limetka                1       9,36 €
+     3816-1-150tab            HMB - GymBeam 180 tab.                               1       8,88 €
+     9037-8-vanilla           Flavour Drops - GymBeam 30 ml - vanilka              4       8,40 €
+     9037-6-chocolate         Flavour Drops - GymBeam 30 ml - čokoláda             4       8,40 €
+     7074-1-250g-bez-prichute MSM - GymBeam 250 g - bez príchute                   3       8,28 €
+     37864-1-385g             BIO Zero Noodles 385 g – GymBeam 385 g               4       8,00 €
+     256-362-200 tab          256-362-200 tab                                      1       7,99 €
+     37300-1-100g             37300-1-100g                                         1       7,96 €
+     3810-2-500g              L-Glutamín - GymBeam 500 g - bez príchute - 00       1       7,96 €
+     30713-1-250g-orange      30713-1-250g-orange                                  1       7,96 €
+     3734-9-250g-vodny-melon  Bcaa 4:1:1 Instant - GymBeam 250 g - vodný mel       1       7,96 €
+     3734-8-250g-citron-limetka Bcaa 4:1:1 Instant - GymBeam 250 g - citrón li       1       7,96 €
+     30713-2-250g-mango-maracuja 30713-2-250g-mango-maracuja                          1       7,96 €
+     29378-1-60caps           ProbioTen - GymBeam + darčeky 60 kaps. - 00          1       7,96 €
+     29847-1-90-kaps          29847-1-90-kaps                                      1       7,96 €
+     6627-1-double-chocolate-chunk Proteínový puding - GymBeam 500 g - dvojnásobn       2       7,96 €
+     30713-3-250g-lemon-lime  30713-3-250g-lemon-lime                              1       7,96 €
+     29950-1-200g             29950-1-200g                                         1       7,20 €
+     28082-120kaps-bez-prichute GABA - GymBeam 120 kaps.                             1       7,16 €
+     28683-4-1000g-chocolate  Anabolic Whey - GymBeam + darček 1000 g - čoko       1       7,16 €
+     28621-4-1000g-banana     28621-4-1000g-banana                                 1       7,16 €
+     43753-1-90caps           Vitamín K2 (menachinón) - GymBeam 90 kaps.           1       7,16 €
+     28095-6-sour-cherry      Iontový nápoj ReHydrate - GymBeam višňa              1       7,16 €
+     41356-1-90caps           Rhodiola rosea - GymBeam 90 kaps.                    1       7,16 €
+     41263-1-120caps          41263-1-120caps                                      1       7,16 €
+     28683-6-1000g-strawberry Anabolic Whey - GymBeam + darček 1000 g - jaho       1       7,16 €
+     28095-3-pink-grep        Iontový nápoj ReHydrate - GymBeam ružový grape       1       7,16 €
+     46228-1-340g             Kešu maslo s kokosom, bielou čokoládou a čučor       1       7,16 €
+     48604-1-90caps           48604-1-90caps                                       2       7,16 €
+     7471-1-chocolate         Proteínové arašidové maslo - GymBeam čokoláda        1       7,04 €
+     7471-4-salted-caramel    Proteínové arašidové maslo - GymBeam slaný kar       1       7,04 €
+     7471-2-vanilla           Proteínové arašidové maslo - GymBeam vanilka -       1       7,04 €
+     37054-1-400g-milky-white MoiMüv Protein Spread - GymBeam 400 g - milky        1       6,36 €
+     6086-3-500g-unflavored   Proteínové palacinky Pancake & Waffle Mix 500        1       6,36 €
+     41332-1-90caps           NAC (N-acetyl-L-cysteín) - GymBeam 90 kaps.          1       6,36 €
+     46066-1-90caps           Ženšen - GymBeam 90 kaps.                            1       6,36 €
+     44698-1-100g             44698-1-100g                                         2       6,32 €
+     32899-2-1000g-vanilla    32899-2-1000g-vanilla                                2       6,32 €
+     29691-1-90-tab           Vitamín B12 (kobalamín) - GymBeam 90 tab.            2       6,32 €
+     28760-1-60kaps-unflavored 28760-1-60kaps-unflavored                            2       6,32 €
+     28092-2-cheese           Proteínová Pizza - GymBeam 500 g - syr               1       5,96 €
+     28092-1-unflavoured      Proteínová Pizza - GymBeam 500 g - bez príchut       1       5,96 €
+     29059-1-60tabs           Chróm Pikolinát - GymBeam 60 tab.                    2       5,92 €
+     46156-1-100g             46156-1-100g                                         2       5,68 €
+     32176-1-500ml            Šejker BeastPink Rose 500 ml - BeastPink singl       2       5,60 €
+     3885-4-500g-green-apple  100% Mikronizovaný kreatín monohydrát 500 g -        1       5,56 €
+     3885-3-500g-lemon-lime   100% Mikronizovaný kreatín monohydrát 500 g -        1       5,56 €
+     37909-1-90tab            37909-1-90tab                                        1       5,56 €
+     34501-1-242ml-chocolate  25g Protein Milkshake - GymBeam 250 ml - čokol       4       5,08 €
+     3810-1-250g              L-Glutamín - GymBeam 250 g - bez príchute - 00       1       4,76 €
+     31256-1                  Zinok chelát (bisglycinát) - GymBeam 90 kaps.        1       4,76 €
+     6177-2-120caps-bez-prichute ZMB6 - GymBeam 120 kaps.                             1       4,76 €
+     2813-2-2500g             Maltodextrín - GymBeam 2500 g - bez príchute -       1       4,76 €
+     34219-1-120caps          Lecitín - GymBeam 120 kaps.                          1       4,76 €
+     8234-1-caesar            ZERO DRESING caesar – GymBeam 320 ml                 2       4,72 €
+     37978-1-350ml            ZERO OMÁČKA sladké čili - GymBeam 350 ml             2       4,72 €
+     6860-1-agave             BIO Agáve sirup - GymBeam 250 ml                     2       4,72 €
+     28646-1                  ZERO SIRUP čokoláda a lieskový oriešok - GymBe       2       4,72 €
+     7675-1-bbq               ZERO OMÁČKA barbecue 320 ml - GymBeam 320 ml         2       4,72 €
+     8232-1-strawberry        ZERO SIRUP jahoda - GymBeam 320 ml                   2       4,72 €
+     40864-1-90tab            Kyselina listová (vitamín B9) - GymBeam 90 tab       2       4,72 €
+     40507-1-20tab            Multivitamín 100% šumivý - GymBeam pomaranč -        3       4,68 €
+     29956-1-300g             BIO Psyllium - GymBeam 300 g                         1       4,32 €
+     6418-2-500g-bez-prichute Taurín - GymBeam 500 g                               1       4,28 €
+     29676-1-90-tabs          Vitamín B-Complex Forte - GymBeam 90 tab.            1       4,20 €
+     5951-4-340g-crunchy      Arašidové maslo - GymBeam 340 g - chrumkavé          2       4,16 €
+     258-369-90 tab           Kofeín - GymBeam 90 tab.                             1       3,96 €
+     3885-1-500g              100% Mikronizovaný kreatín monohydrát 500 g -        1       3,96 €
+     50620-1-90tab            50620-1-90tab                                        1       3,96 €
+     36253-1-90caps           Selén - GymBeam 90 kaps.                             1       3,56 €
+     28396-1-120kaps-unflavored Vitamín B-Complex - GymBeam 120 tab.                 1       3,32 €
+     48139-2-450g-strawberry  48139-2-450g-strawberry                              1       3,16 €
+     7067-1-60kaps-bez-prichute 7067-1-60kaps-bez-prichute                           1       3,16 €
+     48139-3-450g-coconutcocoa 48139-3-450g-coconutcocoa                            1       3,16 €
+     28384-2-340g-coconut     Arašidové maslo s kokosom - GymBeam 340 g            1       2,88 €
+     30342-2-120-caps         Vitamín D3 1000 IU - GymBeam 120 kaps. - 00          1       2,84 €
+     32899-3-1000g-unflavored 32899-3-1000g-unflavored                             1       2,76 €
+     7679-1-ketchup           ZERO OMÁČKA kečup - GymBeam 320 ml                   1       2,36 €
+     28648-1                  ZERO OMÁČKA boloňská – GymBeam 350 ml                1       2,36 €
+     28650-1                  ZERO SIRUP coconut bites - GymBeam 350 ml            1       2,36 €
+     5383-2-500g              Chia semienka - GymBeam 400 g                        1       2,36 €
+     28816-1-350ml-white-chocolate ZERO SIRUP biela čokoláda - GymBeam 350 ml           1       2,36 €
+     28763-1-60kaps-unflavored Draslík - GymBeam 90 kaps.                           1       2,36 €
+     9037-5-hazelnut          9037-5-hazelnut                                      1       2,10 €
+     9037-4-coconut           9037-4-coconut                                       1       2,10 €
+     37870-1-385g             BIO Zero Rice 385 g – GymBeam 385 g                  1       2,00 €
+     37858-1-385g             BIO Zero Fettuccine 385 g – GymBeam 385 g            1       2,00 €
+     48487-2-greenapple-75g   ReCharge Gél - GymBeam 75 g - zelené jablko          1       1,04 €
+     48487-1-blackberry-75g   ReCharge Gél - GymBeam 75 g - ostružina              1       1,04 €
+     5598-1-1000g-cokolada    Hovädzí (Beef) Proteín Hydrobeef™ - GymBeam 10       1       0,00 €
+     6086-4-500g-blueberries  Proteínové palacinky Pancake & Waffle Mix 500        2       0,00 €
+     48406-3-doublechocolate-75g MoiMüv Protein Cookie - GymBeam dvojitá čokolá      12       0,00 €
+     6627-2-vanilla-blueberries 6627-2-vanilla-blueberries                           1       0,00 €
+     39088-1-120tab           39088-1-120tab                                       1       0,00 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+     8789-1-pineapple         L-karnitín 3000 Liquid Shot - GymBeam ananás -      60       0,00 €
+     44767-1-250g             44767-1-250g                                         1       0,00 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+     37927-1-90tab            Kurkumin + Vitamín E - GymBeam 90 kaps.              1       0,00 €
+     49300-1-60caps           49300-1-60caps                                       3       0,00 €
+     29990-1-curry            ZERO OMÁČKA kari - GymBeam 350 ml                    1       0,00 €
+
+── 15. objednávka 103215410 (order_id 8224330) — 4 189,77 € v položkách ──
+   zákazník: Dr.Max 100 s.r.o. <daniel.franko@drmax.sk>, SK, 18. 5. 2021, GMV objednávky 4 189,77 €
+   29 riadkov, 232 kusov
+     kód                      názov                                            kusov          GMV
+     649-1668-44 sáčkov       Animal Flex - Universal Nutrition + darček 44      110   3 118,50 €
+     1593-1617-120 tab        Tribulus Terrestris - GymBeam 120 tab.              30     158,40 €
+     1731-1731-100 tab        Karnitín TABS - GymBeam 90 tab.                     15     119,40 €
+     5075-27-1000g-vanilla    True Whey - GymBeam 1000 g - vanilka - 00            8      82,88 €
+     28792-1-120kaps-unflavored Beast burn - BeastPink 120 kaps.                     6      71,76 €
+     3425-1                   BCAA 1500 + Lysine - GymBeam 300 tab.                5      67,80 €
+     3734-25-500g-orange      Bcaa 4:1:1 Instant - GymBeam 500 g - pomaranč        5      67,80 €
+     5075-9-2500g-coklada-kokos True Whey - GymBeam 2500 g - čokoláda kokos -        3      62,28 €
+     5598-1-1000g-cokolada    Hovädzí (Beef) Proteín Hydrobeef™ - GymBeam 10       4      47,84 €
+     5075-2-2500g-vanilka     True Whey - GymBeam 2500 g - vanilka - 00            2      41,52 €
+     5075-26-1000g-chocolate-coconut True Whey - GymBeam 1000 g - čokoláda kokos -        4      41,44 €
+     3810-3-1000g             L-Glutamín - GymBeam 1000 g - bez príchute - 0       3      38,28 €
+     5598-2-1000g-vanilla     Hovädzí (Beef) Proteín Hydrobeef™ - GymBeam 10       3      35,88 €
+     6626-1-120 tab           Arginín A.K.G. - GymBeam 120 tab.                    5      31,80 €
+     28683-5-1000g-vanilla    Anabolic Whey - GymBeam + darček 1000 g - vani       4      28,64 €
+     256-362-200 tab          256-362-200 tab                                      3      23,97 €
+     5075-31-1000g-banana     True Whey - GymBeam 1000 g - banán - 00              2      20,72 €
+     28784-1-390g-orange      ProAMINO - GymBeam 390 g - pomaranč                  2      17,90 €
+     28324-3-1000g-white-chocolate-coconut Just Whey Grass-Fed Protein – GymBeam 1000 g -       1      15,96 €
+     3734-14-250g-blackcurrant Bcaa 4:1:1 Instant - GymBeam 250 g - čierne rí       2      15,92 €
+     3734-20-250g-mango-maracuja Bcaa 4:1:1 Instant - GymBeam 250 g - mango mar       2      15,92 €
+     29667-3-300-g-green-apple Kreatín Crea7in - GymBeam 300 g - zelené jablk       2      15,92 €
+     2813-2-2500g             Maltodextrín - GymBeam 2500 g - bez príchute -       3      14,28 €
+     404-2-cokolada-1000g     Micelárny kazeín - GymBeam 1000 g - čokoláda         1      11,16 €
+     1747-1744-500 tab        Beef&Egg - GymBeam 500 tab.                          1       9,56 €
+     28683-6-1000g-strawberry Anabolic Whey - GymBeam + darček 1000 g - jaho       1       7,16 €
+     5206-1-bez-prichute      Dextróza - GymBeam 1000 g                            3       7,08 €
+   * 31571                    Vzorka - nechám sa prekvapiť                         1       0,00 €
+   * 31577                    Darček - nechám sa prekvapiť                         1       0,00 €
+
+* = darček alebo vzorka

@@ -195,7 +195,7 @@ def account_gmv_timeline(monthly, orders, accounts, figure_id, group_note):
         f"V €, po mesiacoch od {C.DISPLAY_START_YEAR}. Mesiac bez objednávky je nula, "
         f"nie chýbajúca hodnota. Účet vyhľadaj alebo vyber v zozname nad grafom — "
         f"{group_note}, "
-        f"zoradené podľa GMV v minuloročnom okne. V hover je aj počet objednávok.",
+        f"zoradené podľa GMV v minuloročnom okne.",
         "bar",
         [str(month) for month in monthly.index],
         [base.series("GMV", monthly[first], C.COLOR_BLUE)],
@@ -335,8 +335,7 @@ def top_skus_by_orders(sku_totals, count, figure_id, group_note):
     return _sku_ranking_chart(
         top, len(sku_totals), figure_id,
         f"Top {len(top)} produktov podľa počtu objednávok",
-        f"V koľkých objednávkach sa daný produkt objavil — {group_note}. Na rozdiel "
-        f"od rebríčka podľa GMV sem nevystúpi jedna veľká objednávka drahého tovaru.",
+        f"V koľkých objednávkach sa daný produkt objavil — {group_note}.",
         "orders", "Objednávok", "count", C.COLOR_TEAL,
     )
 
@@ -347,10 +346,7 @@ def _sku_ranking_chart(top, sku_count, figure_id, title, lead,
     return base.figure(
         figure_id,
         title,
-        f"{lead} Popisok je skrátený názov produktu, ak je v mape kódov; inak jeho "
-        f"kód. Plný názov je v hover. "
-        f"Ide o konkrétne varianty, nie o produktové kategórie — tá istá tyčinka "
-        f"v dvoch príchutiach sú dva riadky. "
+        f"{lead} "
         f"{base.population_note(sku_count, 'rôznymi produktmi')}",
         "bar",
         top["short_label"],

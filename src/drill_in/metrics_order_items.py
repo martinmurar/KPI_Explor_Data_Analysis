@@ -31,20 +31,24 @@ def by_sku(items):
 
 
 def basket_profile(items):
-    """Ako vyzerá typický nákupný košík skupiny."""
+    """Ako vyzerá typický nákupný košík skupiny.
+
+    Počíta sa rôznymi produktmi, nie riadkami — ten istý produkt býva
+    v objednávke na dvoch riadkoch len výnimočne (rádovo 0,05 % riadkov)
+    a „riadok“ čitateľovi nič nehovorí.
+    """
     per_order = items.groupby("increment_id").agg(
-        lines=("sku", "size"),
+        products=("sku", "nunique"),
         units=("qty", "sum"),
         gmv=("gmv", "sum"),
     )
     return {
         "orders": len(per_order),
-        "lines": len(items),
         "skus": items["sku"].nunique(),
-        "median_lines": per_order["lines"].median(),
+        "median_products": per_order["products"].median(),
         "median_units": per_order["units"].median(),
         "median_gmv": per_order["gmv"].median(),
-        "single_line_pct": (per_order["lines"] == 1).mean() * 100,
+        "single_product_pct": (per_order["products"] == 1).mean() * 100,
     }
 
 

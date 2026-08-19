@@ -32,7 +32,28 @@ def load_credit_memos(df):
     memos["link"] = memos["link"].fillna("")
     memos["source"] = [link_source(link) for link in memos["link"]]
     memos["label"] = memos["company_name"].fillna(memos["customer_name"])
+    memos = _in_euros(memos, df)
     return memos.sort_values("gmv", ascending=False)
+
+
+def _in_euros(memos, df):
+    """Prepočíta sumy z lokálnej meny na eurá.
+
+    Export dobropisov je v mene objednávky (HUF, CZK, PLN, UAH), export
+    objednávok v eurách — sčítať ich dokopy dáva nezmysel, maďarská objednávka
+    za 287 030 HUF by prebila celý zvyšok zoznamu. Kurz sa neberie z tabuľky
+    kurzov, ale z tej istej objednávky: rovnaká suma v oboch exportoch dáva
+    presne ten kurz, ktorý Magento pri objednávke použilo.
+    """
+    in_eur = df.drop_duplicates("increment_id").set_index("increment_id")["gmv"]
+    rate = memos["gmv"] / memos["order_number"].map(in_eur)
+
+    converted = memos.copy()
+    converted["gmv_local"] = memos["gmv"]
+    converted["refund_local"] = memos["total_refund"]
+    converted["gmv"] = memos["order_number"].map(in_eur)
+    converted["total_refund"] = memos["total_refund"] / rate
+    return converted
 
 
 def link_source(link):
