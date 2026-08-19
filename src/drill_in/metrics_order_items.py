@@ -10,7 +10,6 @@ zmysel pre jednorazových zákazníkov aj pre bežných.
 """
 
 import os
-import re
 
 import pandas as pd
 
@@ -142,20 +141,24 @@ def load_cached_items(cache_path):
     return order_items.cached_items(cache_path)
 
 
-def gift_or_sample(items):
-    """Koľko objednávok skupiny obsahovalo darček alebo vzorku.
+def gift_sample_skus(items):
+    """Kódy darčeka a vzorky, ktoré sa v položkách naozaj vyskytujú.
 
-    Hľadá sa v kóde aj v názve produktu — vzorky a darčeky nemajú v dátach
-    vlastný príznak. Pri jednorazových zákazníkoch je objednávka a účet to isté,
-    takže podiel objednávok je zároveň podielom účtov.
+    Zoznam je pevný (C.GIFT_SAMPLE_SKUS), nehľadá sa podľa názvu — „+ darček“
+    v názve má aj bežne predávaný tovar. Slúži len na spočítanie objednávok;
+    z rebríčkov ani zo súčtov sa tieto produkty nevyhadzujú.
     """
-    names = load_sku_names()
-    pattern = re.compile(C.GIFT_SAMPLE_PATTERN, re.IGNORECASE)
+    present = set(items["sku"].unique())
+    return {sku for sku in C.GIFT_SAMPLE_SKUS if sku in present}
 
-    matching = set()
-    for sku in items["sku"].unique():
-        if pattern.search(sku) or pattern.search(names.get(sku, "")):
-            matching.add(sku)
+
+def gift_or_sample(items):
+    """Koľko objednávok skupiny obsahovalo produkt darček alebo vzorku.
+
+    Pri jednorazových zákazníkoch je objednávka a účet to isté, takže podiel
+    objednávok je zároveň podielom účtov.
+    """
+    matching = gift_sample_skus(items)
 
     orders = items["increment_id"].nunique()
     with_gift = items.loc[items["sku"].isin(matching), "increment_id"].nunique()

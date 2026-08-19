@@ -60,9 +60,11 @@ SKU_LABEL_MAX_CHARS = 32
 # rovnaké. Vyhadzujú sa po častiach oddelených pomlčkou.
 SKU_LABEL_DROP = ("GymBeam",)
 
-# Vzorky a darčeky nie sú predaj — do objednávky ich pribalíme my. Rozpoznávajú
-# sa podľa názvu aj kódu produktu, lebo v dátach nemajú vlastný príznak.
-GIFT_SAMPLE_PATTERN = r"(gift|sample|vzork|darcek|darček)"
+# Darček a vzorka. V rebríčkoch a súčtoch sú to bežné produkty ako každý iný;
+# navyše sa len počíta, v koľkých objednávkach sa objavili. Hľadajú sa podľa
+# kódu, nie podľa názvu — „+ darček“ býva aj v názve bežne predávaného balenia
+# (napr. Ashwagandha + darček 90 kaps.).
+GIFT_SAMPLE_SKUS = ("31571", "31577")
 
 # ── analýza produktov (tretí report) ──────────────────────────────────────────
 OUTPUT_HTML_PRODUCTS = str(DATA_DIR / "b2b_products.html")
@@ -208,7 +210,11 @@ ACCOUNT_GROWTH_HISTORY_START = pd.Timestamp(year=DISPLAY_START_YEAR, month=1, da
 # FREQUENCY_WINDOW_MONTHS z hlavného reportu: 15 mesiacov presne pokryje obe
 # okná KPI (minuloročné aj aktuálne), takže „účet bez objednávky v okne“ je
 # skutočne mŕtvy účet a nie účet, ktorý nakúpil tesne pred 12-mesačnou hranicou.
-KPI_DIAG_WINDOW_MONTHS = ACCOUNT_GROWTH_MIN_AGE_MONTHS
+KPI_DIAG_WINDOW_MONTHS = 12
+
+# Názov stĺpca s GMV za toto okno. Dĺžka okna je priamo v názve, takže po zmene
+# KPI_DIAG_WINDOW_MONTHS sa nedá omylom čítať číslo za iné obdobie.
+KPI_DIAG_GMV_KEY = f"gmv_{KPI_DIAG_WINDOW_MONTHS}m"
 
 KPI_DIAG_THIN_ORDERS = 2
 

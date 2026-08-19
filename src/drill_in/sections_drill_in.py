@@ -21,6 +21,9 @@ NUM = R.format_number
 
 MONTHS_PER_YEAR = 12
 
+# Koľko najväčších účtov koša zhrnie veta o koncentrácii.
+LONG_TENURE_TOP = 5
+
 
 def YEARS(months, decimals=1):
     """Mesiace vyjadrené v rokoch."""
@@ -227,7 +230,8 @@ def _dropped_profile(metrics):
 ako gym, sport či webáruház. <b>Ani jedna firma, ktorá by vyzerala ako
 veľkoodberateľ.</b> Za posledných {C.KPI_DIAG_WINDOW_MONTHS} mesiacov minuli spolu
 {EUR(detail["gmv_window"].sum())}, teda {EUR(monthly)} mesačne. Najväčší posudzovaný účet
-({R.escape(largest["name"])}) urobil v tom istom okne {EUR(largest["gmv_12m"])} — celá
+({R.escape(largest["name"])}) urobil v tom istom okne
+{EUR(largest[C.KPI_DIAG_GMV_KEY])} — celá
 vyradená skupina je oproti nemu
 zaokrúhľovacia chyba.</p>
 <p>Nie je to skupina, ktorá raz vypadla. <b>Nikto z nich nemá viac než
@@ -503,7 +507,8 @@ def _churned_intro(metrics):
 {PCT(accounts["previous"].sum() / zero["previous"].sum() * 100)} GMV odídenej skupiny.</p>
 <p>Zvyšných {NUM(alive)} účtov ({EUR(alive_gmv)}) nakúpilo za posledných
 {C.KPI_DIAG_CHURN_DAYS} dní — len netrafili {C.GMV_WINDOW_MONTHS}-mesačné okno KPI.</p>
-<p>Zvyšok sekcie je o tom, kto tá skupina je: ako dlho u nás nakupovali, koľko
+<p>Prvý graf slúži na vyhľadanie konkrétneho účtu, zvyšok sekcie je o tom, kto tá
+skupina je ako celok: ako dlho u nás nakupovali, koľko
 objednávok stihli, z ktorých trhov sú a kedy stíchli. Hľadá sa spoločný znak —
 ak ho skupina má, dá sa na ňom postaviť opatrenie; ak nie, je to
 {NUM(len(accounts))} nezávislých odchodov.</p>
@@ -537,21 +542,32 @@ def _long_tenure_block(long_tenure, accounts):
 
 def _long_tenure_text(long_tenure, accounts):
     """Čo najvyšší kôš znamená v peniazoch."""
+    count_share = len(long_tenure) / len(accounts) * 100
     gmv_share = long_tenure["lifetime_gmv"].sum() / accounts["lifetime_gmv"].sum() * 100
-    top_five = long_tenure["lifetime_gmv"].head(5).sum()
+
+    top_count = min(LONG_TENURE_TOP, len(long_tenure))
+    top_share = (long_tenure["lifetime_gmv"].head(top_count).sum()
+                 / long_tenure["lifetime_gmv"].sum() * 100)
 
     return f"""
-<p>Najvyšší kôš je zároveň ten najdrahší. <b>{NUM(len(long_tenure))} účtov, ktoré
+<p>{_long_tenure_lead(count_share, gmv_share)} <b>{NUM(len(long_tenure))} účtov, ktoré
 u nás nakupovali dlhšie než {YEARS(MD.CHURN_LONG_TENURE_MONTHS, 0)} roky</b>, je
-{PCT(len(long_tenure) / len(accounts) * 100)} skupiny, ale
-{PCT(gmv_share)} jej lifetime GMV ({EUR(long_tenure["lifetime_gmv"].sum())}).
+{PCT(count_share)} skupiny a drží {PCT(gmv_share)} jej lifetime GMV
+({EUR(long_tenure["lifetime_gmv"].sum())}).
 Medián dĺžky života je tu {YEARS(long_tenure["tenure_months"].median())} roka,
 takže zlý onboarding to nevysvetlí — títo zákazníci boli zabehnutí.</p>
-<p>Ani v rámci koša nie sú si účty rovné: <b>top 5 z nich drží
-{PCT(top_five / long_tenure["lifetime_gmv"].sum() * 100)} jeho lifetime GMV</b>.
-Medián ticha je {NUM(long_tenure["months_silent"].median(), 1)} mesiacov — čím
-kratšie mlčia, tým väčšiu šancu má oslovenie.</p>
+<p>Ani v rámci koša nie sú si účty rovné: <b>top {NUM(top_count)} z nich drží
+{PCT(top_share)} jeho lifetime GMV</b>. Medián ticha je
+{NUM(long_tenure["months_silent"].median(), 1)} mesiacov — čím kratšie mlčia, tým
+väčšiu šancu má oslovenie.</p>
 """
+
+
+def _long_tenure_lead(count_share, gmv_share):
+    """Úvodná veta odseku. Mení sa podľa dát, aby netvrdila viac, než v nich je."""
+    if gmv_share > count_share:
+        return "Najvyšší kôš váži v peniazoch viac, než napovedá jeho počet."
+    return "Najvyšší kôš má na GMV menšiu váhu, než by jeho počet napovedal."
 
 
 def _long_tenure_table(long_tenure):
@@ -818,9 +834,9 @@ def _gift_text(gift, prefix):
 
     return f"""
 <p><b>Darček alebo vzorku obsahovalo {PCT(gift["share_pct"])} {unit}</b>
-({NUM(gift["orders_with_gift"])} z {NUM(gift["orders"])}). Rozpoznaných je
-{NUM(gift["products"])} takých produktov — nie sú to predané kusy, pribalíme
-ich my.</p>
+({NUM(gift["orders_with_gift"])} z {NUM(gift["orders"])}). Ide o produkty
+„Darček — nechám sa prekvapiť“ a „Vzorka — nechám sa prekvapiť“; v rebríčkoch
+nižšie sú zarátané ako každý iný tovar.</p>
 """
 
 

@@ -193,7 +193,8 @@ def account_gmv_timeline(monthly, orders, accounts, figure_id, group_note):
         figure_id,
         "GMV účtu v čase",
         f"V €, po mesiacoch od {C.DISPLAY_START_YEAR}. Mesiac bez objednávky je nula, "
-        f"nie chýbajúca hodnota. Účet vyber v zozname nad grafom — {group_note}, "
+        f"nie chýbajúca hodnota. Účet vyhľadaj alebo vyber v zozname nad grafom — "
+        f"{group_note}, "
         f"zoradené podľa GMV v minuloročnom okne. V hover je aj počet objednávok.",
         "bar",
         [str(month) for month in monthly.index],

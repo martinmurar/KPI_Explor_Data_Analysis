@@ -311,7 +311,7 @@ def largest_account(table, df):
     gmv = window.groupby("cust")["gmv"].sum().reindex(table.index).fillna(0.0)
     cust = gmv.idxmax()
     names = data.company_names(df)
-    return {"name": names.get(cust, cust), "gmv_12m": gmv.max()}
+    return {"name": names.get(cust, cust), C.KPI_DIAG_GMV_KEY: gmv.max()}
 
 
 def dropped_by_country(detail):
